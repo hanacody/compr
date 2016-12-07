@@ -1,0 +1,6 @@
+<?php
+setCookie("rankup_log_start","true", time()+1800, '/');
+if(!$_COOKIE['rankup_log_start']) include "./rankup_module/rankup_log/rankuplog.php";
+
+header("Location: ./main/index.html");
+?>
