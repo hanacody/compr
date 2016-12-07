@@ -1,0 +1,18 @@
+<? if(!empty($menu_name)) { ?>
+		<tr>
+			<td class="left_submenu_title" height="22"><?=$menu_name?></td>
+		</tr>
+		<tr>
+			<td background="<?=$left_skin_url?>dotline.gif" height="1"></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+<? } ?>
+		<tr>
+			<td style="padding-left:5px"> 
+				<table align="center" border="0" cellpadding="3" cellspacing="0" width="100%">
+				<tbody>
+				<?=$board_item_contents?>
+				</tbody>
+				</table>
+			</td>
+		</tr>

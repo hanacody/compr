@@ -1,0 +1,179 @@
+<?php
+include_once "../Libs/_php/rankup_basic.class.php";
+include_once "../rankup_module/rankup_board/rankup_board.class.php";
+
+$rankup_board = new rankup_board(empty($_GET['id']) ? $_POST['id'] : $_GET['id']);
+
+###########################################################################
+## 주요 인자값 정리
+###########################################################################
+// id : 게시판 아이디
+// no : 게시물 번호
+// pcno : 상위 메뉴 번호
+// mode : 작업모드
+// cmd : 처리명령
+// page : 페이지 번호
+//  ...
+//  ...
+###########################################################################
+switch($_POST['mode']) {
+	// 신규 게시물 등록/수정
+	case "regist_article":
+		$result = $rankup_board->regist_article($_POST);
+		// 작성후 되돌아갈 링크 설정
+		$referer_infos = parse_url($_SERVER['HTTP_REFERER']);
+		parse_str($referer_infos['query'], $referer_infos);
+		unset($referer_infos['mode'], $referer_infos['pano']); // write 모드, 답글시 부모글 번호 제거
+		$board_links = http_build_query($referer_infos); // php5 이상, rankup_basic.class.php 에 정의됨
+		$rankup_board->popup_msg_js("게시물이 성공적으로 등록되었습니다.", "./index.html?$board_links");
+		exit;
+		break;
+	// 댓글 등록
+	case "regist_comment":
+		$result = $rankup_board->regist_comment($_POST);
+		$message = "댓글이 성공적으로 등록되었습니다.";
+		echo "
+		<script type='text/javascript'>
+		parent.rankup_board.comment_draw({no:$result[0], wdate:'$result[1]', writer:\"$result[2]\", uip:\"$result[3]\", pno:$result[4], reply_icon:\"$result[5]\"});
+		alert('$message'+parent.SPACE);
+		</script>";
+		exit;
+		break;
+	// 댓글 수정 - 2009.09.09 added
+	case "apply_comment":
+		$rankup_board->change_encoding($_POST, "IN");
+		echo $rankup_board->apply_comment($_POST);
+		exit;
+		break;
+	// 파일 첨부
+	case "post_attached":
+		$original_name = $_FILES['attach']['name'];
+		// 파일크기 체크
+		$file_size = filesize($_FILES['attach']['tmp_name'])/1024; // KB
+		if($file_size==0 || round($file_size)>$rankup_board->sattach['attach_size']) {
+			@unlink($_FILES['attach']['tmp_name']); // 첨부했던 임시파일 제거
+			// 파일용량에 따른 에러 메시지 - 2010.09.28 modified
+			if(!$file_size) $rankup_board->popup_msg_js("첨부파일이 정상적으로 업로드 되지 않았습니다.\\n\\n웹공간이 가득찼거나 첨부파일이 ".(intval(ini_get("post_max_size"))*1024)."KB를 초과했는지\\n다시 확인하시기 바랍니다.", "VOID");
+			else $rankup_board->popup_msg_js("첨부파일의 크기가 제한용량(".number_format($rankup_board->sattach['attach_size'])." KB)을 초과하여 등록이 취소되었습니다.", "VOID");
+		}
+		$attached = $rankup_board->post_attached($_FILES['attach'], true);
+		if(!empty($attached['name'])) {
+			list($width, $height, $type, $attr, $size) = $attached['infos'];
+			$on_attached = array_pop(explode("/", $attached['name']));
+			if($width && $height) $wh_size = "<br>$width × $height";
+			$info = strtoupper($type)."<br>($size)".$wh_size;
+			echo "
+			<script type='text/javascript'>
+			var on_attached = parent.rankup_board.registFrm.on_attached;
+			if(on_attached.value) on_attached.value = on_attached.value + ',';
+			on_attached.value = on_attached.value + '$original_name:$on_attached';
+			parent.rankup_board.attach_draw('$attached[name]', {
+				'width': ".round($width).",
+				'height': ".round($height).",
+				'type': '$type',
+				'text': '$info'
+			});
+			</script>";
+		}
+		exit;
+		break;
+
+	default:
+		// 첨부파일 다운로드
+		if($_GET['cmd']=="download") {
+			$rankup_board->download_attach($_GET); // 별도의 리턴값이 없다.
+			exit;
+		}
+		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-
+		// Ajax or GET 방식 처리
+		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==-=-=-=-
+		// 인코딩 변환
+		if(!empty($_GET['cmd'])) $rankup_board->change_encoding($_GET, "IN");
+		switch($_GET['cmd']) {
+			case "view_article": // 게시물 보기
+				$message = $rankup_board->view_article($_GET);
+				$result = !empty($message);
+				break;
+			case "delete_article": // 게시물 삭제
+			case "modify_article": // 게시물 수정
+				$message = $rankup_board->verify_author($_GET);
+				$result = !empty($message);
+				break;
+			case "delete_articles": // 게시물 선택삭제
+				$message = $rankup_board->delete_articles($_GET);
+				$result = !empty($message);
+				break;
+			case "vote_article": // 게시물 추천
+				$message = $rankup_board->vote_article($_GET);
+				$result = !empty($message);
+				break;
+			case "load_comment": // 댓글 로드
+				$message = $rankup_board->get_comment_articles($_GET);
+				$result = !empty($message);
+				break;
+			case "delete_comment": // 댓글 삭제
+				$message = $rankup_board->delete_comment($_GET);
+				$result = !empty($message);
+				break;
+			case "modify_comment": // 댓글 수정 - 2009.09.09 added
+				$message = $rankup_board->modify_comment($_GET);
+				$result = !empty($message);
+				break;
+			case "delete_attach": // 첨부파일 삭제
+				$result = $rankup_board->delete_attach($_GET);
+				$message = $result ? "성공적으로 삭제되었습니다." : "삭제가 실패하였습니다.";
+				break;
+			case "comment_reply": // 댓글 댓글 - 2011.08.16 added
+				$message = $rankup_board->comment_reply($_GET);
+				$result = !empty($message);
+				break;
+			case "load_attach":
+				$message = $rankup_board->load_attach($_GET);
+				$result = !empty($message);
+				break;
+			default:
+
+				// 페이지 제너레이터 - 필수
+				include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+				include_once '../design/page_generator.class.php';
+
+				$frame = new rankup_frame;
+				$gen = new page_generator($_GET['pid']);
+
+				if(!$_GET['id']) $_GET['id'] = $gen->infos['component'];
+				$rankup_board = new rankup_board($_GET['id']);
+
+				// 페이지 구성
+				if(empty($_GET['id'])) $board_contents = $rankup_board->get_main_contents($_GET['pcno']); // 해당 메뉴의 메인페이지
+				else $board_contents = $rankup_board->get_board_contents($_GET); // 게시물목록/상세페이지/등록폼/수정폼 구성
+				if(!$board_contents) return;
+
+				// 타이틀, 스타일 출력 / 상단 컨텐츠
+				$rankup_control->print_user_head($gen->page_title);
+				include_once $base_dir.'include/top.html';
+
+				// 메인 컨텐츠
+				echo '
+				<table width="690" cellpadding="0" cellspacing="0" border="0" align="center">
+				<tr>
+					<td>
+						'.$board_contents.'
+					</td>
+				</tr>
+				</table>';
+
+				// 하단 컨텐츠
+				include_once $base_dir.'include/bottom.html';
+				exit;
+		}
+		if($result) {
+			// 인코딩 변환
+			$rankup_board->change_encoding($message, 'OUT');
+			$result = $result ? "success" : "failure";
+			header("Content-type: text/xml; charset=utf-8");
+			echo "<?xml version='1.0' encoding='utf-8'?>\n";
+			echo "<resultData result='$result'>$message</resultData>";
+		}
+		exit;
+}
+?>

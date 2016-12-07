@@ -1,0 +1,147 @@
+<?php
+/**
+ * 폼(FORM)빌더용 - 상세 페이지
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+// 타이틀, 스타일 출력 / 상단 컨텐츠
+$gen->page_title .= '(상세보기)'; // 현재위치 + 윈도우 타이틀 출력부분
+$gen->infos['base_name'] .= '(상세보기)'; // 컨텐트 타이틀 출력부분
+
+include_once '../../rankup_module/rankup_fbuilder/rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+$fs_rows = $fbuilder->get_settings($_GET['fno']);
+if(!$fs_rows['no']) {
+	scripts('alert("잘못된 요청입니다.");history.back()');
+	exit;
+}
+// 글읽기 권한 체크
+if(!$fbuilder->check_author($_GET['fno'], $_GET['no'])) {
+	scripts('alert("글 작성자만 내용을 열람하실 수 있습니다.");history.back();');
+	exit;
+}
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+$rows = $fbuilder->get_article($_GET['fno'], $_GET['no']);
+
+include_once '../../rankup_module/rankup_builder/attachment.class.php';
+$attach = new attachment('fbuilder');
+
+$status_texts = array(
+	'request' => '<font color="#ff6600">미확인</font>',
+	'hold' => '글확인',
+	'answered' => '<font color="#3366cc">답변완료</font>'
+);
+
+// 필수·일반항목 텍
+$require_icon = $normal_icon = '';
+
+?>
+
+<div id="container">
+
+	<div class="tit0">
+		<div class="tit_t"><?=$gen->page_title?></div>
+	</div>
+
+	<?php
+	// 등록폼 출력
+	echo $fbuilder->draw_view($fs_rows, array(
+		'forms' => $fs_rows,
+		'values' => $rows,
+		'entry' => array(
+			1 => '
+				<div style="height:22px">
+					{:on_group_name:}
+				</div>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0" class="m_table">
+				<col width="90" />
+				<col />
+				<tr>
+					<td class="Form_top" colspan="2"></td>
+				</tr>
+				{:before_contents:}
+				{:fields:}
+				{:after_contents:}
+				</table>',
+			2 => '<hr style="visibility:hidden" />'
+		),
+		'on_group_name' => '<div class="subtitle"><img src="'.$pc_domain.SKIN.'img/bullet_s_tit.png" class="bullet_img" />&nbsp;{:group_name:}</div>',
+		'before_contents' => $before_contents, // the first time
+		'after_contents' => $after_contents, // the last time
+
+		'field_entry' => array(
+			'entry' => array(
+				1 => '
+				<tr>
+					<td class="Form_ess">{:require_icon:}{:normal_icon:}{:field_name:}</td>
+					<td class="Form_right">{:field_value:} {:on_hint:}</td>
+				</tr>'
+			),
+			'field_items' => array(
+				'email' => '{:email:}',
+				'jumin' => '{:jumin1:} - *******',
+				'addrs' => '{:zipcode:}, {:addrs1:} {:addrs2:}',
+				'attach' => '<a href="'.$pc_domain.$attach->configs['save']['folder'].'{:name:}">{:name:}</a>',
+				'calendar' => array(
+					1 => '{:sdate:}',
+					2 => '{:sdate:} ~ {:edate:}'
+				),
+				'dimension' => '{:square:}㎡ (약 {:pyeong:}평)'
+			),
+			'on_hint' => ' <span class="tip">{:hint:}</span>',
+			'require_icon' => $require_icon,
+			'normal_icon' => $normal_icon
+		)
+	));
+	?>
+
+	<hr style="visibility:hidden" />
+	<div class="subtitle" style="height:20px;"><img src="<?=$pc_domain.SKIN?>img/bullet_s_tit.png" class="bullet_img" />&nbsp;기타사항</div>
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="m_table">
+		<col width="90" />
+		<col width="*" />
+		<tr>
+			<td class="Form_top" colspan="2"></td>
+		</tr>
+		<tr>
+			<td class="Form_ess"><?=$normal_icon?>등록일시</td>
+			<td class="Form_right"><?=$rows['regist_time']?></td>
+		</tr>
+		<tr>
+			<td class="Form_ess"><?=$normal_icon?>답변상태</td>
+			<td class="Form_right"><?=$status_texts[$rows['status']]?></td>
+		</tr>
+<?php
+// 답변이 완료된 경우
+if($rows['status']=='answered') {
+?>
+		<tr>
+			<td class="Form_ess"><?=$normal_icon?>답변일시</td>
+			<td class="Form_right">
+				<?=$rows['answered_time']?>
+				<span id="tip">+ 답변내용은 고객님의 이메일을 확인하시기 바랍니다.</span>
+			</td>
+		</tr>
+<?php
+}
+?>
+	</table>
+
+	<div style="margin:10px 0;text-align:center">
+		<a onClick="history.back()" class="list_btn" >목록보기</a>
+	</div>
+
+</div>
+
+<?php
+include_once '../include/bottom.html';
+?>

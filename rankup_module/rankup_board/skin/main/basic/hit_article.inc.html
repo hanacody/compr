@@ -1,0 +1,67 @@
+<?
+if($category_infos->sprint['hcbest']!=="yes") return;
+?>
+				<tr valign="top" height="100%">
+					<td width="50%" style="padding-right:7px;">
+						<!-- 조회수 베스트 -->
+						<table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
+							<tr>
+								<td height="33" width="7"><img src="<?=$this->skin_url?>best01.gif"></td>
+								<td background="<?=$this->skin_url?>best02.gif" width="100%"> 
+									<table border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td><img align="absmiddle" src="<?=$this->skin_url?>besticon.gif"></td>
+											<td style="padding:5 0 0 7 px"><b>조회수 BEST</td>
+										</tr>
+									</table>
+								</td>
+								<td width="7"><img src="<?=$this->skin_url?>best03.gif"></td>
+							</tr>
+							<tr height="100%" valign="top">
+								<td background="<?=$this->skin_url?>best04.gif"></td>
+								<td style="padding-top:5px"> 
+									<table width="100%" cellpadding="3" cellspacing="0" border="0" style="table-layout:fixed">
+									<?=$this->get_best_articles("hit_best", $pcno)?>
+									</table>
+								</td>
+								<td background="<?=$this->skin_url?>best05.gif"></td>
+							</tr>
+							<tr>
+								<td width="7"><img src="<?=$this->skin_url?>best06.gif"></td>
+								<td background="<?=$this->skin_url?>best07.gif" width="100%"></td>
+								<td width="7"><img src="<?=$this->skin_url?>best08.gif"></td>
+							</tr>
+						</table>
+					</td>
+					<td width="50%" style="padding-left:7px;">
+						<!-- 댓글수 베스트 -->
+						<table border="0" cellpadding="0" cellspacing="0" width="100%" height="100%">
+							<tr>
+								<td height="33" width="7"><img src="<?=$this->skin_url?>best01.gif"></td>
+								<td background="<?=$this->skin_url?>best02.gif" width="100%"> 
+									<table border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td><img align="absmiddle" src="<?=$this->skin_url?>besticon.gif"></td>
+											<td style="padding:5 0 0 7 px"><b>댓글수 BEST</td>
+										</tr>
+									</table>
+								</td>
+								<td width="7"><img src="<?=$this->skin_url?>best03.gif"></td>
+							</tr>
+							<tr height="100%" valign="top">
+								<td background="<?=$this->skin_url?>best04.gif"></td>
+								<td style="padding-top:5px"> 
+									<table width="100%" cellpadding="3" cellspacing="0" border="0" style="table-layout:fixed">
+									<?=$this->get_best_articles("comment_best", $pcno)?>
+									</table>
+								</td>
+								<td background="<?=$this->skin_url?>best05.gif"></td>
+							</tr>
+							<tr>
+								<td width="7"><img src="<?=$this->skin_url?>best06.gif"></td>
+								<td background="<?=$this->skin_url?>best07.gif" width="100%"></td>
+								<td width="7"><img src="<?=$this->skin_url?>best08.gif"></td>
+							</tr>
+						</table>		
+					</td>
+				</tr>

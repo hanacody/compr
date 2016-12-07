@@ -1,0 +1,93 @@
+<?php
+/**
+ * 맵 - 찾아오시는길
+ *@note: NAVER Map 활용
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+// 맵 설정 로드
+$ms_rows = $rankup_control->get_config_info('map_settings');
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+
+/**
+ * 네이버지도2.0
+ */
+if($ms_rows['use_nhn_map']=='yes') {
+	$ns_rows = $rankup_control->get_config_info('navermap_settings');
+	$map_key = $rankup_control->get_mapkey('nhn');
+
+	if($map_key) {
+		// 네이버지도 프레임
+		$nhn_map_class = 'Form_box';
+		$nhn_map_frame = '../rankup_module/rankup_post/nhn_map.frame.html?width=730px&height=400px&key='.$map_key.'&mapx='.$ms_rows['mapx'].'&mapy='.$ms_rows['mapy'];
+		include_once '../rankup_module/rankup_post/nhn_map.inc.php';
+?>
+<style type="text/css"> #nhn_map {width: 726px;height: 396px} </style>
+
+<?php
+	}
+}
+
+/**
+ * 약도 이미지
+ */
+else {
+	include_once '../rankup_module/rankup_builder/attachment.class.php';
+	$attach = new attachment('map');
+	$map_content = $attach->preview($ms_rows['map_attach'], array(
+		'image' => '<img src="{:folder:}{:name:}" width="{:width:}" height="{:height:}" align="absmiddle" />',
+		'flash' => "<script>flashDraw('map','{:folder:}{:name:}','{:width:}','{:height:}','transparent','')</script>"
+	), array(686, null));
+
+	if($map_content) {
+?>
+
+<table width="730" cellpadding="0" cellspacing="0" border="0" align="center">
+	<tr>
+		<td class="pd_t_10">
+			<div style="width:730px; margin: 0 auto;text-align: center" class="Form_box">
+				<?=$map_content?>
+			</div>
+		</td>
+	</tr>
+</table>
+
+<?php
+	}
+}
+?>
+
+<table width="730" cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top:10px">
+	<tr>
+		<td class="subtitle"><img class="bullet_img" src="../rankup_module/rankup_board/img/bullet_s_tit.png"> 주소</td>
+	</tr>
+	<tr>
+		<td class="pd_t_10">
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td class="Form_top" colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td class="Form_left" width="100">우편번호</td>
+				<td class="Form_right"><?=$ms_rows['zipcode']?></td>
+			</tr>
+			<tr>
+				<td class="Form_left">주소</td>
+				<td class="Form_right"><?=$ms_rows['addrs1'].' '.$ms_rows['addrs2']?></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+</table>
+
+<?php
+include_once '../include/bottom.html';
+?>

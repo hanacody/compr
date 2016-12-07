@@ -1,0 +1,88 @@
+<?php
+/**
+ * 약도안내
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+// 맵 설정 로드
+$ms_rows = $rankup_control->get_config_info('map_settings');
+
+$mobile->print_header($gen->page_title);
+include_once '../include/top.html';
+?>
+
+<div id="container">
+	<div class="tit0">
+		<div class="tit_t">약도안내</div>
+	</div>
+<?php
+/**
+ * 네이버지도2.0
+ */
+if($ms_rows['use_nhn_map']=='yes') {
+	$ns_rows = $rankup_control->get_config_info('navermap_settings');
+	$map_key = $rankup_control->get_mapkey('nhn');
+	if($map_key) {
+?>
+	<style type="text/css">
+	#nhn_map {
+		width: 100%;
+		height: 240px;
+		background: #ffffff;
+		border: 2px #00cc00 solid;
+	}
+	</style>
+	<script type="text/javascript">
+	//<![CDATA[
+	window.onorientationchange = function() {
+		$('nhn_map').style.width = '100%';
+		nmap.oMap.setSize(new nhn.api.map.Size($('nhn_map').getWidth()-8, 240));
+	}
+	Event.observe(window, 'load', function() {
+		nmap.initialize('nhn_map', '<?=$map_key?>', true);
+	});
+	//]]>
+	</script>
+	<script type="text/javascript" src="http://openapi.map.naver.com/openapi/naverMap.naver?ver=2.0&key=<?=$map_key?>"></script>
+	<script type="text/javascript" src="./map.js"></script>
+	<div id="nhn_map"><img src="http://static.naver.com/maps2/icons/pin_spot2.png" style="visibility:hidden" /></div>
+	<div style="text-align:right;margin-top:1px"><a href="http://dev.naver.com/openapi" target="_blank"><img src="http://openapi.naver.com/logo/logo07_1.gif" alt="NAVER OpenAPI" /></a></div>
+	<input type="hidden" id="mapx" name="mapx" value="<?=$ms_rows['mapx']?>" />
+	<input type="hidden" id="mapy" name="mapy" value="<?=$ms_rows['mapy']?>" />
+<?php
+	}
+}
+
+/**
+ * 약도 이미지
+ */
+else {
+	include_once '../../rankup_module/rankup_builder/attachment.class.php';
+	$attach = new attachment('map');
+	$map_content = $attach->preview($ms_rows['map_attach'], array(
+		'image' => '<img src="{:folder:}{:name:}" width="100%" align="absmiddle" />',
+		'flash' => "<script>flashDraw('map','{:folder:}{:name:}','{:width:}','{:height:}','transparent','')</script>"
+	));
+	if($map_content) {
+		echo '
+		<div style="width:100%;margin:0 auto;text-align:center;background:#fff;border:2px #00cc00 solid;">
+		'.$map_content.'
+		</div>';
+	}
+}
+?>
+	<div class="text tbr">
+		<b class="blue">상세주소</b> <br/>
+		[<?=$ms_rows['zipcode']?>] <?=$ms_rows['addrs1'].' '.$ms_rows['addrs2']?>
+	</div>
+
+</div>
+
+<?php
+include_once '../include/bottom.html';
+?>

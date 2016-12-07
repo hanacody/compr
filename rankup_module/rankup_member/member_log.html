@@ -1,0 +1,141 @@
+<?php
+/**
+ * 회원 로그인 기록
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+if(!$_GET['sdate']) $_GET['sdate'] = date('Y-m-d');
+if(!$_GET['edate']) $_GET['edate'] = date('Y-m-d');
+
+list($totals, $contents) = $rankup_member->print_log(array(
+	'times' => 2,
+	'entry_wrap' => array('<tr>', '</tr>'),
+	'entry' => array(
+		0 => '<td colspan="4" height="40"><span disabled>로그인 기록이 없습니다.</span></td>',
+		1 => '
+			<td>{:row:}</td>
+			<td><a href="./member_detail.html?uid={:member_id:}">{:member_id:}</a></td>
+			<td>{:login_ip_addr:}</td>
+			<td>{:login_date:}</td>',
+		3 => '<td style="padding:0" bgcolor="#ffffff"></td>'
+	)
+), $limits=40);
+
+$rankup_control->print_admin_head('회원 로그인 기록');
+?>
+<div class="bar"><script> titleBar('회원 로그인 기록') </script></div>
+
+<form name="searchFrm" method="GET" action="./member_log.html" style="margin-top:30px">
+	<table width="760" align="center" cellpadding="4" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+	<tr class="gray_bg">
+		<td>
+			<table cellpadding="2" cellspacing="1" border="0" align="center">
+			<tr align="center">
+				<td><input type="checkbox" name="use_date"<? if($_GET['use_date']) echo " checked" ?>></td>
+				<td width="180">
+					<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+				</td>
+				<td width="409" id="period_search_option">
+					<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td bgcolor="white">
+			<table cellpadding="2" cellspacing="1" border="0" align="center">
+			<tr>
+				<td>
+					<select name="smode">
+					<option value="member_id">회원아이디</option>
+					<option value="login_ip_addr"<? if($_GET['smode']=='login_ip_addr') echo ' selected' ?>>로그인IP주소</option>
+					</select>
+				</td>
+				<td>
+					<input type="text" name="skey" value="<?=htmlspecialchars($_GET['skey'])?>" class="simpleform" size="15" maxlength="20" style="background-color:white">
+				</td>
+				<td align="right"><input type="image" src="../../Libs/_images/btn_search.gif" alt="검색"></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</form>
+
+<table width="760" cellpadding="0" cellspacing="0" align="center" style="margin-top:20px">
+<tr>
+	<td>
+		<img src="../../Libs/_images/ic_bullet1.gif">총 <b style="color:#FF6600"><?=number_format($totals)?>건</b>의 로그가 검색되었습니다.
+	</td>
+</tr>
+</table>
+
+<table width="760" align="center" cellpadding="8" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="margin-top:5px">
+<tr class="gray_bg" align="center">
+	<td width="25">No</td>
+	<td width="95">아이디</td>
+	<td width="80">로그인IP</td>
+	<td>로그인시각</td>
+	<td style="padding:0" width="1" bgcolor="#ffffff"></td>
+	<td width="25">No</td>
+	<td width="95">아이디</td>
+	<td width="80">로그인IP</td>
+	<td>로그인시각</td>
+</tr>
+<tbody id="log_frame" align="center">
+<?=$contents?>
+</tbody>
+</table>
+
+<table width="760" cellpadding="0" cellspacing="0" align="center" style="margin-top:10px">
+<tr>
+	<td>
+		<a onClick="log.del()"><img src="./img/btn_del_log.gif" alt="3개월전 로그삭제" align="absmiddle" /></a>
+		<a onClick="log.reset()"><img src="./img/btn_reset_log.gif" alt="로그초기화" align="absmiddle" /></a>
+	</td>
+</tr>
+<tr>
+	<td>
+		<div id="paging">
+			<?=$rankup_control->print_paging($totals, $limits)?>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td height="20"></td>
+</tr>
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+var log = {
+	del: function() {
+		if(!confirm('3개월전 로그 데이터를 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_log'});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제 되었습니다.');
+				location.replace('./member_log.html');
+			}
+		}, false);
+	},
+	reset: function() {
+		if(!confirm('로그 데이터를 초기화하시겠습니까?')) return false;
+		proc.parameters({mode: 'reset_log'});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('초기화 되었습니다.');
+				location.replace('./member_log.html');
+			}
+		}, false);
+	}
+}
+//>
+</script>
+
+</body>
+</html>

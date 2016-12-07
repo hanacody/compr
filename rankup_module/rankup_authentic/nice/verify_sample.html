@@ -1,0 +1,89 @@
+<?php
+/**
+ * 실명인증 페이지 샘플
+ */
+include_once '../../../Libs/_php/rankup_basic.class.php';
+include_once '../rankup_authentic.class.php';
+include_once 'authentic.class.php';
+
+$auth = new authentic;
+
+$rankup_control->print_user_head('실명확인');
+?>
+<body>
+<link rel="stylesheet" type="text/css" href="<?=$base_url?>rankup_module/rankup_authentic/nice/verify.css" />
+<style type="text/css">
+div.content {width:800px;margin:50px auto;text-align:left}
+
+/** step **/
+div.step {margin-bottom:80px}
+div.step dl {width:100%;margin:0;padding:0}
+div.step dt {display:table-cell;width:150px;height:130px;line-height:130px;font-size:20px;color:#dedede;text-align:center;border:5px #ddd solid;vertical-align:middle;font-weight:bold;*float:left}
+div.step dt.on {border:5px #999 solid;color:#333}
+div.step dd {display:table-cell;width:50px;height:130px;line-height:130px;margin:0;padding:0;color:#f7f7f7;text-align:center;vertical-align:middle;*float:left}
+</style>
+
+<center>
+<div class="content">
+
+	<div class="tab">
+		<h1>인증종류</h1>
+		<div class="tip"><a onClick="verify.tip(this, 'ipin_tip')">아이핀 도움말</a></div>
+		<div id="ipin_tip" style="display:none">
+			<div class="close"><a onClick="$('ipin_tip').hide()">×</a></div>
+			<div class="wrap">
+				<b>아이핀(I-Pin)이란?</b>
+				<p>인터넷 상에서 주민등록번호를 대신하여 본인임을 확인 받을 수 있는<br />사이버 신원 확인번호입니다.</p>
+			</div>
+		</div>
+		<ul>
+			<li onClick="verify.tab(this)" class="on"><input type="radio" name="vmKind" checked value="jumin" id="vmKind_jumin" /><label for="vmKind_jumin">실명확인</label></li>
+			<li onClick="verify.tab(this)" class="end"><input type="radio" name="vmKind" value="ipin" id="vmKind_ipin" /><label for="vmKind_ipin">아이핀(I-Pin)</label></li>
+		</ul>
+	</div>
+
+	<div id="jumin_frame" class="box">
+		<h1>실명인증</h1>
+		<form id="jumin_form" name="jumin_form" action="javascript:void(0)" onSubmit="return jumin_validate(this) && $jumin.submit(this, 'jumin_form')" autocomplete="off">
+			<input type="radio" name="foreigner" onClick="verify.foreigner(this.value)" checked value="1" id="foreigner_1"><label for="foreigner_1">일반회원<span class="tip"> ( 만 14세 이상 내국인 )</span></label>
+			<input type="radio" name="foreigner" onClick="verify.foreigner(this.value)" value="2" id="foreigner_2"><label for="foreigner_2">국내외국인회원</label>
+			<dl class="box">
+				<dt>성명</dt><dd><input type="text" name="userNm" size="20" maxlength="30" class="input" /></dd>
+				<dt id="userno_text">주민등록번호</td><dd><input type="text" name="userNo1" maxlength="6" class="input sno" /></dd>
+				<dt>-</dt>
+				<dd><input type="password" name="userNo2" maxlength="7" class="input sno" /></dd>
+				<dt><input type="image" src="<?=$base_url?>rankup_module/rankup_authentic/img/btn_verify.gif" alt="실명확인" align="absmiddle" /></dt>
+			</dl>
+			<ul class="hint">
+				<li>타인의 주민등록번호를 임의로 사용하면 '주민등록법'에 의해 3년 이하의 징역 또는 1천만원 이하의 벌금이 부과될 수 있습니다.</li>
+				<li>입력하신 주민등록번호(외국인등록번호)는 <b style="color:#f60"><?=$config_info['site_name']?>에 별도 저장되지 않으며</b>, 신용평가기관을 통한 실명확인용으로만 이용됩니다.</li>
+			</ul>
+		</form>
+	</div>
+
+	<div id="ipin_frame" style="display:none" class="box">
+		<h1>아이핀(I-Pin)인증</h1>
+		<form name="request_form" method="POST">
+			<input type="hidden" id="SendInfo" name="SendInfo" >
+			<input type="hidden" id="ProcessType" name="ProcessType" >
+		</form>
+		<p class="box">
+			아이핀 인증을 통한 가입을 원하시면<br>
+			아이핀 인증 버튼을 눌러 <b><?=$config_info['site_name']?></b> 회원가입을 진행해 주십시오.
+		</p>
+		<center>
+			<a onClick="ipin_pop()"><img src="http://image.creditbank.co.kr/static/img/vno/new_img/bt_26.gif" align="absmiddle" /></a>
+		</center>
+	</div>
+
+	<script type="text/javascript" src="http://secure.nuguya.com/nuguya/nice.nuguya.oivs.crypto.js"></script>
+	<script type="text/javascript" src="http://secure.nuguya.com/nuguya/nice.nuguya.oivs.msg.js"></script>
+	<!--<script type="text/javascript" src="http://secure.nuguya.com/nuguya/nice.nuguya.oivs.msgg.utf8.js"></script>-->
+	<script type="text/javascript" src="http://secure.nuguya.com/nuguya/nice.nuguya.oivs.util.js"></script>
+	<script type="text/javascript" src="<?=$config_info['domain']?>rankup_module/rankup_authentic/nice/verify.js"></script>
+
+</div>
+</center>
+
+</body>
+</html>

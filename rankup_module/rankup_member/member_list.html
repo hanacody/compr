@@ -1,0 +1,305 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+if(!$_GET['sdate']) $_GET['sdate'] = date("Y-m-d");
+if(!$_GET['edate']) $_GET['edate'] = date("Y-m-d");
+
+switch($_GET['pkind']) {
+	default: $_GET['pkind'] = 'all';
+	case 'all': $pkind_text = '전체회원관리'; break;
+	case 'general': $pkind_text = '일반회원관리'; break;
+	case 'secession': $pkind_text = '탈퇴신청회원관리'; break;
+}
+
+$rankup_control->print_admin_head($pkind_text);
+?>
+<body>
+<div class="bar"><script> titleBar("<?=$pkind_text?>") </script></div>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="./rankup_member.js"></script>
+
+<!-- 관리자메모 -->
+<div id="memo_frame" style="position:absolute;display:none;">
+	<table width="700" height="300" cellpadding="0" cellspacing="0"  border="0" bgcolor="#ffffff" style="border:2px solid #000000;position:relative;z-index:0">
+	<input type="hidden" id="uid" name="uid">
+	<tr><td><div class="bar"><script> titleBar('메모등록') </script></div></td></tr>
+	<tr>
+		<td style="border:#dedede 1px solid" style="padding:10px">
+			<table width="100%" cellpadding="0" cellspacing="0">
+			<tr>
+				<td><textarea type="editor" id="memo" name="memo" style="width:100%;height:250px" nofocus nonimage></textarea></td>
+			</tr>
+			<tr><td height="10"></td></tr>
+			<tr>
+				<td align="center"><a onClick="rankup_member.memo_save()"><img src="../../Libs/_images/btn_save.gif" align="absmiddle" alt="저장"></a> <a onClick="rankup_member.memo.close()"><img src="../../Libs/_images/btn_close.gif" align="absmiddle" alt="닫기"></a></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</div>
+<!-- 관리자메모 -->
+
+<iframe id="multiProcessFrame" name="multiProcessFrame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td height="25">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td></td>
+						<td align="right"><a onClick="help.style.display=help.style.display=='none' ? 'block' : 'none';"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<!--도움말-->
+		<tr id="help" style="display:none;">
+			<td>
+				<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+				<tr>
+					<td class="help_bg">
+						<table cellpadding="0" cellspacing="5" border="0" width="100%">
+						<tr><td><img src="../../Libs/_images/ic_arrow2.gif">회원이 사용자화면에서 회원탈퇴를 하면 더 이상 회원아이디로 로그인을 할 수 없습니다.</td></tr>
+						<tr><td><img src="../../Libs/_images/ic_arrow2.gif">회원탈퇴와 동시에 해당회원이 등록한 정보는 비공개로 설정됩니다.</td></tr>
+						<tr><td><img src="../../Libs/_images/ic_arrow2.gif">회원이 회원탈퇴를 하면 관리자에서 탈퇴이유와 함께 탈퇴회원을 확인 할 수 있습니다.</td></tr>
+						<tr><td><img src="../../Libs/_images/ic_arrow2.gif">관리자가 관리자>탈퇴신청회원리스트에서 탈퇴(삭제)를 시키면 비로소 모든 정보가 사라지게 됩니다.</td></tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<!--도움말-->
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="1" bgcolor="#dedede">
+				<form name="searchFrm" action="./member_list.html" method="GET">
+				<input type="hidden" id="pkind" name="pkind" value="<?=$_GET['pkind']?>">
+				<tr bgcolor="#f7f7f7">
+					<td>
+						<table cellpadding="2" cellspacing="1" border="0" align="center">
+						<tr align="center">
+							<td><input type="checkbox" name="use_date"<? if($_GET['use_date']) echo " checked" ?>></td>
+							<td width="180">
+								<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+							</td>
+							<td width="409" id="period_search_option">
+								<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="white">
+						<table cellpadding="2" cellspacing="1" border="0" align="center">
+						<tr>
+							<td>
+								<select name="slevel">
+								<option value="">회원등급</option>
+								<?php
+								array_pop($config_info['smlevel']);
+								foreach($config_info['smlevel'] as $level=>$name) {
+									$selected = ($_GET['slevel']==$level) ? ' selected' : '';
+									echo sprintf('<option value="%d"%s>%s</option>', $level, $selected, $name);
+								}
+								?>
+								</select>
+							</td>
+							<td>
+								<select id="smode" name="smode">
+								<option value="uid">아이디</option>
+								<option value="name">이름</option>
+								<option value="email">이메일</option>
+								<option value="hphone">휴대전화</option>
+								<option value="phone">전화번호</option>
+								<option value="address">주소</option>
+								</select>
+							</td>
+							<td><input type="text" name="skey" size="20" value="<?=$_GET['skey']?>" maxlength="20" class="simpleform"></td>
+							<td><input type="image" src="../../Libs/_images/btn_search.gif" border="0" align="absmiddle"></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</form>
+				</table>
+				<script type="text/javascript">
+				$('smode').value = "<? echo $_GET['smode'] ? $_GET['smode'] : 'uid' ?>";
+				</script>
+			</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td>
+<?php
+//@entry setting
+switch($_GET['pkind']) {
+	// 전체회원
+	case 'all':
+		$bind_entry = array(
+			'title_wrap' => array('<tr align="center" class="gray_bg">', '</tr>'),
+			'title' => '
+				<td width="30"><input type="checkbox" id="checker_top" onClick="rankup_member.checker.all(this.checked)"></td>
+				<td>기본정보</td>
+				<td width="70">등급</td>
+				<td width="80">휴대전화</td>
+				<td width="45">SMS</td>
+				<td width="45">방문</td>
+				<td width="70">가입일</td>
+				<td width="45">메모</td>
+				<td width="45">수정</td>
+				<td width="45">삭제</td>',
+			'entry_wrap' => array('<tr>', '</tr>'), // 감싸는 태그
+			'entry' => array(
+				0 => '<td colspan="10" height="50"><center disabled>회원이 존재하지 않습니다.</center></td>', // 빈셀
+				1 => '
+					<td><input type="checkbox" name="uids[]" value="{:uid:}"></td>
+					<td align="left"><a href="member_detail.html?uid={:uid:}" title="고객정보">{:name:} <nobr>({:uid:})</nobr></a></td>
+					<td>{:level:}</td>
+					<td>{:hphone:}</td>
+					<td><a onClick="{:send_sms:}">발송</a></td>
+					<td>{:visit:}</td>
+					<td>{:join_time:}</td>
+					<td><a onClick="rankup_member.memo_open(this, \'{:uid:}\')"{:on_memo:}>메모</a></td>
+					<td><a href="rad_member_modify.html?uid={:uid:}"><img src="./img/btn_modify.gif" align="absmiddle"></a></td>
+					<td><a onClick="rankup_member.delete_member(\'{:uid:}\')"><img src="./img/btn_board_del.gif" align="absmiddle"></a></td>'
+			),
+			'on_memo' => ' style="color:red"'
+		);
+		break;
+	// 탈퇴신청회원
+	case 'secession':
+		$bind_entry = array(
+			'title_wrap' => array('<tr align="center" class="gray_bg">', '</tr>'),
+			'title' => '
+				<td width="30"><input type="checkbox" id="checker_top" onClick="rankup_member.checker.all(this.checked)"></td>
+				<td>기본정보</td>
+				<td width="70">등급</td>
+				<td width="70">가입일</td>
+				<td width="70">탈퇴신청일</td>
+				<td width="55">탈퇴이유</td>
+				<td width="45">방문</td>
+				<td width="45">메모</td>
+				<td width="45">수정</td>
+				<td width="45">삭제</td>',
+			'entry_wrap' => array('<tr>', '</tr>'),
+			'entry' => array(
+				0 => '<td colspan="10" height="50"><center disabled>회원이 존재하지 않습니다.</center></td>', // 빈셀
+				1 => '
+					<td><input type="checkbox" name="uids[]" value="{:uid:}"></td>
+					<td align="left"><a href="member_detail.html?uid={:uid:}" title="고객정보">{:name:}</a> ({:uid:})</td>
+					<td>{:level:}</td>
+					<td>{:join_time:}</td>
+					<td>{:secession_wdate:}</td>
+					<td><a onClick="rankup_member.open_secession(this, \'{:uid:}\')"><img src="./img/btn_why.gif" align="absmiddle"></a></td>
+					<td>{:visit:}</td>
+					<td><a onClick="rankup_member.memo_open(this, \'{:uid:}\')"{:on_memo:}>메모</a></td>
+					<td><a href="rad_member_modify.html?uid={:uid:}"><img src="./img/btn_modify.gif" align="absmiddle"></a></td>
+					<td><a onClick="rankup_member.delete_member(\'{:uid:}\')"><img src="./img/btn_board_del.gif" align="absmiddle"></a></td>'
+			),
+			'on_memo' => ' style="color:red"'
+		);
+		break;
+}
+list($totals, $today, $titlebars, $contents, $paging, $addWhere) = $rankup_member->print_member_contents($bind_entry);
+?>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr height="26">
+					<td><img src="../../Libs/_images/ic_bullet1.gif">총 <b style="color:#FF6600"><?=number_format($totals)?></b> 명의 회원이 검색되었습니다.</td>
+					<td align="right">오늘가입 : <b><?=number_format($today)?> 명</b></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<?=$titlebars?>
+						<tbody id="content_frame" align="center">
+						<?=$contents?>
+						</tbody>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height="10" colspan="2"></td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td>
+								<a onClick="rankup_member.checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle"></a>
+								<a onClick="rankup_member.delete_member()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle"></a>
+<?php
+if($_GET['pkind']=='all') {
+?>
+								<select name="level" onChange="if(this.value) change_level(this)">
+								<option value="">회원등급변경</option>
+								<?php
+								array_pop($config_info['smlevel']);
+								foreach($config_info['smlevel'] as $level=>$text) {
+									echo sprintf('<option value="%d">Lv.%d %s</option>', $level, $level, $text);
+								}
+								?>
+								</select>
+<?php
+}
+?>
+							</td>
+							<td align="right" width="110">
+								<?php
+								if($_GET['pkind']!='secession') {
+									echo '<a onClick="rankup_member.excel_download()"><img src="./img/btn_excel_save.gif" align="absmiddle"></a>';
+								}
+								?>
+							</td>
+						</tr>
+						<tr>
+							<td align="center" colspan="3">
+								<div id="paging"><? echo $paging ?></div>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+				<script type="text/javascript">
+				rankup_member.initialize('<?=$_GET['pkind']?>');
+				rankup_member.memo.initialize('memo_frame');
+				rankup_member.checker.initialize('content_frame');
+				rankup_member.where = "<?=$addWhere?>";
+				// 회원등급 변경
+				var change_level = function(el) {
+					var uids = rankup_member.checker.get();
+					if(uids.blank()) {
+						el.value = '';
+						alert('등급을 변경하실 회원을 선택하여 주십시오.');
+						return false;
+					}
+					if(!confirm('선택하신 회원을 \''+ el.options[el.options.selectedIndex].text +'\' 등급으로 변경하시겠습니까?')) {
+						el.value = '';
+						return false;
+					}
+					proc.parameters({mode: 'change_level', level: el.value, uids: uids});
+					proc.process(function(trans) {
+						alert('변경되었습니다.');
+						location.reload();
+					}, false);
+				}
+				</script>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

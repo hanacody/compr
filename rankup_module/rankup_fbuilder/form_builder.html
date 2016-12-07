@@ -1,0 +1,146 @@
+<?php
+/**
+ * 폼 등록
+ */
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include_once 'rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+if($_GET['no']) $rows = $fbuilder->get_settings($_GET['no']);
+
+$rankup_control->print_admin_head('폼(FORM)관리 - 폼등록');
+?>
+<body>
+<div class="bar"><script> titleBar('폼(FORM)관리 - 폼등록') </script></div>
+<style type="text/css"> @import url(form_builder.css); </style>
+
+<center>
+<div style="width:780px;text-align:left">
+
+	<form id="save_form" name="save_form" onSubmit="return false" style="margin-top:30px">
+		<input type="hidden" id="fno" name="fno" value="<?=$rows['no']?>" />
+		<div id="sub_title">기본설정</div>
+		<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+		<col width="130" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 등록폼 이름</td>
+			<td>
+				<input type="hidden" id="prev_form_name" name="prev_form_name" value="<?=htmlspecialchars($rows['form_name'])?>" />
+				<input type="text" id="form_name" name="form_name" required hname="등록폼 이름" value="<?=htmlspecialchars($rows['form_name'])?>" size="40" maxlength="20" class="simpleform" />
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 글쓰기 권한</td>
+			<td>
+				<select name="write_level">
+				<?php
+				foreach($config_info['smlevel'] as $level=>$text) {
+					$_selected = ($rows['write_level']==$level) ? ' selected' : '';
+					echo sprintf('<option value="%d"%s>%s</option>', $level, $_selected, $text);
+				}
+				?>
+				</select>
+				부터 글쓰기 가능
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 관리자 통보</td>
+			<td>
+				<input type="radio" name="use_alarm" checked value="yes" id="use_alarm_yes" /><label for="use_alarm_yes">사용함</label>
+				<input type="radio" name="use_alarm"<? if($rows['use_alarm']=='no') echo ' checked' ?> value="no" id="use_alarm_no" /><label for="use_alarm_no">사용안함</label>
+				<span id="tip">+ 문의글이 등록 되었을때 휴대전화로 통보 받을 수 있습니다.</span>
+				<table width="100%" cellpadding="4" cellspacing="0" border="1" bordercolor="#dedede" class="table1" style="margin-top:5px">
+					<col width="120" />
+					<col />
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 통보받을 휴대전화</td>
+						<td><input type="text" name="alarm_phone" value="<?=$rows['alarm_phone']?>" option="hphone" maxlength="13" class="simpleform" /><span id="tip">+ 숫자만 입력</span></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 통보받을 메시지</td>
+						<td><input type="text" name="alarm_message" value="<?=htmlspecialchars($rows['alarm_message'])?>" maxlength="80" class="simpleform" style="width:90%" /></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 개인정보수집 동의</td>
+			<td>
+				<input type="radio" name="use_privacy" checked value="yes" id="use_privacy_yes" /><label for="use_privacy_yes">사용함</label>
+				<input type="radio" name="use_privacy"<? if($rows['use_privacy']=='no') echo ' checked' ?> value="no" id="use_privacy_no" /><label for="use_privacy_no">사용안함</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 스팸방지코드 사용</td>
+			<td>
+				<input type="radio" name="use_antispam" checked value="yes" id="use_antispam_yes" /><label for="use_antispam_yes">사용함</label>
+				<input type="radio" name="use_antispam"<? if($rows['use_antispam']=='no') echo ' checked' ?> value="no" id="use_antispam_no" /><label for="use_antispam_no">사용안함</label>
+				<span id="tip">+ 로그인한 회원에게는 스팸방지코드가 노출되지 않습니다.</span>
+			</td>
+		</tr>
+		</table>
+
+		<div style="position:relative;margin-top:30px">
+			<div id="sub_title" style="position:absolute">등록폼 설정</div>
+			<div style="text-align:right"><a onClick="builder.frame.add()">[폼그룹추가+]</a></div>
+		</div>
+
+		<div id="builder_frame"><?/*등록폼 영역*/?></div>
+
+	</form>
+	<div style="margin-top:15px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정하신 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" /></a>
+		<a onClick="builder.preview()"><img src="../../Libs/_images/btn_preview.gif" align="absmiddle" /></a>
+		<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" align="absmiddle" /></a>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<div id="dialog" class="dialog" style="display:none">
+	<form id="dialog_form" name="dialog_form">
+		<dl>
+			<dt>
+				힌트입력
+				<div class="x"><a onClick="builder.field.hint.close()">×</a></div>
+			</dt>
+			<dd>
+				<textarea name="hint"></textarea>
+			</dd>
+			<dd>
+				<a onClick="builder.field.hint.apply()"><img src="../../Libs/_images/btn_regist1.gif" align="absmiddle" /></a>
+				<a onClick="builder.field.hint.close()"><img src="../../Libs/_images/btn_close1.gif" align="absmiddle" /></a>
+			</dd>
+		</dl>
+	</form>
+</div>
+
+<script type="text/javascript" src="form_builder.class.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+builder.initialize('builder_frame');
+$form.blind = true;
+$form.hashes = {mode: 'save_forms'}
+$form.handler = function(trans) {
+	var json = trans.responseText.evalJSON();
+	if(!json.fno) proc.response(trans);
+	else {
+		$('fno').value = json.fno;
+		builder.save.begin(json.fno);
+		alert('저장되었습니다.');
+		// 등록폼 이름이 바뀐경우
+		if($F('prev_form_name')!=$F('form_name')) {
+			$('prev_form_name').value = $F('form_name');
+			try { top.frames['left'].location.reload(); } catch(e) { }
+		}
+	}
+}
+//]]>
+</script>
+
+<body>
+</html>

@@ -1,0 +1,286 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "./rankup_sms_config.class.php";
+$rankup_control->check_admin();
+$rankup_sms_config = new rankup_sms_config();
+
+if($config_info['membership_use']=='no') $rankup_control->popup_msg_js('회원 SMS 발송은 회원제 사용시에만 가능합니다.','');
+
+##################################################################
+#sms를 보낼때 넘겨줘야 하는 값들
+##################################################################
+$client_id = $rankup_sms_config->info['client_id'];
+$client_pw = $rankup_sms_config->info['client_pw'];
+$callback = $rankup_sms_config->info['callback'];
+$name = $_SERVER['HTTP_HOST'];	//이름을 사이트주소로 한다.
+
+if(empty($_GET['start'])) $_GET['start'] = date("Y-m-d");
+if(empty($_GET['end'])) $_GET['end'] = date("Y-m-d");
+
+$sms_list = $rankup_sms_config->make_list_query($_GET);
+
+$list = base64_encode(serialize($sms_list));
+
+$rankup_control->print_admin_head("회원 SMS 발송");
+?>
+<body>
+<script language="javascript" src= "./rankup_util.class.js"></script>
+<script language="javascript" src ="./rankup_ajax.class.js"></script>
+<script type="text/javascript">
+<!--
+var check_send = function() {
+	var obj = document.getElementById("msg");
+	if(!obj.value) {
+		alert("내용을 입력하여 주십시오."+SPACE);
+		obj.focus();
+		return false;
+	}
+	return true;
+}
+var send_all = function() {
+	var client_id = "<?=$client_id?>";
+	var mode = "send_all";
+	var client_pw = "<?=$client_pw?>";
+	var name = "<?=$name?>";
+	var list = "<?=$list?>";
+	var domain = "<?=$_SERVER['HTTP_HOST']?>";
+	var page = "<?=$_SERVER['PHP_SELF']?>";
+	var msg = document.getElementById('msg').value;
+	var callback = document.getElementById('callback').value;
+	var agency = document.getElementById('agency').value;
+	var url = "./regist.php";
+	var param = "client_id="+client_id+"&mode="+mode+"&client_pw="+client_pw+"&list="+list+"&domain="+domain+"&page="+page+"&msg="+msg+"&callback="+callback+"&agency="+encodeURIComponent(agency);
+	new net.content_loader(url, param);
+}
+
+var rankup_sms = {
+
+	get_list: function(page) {
+		if(!page) page =1;
+		this.template = $('msg_frame');
+		var stype = $('stype').value;
+		var sInput = $('stype').next();
+		if(stype == "subject" && sInput.value==""){
+			alert('제목을 입력하여 주십시요.');
+			sInput.focus();
+			return false;
+		}
+		var classObj = this;
+		classObj.template.innerHTML = '<div id="ajax_loading"><img src="/images/loading_big.gif" alt="로딩중"></div>';
+		proc.url = domain+"rankup_module/rankup_request/";
+		proc.proc = "/multiProcess.html";
+		proc.parameters({mode:'get_msgList', page:page, stype:stype, subject:sInput.value});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) {
+				var items = trans.responseXML.getElementsByTagName('content')[0].firstChild.nodeValue;
+				classObj.template.innerHTML = items;
+				classObj.get_msg_show(items);
+			}
+			else proc.response(trans);
+		}, false);
+	},
+	get_msg_show: function() {
+		var This = this;
+		setTimeout(function() {
+			This.template.style.display="block";
+			with(document) {
+				var margin = {
+					top: Prototype.Browser.IE ? body.scrollTop : 0,
+					left: Prototype.Browser.IE ? body.scrollLeft : 0
+				};
+				This.template.setStyle({
+					top: margin.top + (body.offsetHeight/2) - (This.template.offsetHeight/2),
+					left: margin.left + (body.offsetWidth/2) - (This.template.offsetWidth/2)
+				});
+			}
+		}, 100);
+	},
+	get_sinput : function(obj){
+		var sInput = $(obj).next();
+		if(obj.value == "subject") sInput.show();
+		else sInput.hide();
+	},
+	copy: function (msg, agency){
+		$('msg').value = msg;
+		$('agency').value = agency;
+		$('msg').focus();
+		this.template.style.display="none";
+	},
+	check_select: function(el){
+		if(el.value=="general") $('sale').show();
+		else $('sale').hide();
+	}
+}
+
+//-->
+</script>
+<div class="bar"><script> titleBar("회원SMS발송", 270) </script></div>
+<div id="msg_frame"></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<form name= "view_list" method="post">
+			<input type="hidden" name="list" value="<? echo $list ?>">
+			</form>
+			<?
+			if(!$_GET['mode']){
+			?>
+			<tr>
+				<td>
+					<table width="100%" cellpadding="0" cellspacing="1" bgcolor="#dedede">
+						<form name="searchFrm" method="GET" action="<?=$_SERVER['PHP_SELF']?>" onSubmit="return validate(this)">
+						<tr bgcolor="#f7f7f7">
+							<td>
+								<table cellpadding="2" cellspacing="1" border="0" align="center">
+								<tr align="center">
+									<td><input type="checkbox" name="use_date" value="yes"<? if($_GET['use_date']=='yes') echo " checked" ?>></td>
+									<td width="180">
+										<? echo $rankup_control->print_period_search("start|end", $_GET['start']."|".$_GET['end']) ?>
+									</td>
+									<td width="409" id="period_search_option">
+										<? echo $rankup_control->print_period_search_option("start|end") ?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="white">
+								<table cellpadding="2" cellspacing="1" border="0" align="center">
+								<tr>
+									<!--
+									<td>
+										<select name="sale" id="sale">
+										<option value="">전체회원</option>
+										<option value="yes">예약회원</option>
+										</select>
+									</td>
+									-->
+									<td>
+										<select name="slevel">
+										<option value="">회원등급</option>
+										<?php
+										array_pop($config_info['smlevel']);
+										foreach($config_info['smlevel'] as $level=>$name) {
+											$selected = ($_GET['slevel']==$level) ? ' selected' : '';
+											echo sprintf('<option value="%d"%s>%s</option>', $level, $selected, $name);
+										}
+										?>
+										</select>
+									</td>
+									<td>
+										<select name="member_type">
+										<option value="uid">아이디</option>
+										<option value="name">이름</option>
+										<option value="email">이메일</option>
+										</select>
+									</td>
+									<td>
+										<input type="text" name="member_value" value="<?=$_GET['member_value']?>" size="20" class="simpleform">
+									</td>
+									<td>
+										<input type="checkbox" name="use_sms" id="use_sms" value="no"<? if($_GET['use_sms']=="no") echo " checked" ?>><label for="use_sms">수신거부제외</label>
+									</td>
+									<td width="50" align="right">
+										<input type="image" src="../../Libs/_images/btn_search.gif" border="0" align="absmiddle"></a>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						</form>
+						</table>
+						<script type="text/javascript">
+						<!--
+						var form = document.searchFrm;
+						form.member_type.value = "<? echo empty($_GET['member_type']) ? "uid" : $_GET['member_type'] ?>";
+						//-->
+						</script>
+				</td>
+			</tr>
+			<?}?>
+			<tr><td height="15"></td></tr>
+			<tr><td height="25">SMS를 수신할 회원이 <b>총 <?=count($sms_list)?> 명</b> 검색 되었습니다.</td></tr>
+			<tr>
+				<td align="center">
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<tr>
+							<td>
+								<table width="100%" cellpadding="0" cellspacing="0" border="0">
+								<tr>
+									<td width="240">
+										<table width='100%' border='0' cellspacing='0' cellpadding='0'>
+										<form name="send_sms" action="<?=$rankup_sms_config->send_sms_domain?>" method="post" onsubmit="return check_send()">
+										<input type="hidden" name="agency" id="agency">
+										<tr><td height='5'></td></tr>
+										<tr>
+											<td align='center' width='246'>
+												<table width='130' border='0' cellpadding='0' cellspacing='0'>
+												<tr><td><img src='./img/sms_bg_01.gif'></td></tr>
+												<tr>
+													<td background='./img/sms_bg_02.gif' height='87' align='center'><textarea name="msg" id="msg" rows='5' cols='16' class='form' style='background-color:transparent;overflow:hidden;border:0;font-family:돋움체;font-size:12px;' onkeyup="rankup_util.change_word(this,'byte');"></textarea></td>
+												</tr>
+												<tr>
+													<td background='./img/sms_bg_03.gif' height='22' align='center'><span id = "byte">0</span>Byte / 최대 80Byte</td>
+												</tr>
+												</table>
+											</td>
+										</tr>
+										<tr><td height='5'></td></tr>
+										<tr align='center'>
+											<td height='50'>
+												보내는사람<br>
+												<input type="text" name="callback" id="callback" size="20" maxlength="13" class="simpleform">
+											</td>
+										</tr>
+										<tr align='center'>
+											<td>
+												<a onClick="send_all()"><img src='./img/btn_sms_send.gif' style="cursor:hand;" alt="보내기"></a>
+											</td>
+										</tr>
+										<tr><td height="4"></td></tr>
+										<tr align='center'>
+											<td><a onClick="var win=window.open('','win','scrollbars=yes,resizable=no,width=400,height=400');document.forms['view_list'].action = './sms_send_list.html';document.forms['view_list'].target='win';document.forms['view_list'].submit();"><img src='./img/btn_sms_number.gif' alt="발송될 핸드폰 번호보기"></a></td>
+										</tr>
+										<tr><td height="3"></td></tr>
+										<tr><td align="center"><a href="javascript:void(0);" onclick="window.open('./send_sms_one.html', 'vpWin', 'width=154,height=400,left=200,top=200');"><img src="./img/btn_sms_person.gif" alt="개인메시지발송하기"></a></td>
+										</tr>
+										</form>
+										</table>
+									</td>
+									<td>
+										<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#BDD2E3" class="table1" style="margin-bottom:5px;">
+											<tr>
+												<td bgcolor="EDF3F8" style="line-height:160%;">&nbsp;&nbsp;최대 글자수는 80Byte 입니다. 80Byte초과시 뒷부분이 삭제되어 발송됩니다. <br>
+												&nbsp;&nbsp;아래 형식을 사용하면 문자전송시 자동으로 반영되어 전송됩니다.</td>
+											</tr>
+										</table>
+
+										<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+										<? foreach($rankup_sms_config->merge_list as $key=>$val) {
+											if(!in_array($key, array("domain", "date", "id", "name"))) continue;
+										?>
+										<tr>
+											<td align='center' class='gray_bg'><?= $val[0];?></td>
+											<td><?= $val[1];?></td>
+										</tr>
+										<? } ?>
+										</table>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+</body>
+</html>

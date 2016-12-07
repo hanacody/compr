@@ -1,0 +1,609 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../class/gallery.class.php';
+include_once '../class/gallery_admin.class.php';
+include_once '../../rankup_module/rankup_builder/attachment.class.php';
+
+$gallery = new gallery_admin;
+if($_GET['no']) {
+	$gs_rows = $gallery->get_gallery($_GET['no']);
+	$gs_settings = $gs_rows['settings'];
+}
+else {
+	$gs_rows['type'] = 'gallery';
+	// 갤러리 PRESET 적용
+	if(isset($_skin_init['gallery_preset'])) {
+		$gs_settings = $_skin_init['gallery_preset'];
+	}
+}
+
+$rankup_control->print_admin_head('갤러리등록');
+?>
+<div class="bar"><script> titleBar('갤러리등록') </script></div>
+
+<?php
+/**
+ * 컬러픽커 로드
+ *@usage: echo color_picker('name', 'value', 'handler');
+ *@usage: <script> color_picker.initialize('color_frame'); </script> // 컬러픽커 초기화
+ */
+include_once $base_dir.'Libs/_picker/color_picker.inc.php';
+?>
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="../../rankup_module/rankup_builder/attachment.class.js"></script>
+<script type="text/javascript" src="../../rankup_module/rankup_builder/image_box.class.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	if(!el) return;
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'gallery': mode = ['show', 'hide', 'hide', 'hide']; break;
+		case 'webzine': mode = ['hide', 'show', 'show', 'show']; break;
+	}
+	$w('gallery_frame webzine_skin_frame webzine_frame webzine_lists').each(function(frame, index) {
+		$(frame)[mode[index]]();
+		$w('input textarea').each(function(tag) {
+			$A($(frame).select(tag)).each(function(field) {
+				if(mode[index]=='hide') field.disabled = true;
+				else field.disabled = field.getAttribute('face') ? true : false;
+			});
+		});
+	});
+}
+</script>
+<link type="text/css" rel="stylesheet" href="../../rankup_module/rankup_builder/image_frame.css" />
+<style type="text/css">
+div.preview {
+	width: 712px;
+	*width: 734px;
+	height: 150px;
+	overflow: auto;
+	padding: 10px;
+	border: 1px #cecece solid;
+	background-color: #eee;
+	text-align: center;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+.w100 { width: 100% }
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+	<div style="width:750px;text-align:left;margin-top:30px">
+		<form id="save_form" name="save_form" onSubmit="return false">
+			<input type="hidden" id="no" name="no" value="<?=$gs_rows['no']?>" />
+			<div id="sub_title">갤러리등록</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;갤러리명</td>
+				<td>
+					<ul style="list-style:none;margin:0;padding:0;">
+						<li style="float:left"><input type="text" id="gallery_name" name="name" required hname="갤러리명" value="<?=str_replace('"', '&quot;', $gs_rows['name'])?>" size="25" maxlength="20" class="simpleform" /></li>
+					<?php
+					if($gs_rows['type']=='webzine') {
+						echo '<li style="float:left;margin-left:3px;padding-top:2px;"><a onClick="webzine.set_name()"><img src="./img/btn_gallery_name.gif" /></a></li>';
+					}
+					?>
+					</ul>
+				</td>
+			</tr>
+			<tr style="display:<? if($gs_rows['no']) echo 'none' ?>">
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;갤러리 형태</td>
+				<td>
+					<input type="radio" name="gallery_type" checked value="gallery" onClick="change_frame(this)" id="gallery_type_gallery"><label for="gallery_type_gallery">갤러리형</label>
+					<input type="radio" name="gallery_type"<? if($gs_rows['type']=='webzine') echo ' checked' ?> value="webzine" onClick="change_frame(this)" id="gallery_type_webzine"><label for="gallery_type_webzine">웹진형</label>
+					<span id="tip">갤러리 형태는 한번 선택하면 수정할 수 없습니다.</span>
+				</td>
+			</tr>
+			<tbody id="gallery_frame">
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 등록</td>
+					<td>
+						<div id="image_frame">
+							<input type="hidden" face="attach" name="mode" value="post_attach" disabled>
+							<input type="hidden" face="attach" name="kind" value="gallery" disabled>
+							<input type="hidden" face="attach" name="handler" value="image_box.draw" disabled>
+							<input type="hidden" face="attach" name="index" value="<?=$gs_rows['no']?>" disabled>
+							<dl>
+								<dd>
+									<span><input type="file" name="_attach_" onChange="image_box.post(this, 'attach')"></span>
+									<span><a onClick="image_box.del()"><img src="./img/btn_del.gif" align="absmiddle" /></a></span>
+									<span id="tip" style="letter-spacing:0">기본 690px ⅹ 500px ( jpg,gif,png 파일만 가능 )</span>
+								</dd>
+								<dt>
+								<?php
+								$file_datas = array();
+								$attach = new attachment('gallery');
+								$folder = $attach->configs['save']['folder'];
+								foreach(explode(',', $gs_settings['attach']) as $name) {
+									if(is_file($base_dir.$folder.$name)) array_push($file_datas, compact('folder', 'name'));
+								}
+								echo fetch_contents($file_datas, '<div name="{:name:}" onClick="image_box.selector(this)" onMouseOver="$(this).addClassName(\'hover\')" onMouseOut="$(this).removeClassName(\'hover\')"><img src="'.$base_url.'{:folder:}{:name:}" align="absmiddle" /></div>');
+								?>
+								</dt>
+							</dl>
+						</div>
+						<div class="help_bg" style="margin-top:5px">
+							<ul class="help_ul tip">
+								<li><b class="tip2">3D회전형</b> 이미지 권장 크기 : <b class="tip2">400 × 285</b></li>
+								<li><b class="tip2">2D회전형</b> 이미지 권장 크기 : <b class="tip2">500 × 320</b></li>
+								<li>그외 이미지 모션들은 <b class="tip2">갤러리 크기(726 × 500)</b>에 맞춰 등록하시면 됩니다.</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 모션</td>
+					<td>
+						<?php
+						if(!$gs_settings['image_motion']) $gs_settings['image_motion'] = 1;
+						$img_motions = array('1'=>'기본','2'=>'3D회전','3'=>'2D회전','4'=>'슬라이드','5'=>'블라인드','6'=>'줌','7'=>'와이드');
+						foreach($img_motions as $num=>$name) {
+							$checked = ($gs_settings['image_motion']==$num) ? ' checked' : '';
+							echo sprintf(' <input type="radio" name="image_motion"%s value="%d" id="image_motion_%d" /><label for="image_motion_%d">%s형</label>', $checked, $num, $num, $num, $name);
+						}
+						?>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 리스트</td>
+					<td>
+						<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+						<col width="110" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;사용여부</td>
+							<td>
+								<input type="radio" name="image_list_use" checked value="yes" id="image_list_use_yes"><label for="image_list_use_yes">사용함</label>
+								<input type="radio" name="image_list_use"<? if($gs_settings['image_list_use']=='no') echo ' checked' ?> value="no" id="image_list_use_no"><label for="image_list_use_no">미사용</label>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;리스트 형태</td>
+							<td>
+								<?php
+								if(!$gs_settings['image_list_kind']) $gs_settings['image_list_kind'] = 1;
+								$list_motions = array('1'=>'갤러리','2'=>'좌우 화살표','3'=>'둥근 썸네일','4'=>'네모 썸네일','5'=>'스크롤');
+								foreach($list_motions as $num=>$name) {
+									$checked = ($gs_settings['image_list_kind']==$num) ? ' checked' : '';
+									echo sprintf(' <input type="radio" name="image_list_kind"%s value="%d" id="image_list_kind_%d" /><label for="image_list_kind_%d">%s형</label>', $checked, $num, $num, $num, $name);
+								}
+								?>
+								<div class="tip" style="margin-left:20px;margin-top:8px">+이미지 모션이 '3D회전형', '2D회전형'일 경우는 '좌우 화살표형'만 동작합니다.</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;위치지정</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">상단여백</td>
+									<td>
+										<input type="text" name="image_list_top" hname="이미지 리스트 위치" option="number" value="<?=$gs_settings['image_list_top']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">좌측여백</td>
+									<td>
+										<input type="text" name="image_list_left" hname="이미지 리스트 위치" option="number" value="<?=$gs_settings['image_list_left']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;불투명도</td>
+							<td>
+								<input type="text" name="image_list_opacity" hname="이미지 리스트 불투명도" option="number" value="<?=$gs_settings['image_list_opacity']?>" size="3" maxlength="3" minval="1" maxval="100" class="simpleform">
+								<span id="tip">+불투명도 수치가 높을 수록 진하게 출력됩니다. ( 입력 범위: 1 ~ 100 )</span>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;갤러리문구 등록</td>
+					<td id="color_frame">
+						<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+						<col width="110" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구 모션</td>
+							<td>
+								<?php
+								if(!$gs_settings['text_motion']) $gs_settings['text_motion'] = 1;
+								foreach(range(1, 6) as $num) {
+									$checked = ($gs_settings['text_motion']==$num) ? ' checked' : '';
+									echo sprintf(' <input type="radio" name="text_motion"%s value="%d" id="text_motion_%d" /><label for="text_motion_%d">%s형</label>', $checked, $num, $num, $num, strtoupper(chr(64+$num)));
+								}
+								?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;갤러리 제목</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">문구등록</td>
+									<td>
+										<input type="text" name="top_text" hname="상단문구" value="<?=str_replace('"', '&quot;', $gs_settings['top_text'])?>" maxlength="100" class="simpleform w100" />
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">크기/색상</td>
+									<td>
+										<input type="text" name="top_text_size" hname="상단문구 글자크기" option="number" value="<?=$gs_settings['top_text_size']?>" size="5" maxlength="2" class="simpleform"> px /
+										<?=color_picker('top_text_color', $gs_settings['top_text_color'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;설명글(1)</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">문구등록</td>
+									<td>
+										<input type="text" name="middle_text" hname="중간문구" value="<?=str_replace('"', '&quot;', $gs_settings['middle_text'])?>" maxlength="100" class="simpleform w100" />
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">크기/색상</td>
+									<td>
+										<input type="text" name="middle_text_size" hname="중간문구 글자크기" option="number" value="<?=$gs_settings['middle_text_size']?>" size="5" maxlength="2" class="simpleform"> px /
+										<?=color_picker('middle_text_color', $gs_settings['middle_text_color'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;설명글(2)</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">문구등록</td>
+									<td>
+										<input type="text" name="bottom_text" hname="하단문구" value="<?=str_replace('"', '&quot;', $gs_settings['bottom_text'])?>" maxlength="100" class="simpleform w100" />
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">크기/색상</td>
+									<td>
+										<input type="text" name="bottom_text_size" hname="하단문구 글자크기" option="number" value="<?=$gs_settings['bottom_text_size']?>" size="5" maxlength="2" class="simpleform"> px /
+										<?=color_picker('bottom_text_color', $gs_settings['bottom_text_color'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구전체 위치</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">상단여백</td>
+									<td>
+										<input type="text" name="text_container_top" hname="문구전체 위치" option="number" value="<?=$gs_settings['text_container_top']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">좌측여백</td>
+									<td>
+										<input type="text" name="text_container_left" hname="문구전체 위치" option="number" value="<?=$gs_settings['text_container_left']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구전체 배경</td>
+							<td valign="top">
+								<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">업로드</td>
+									<td>
+										<span><input type="file" name="_attach_" onChange="text_container_bg.post(this, 'attach2')"></span>
+										<?php
+										// 등록된 문구전체 배경이미지가 있으면 삭제버튼 출력
+										if($gs_settings['text_container_bg']) echo '<span id="text_container_bg_del"><a onClick="text_container_bg.del('.$gs_rows['no'].')"><img src="./img/btn_del.gif" align="absmiddle" /></a></span>';
+										?>
+										<input type="hidden" id="on_text_container_bg" name="on_text_container_bg">
+										<input type="hidden" face="attach2" name="mode" value="post_attach" disabled>
+										<input type="hidden" face="attach2" name="kind" value="gtext_container_bg" disabled>
+										<input type="hidden" face="attach2" name="handler" value="text_container_bg.draw" disabled>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">불투명도</td>
+									<td><input type="text" name="text_container_opacity" hname="문구배경 불투명도" option="number" minval="1" maxval="100" value="<?=$gs_settings['text_container_opacity']?>" size="3" maxlength="3" class="simpleform"> <span id="tip">+불투명도 수치가 높을수록 진하게 출력됩니다. ( 입력 범위: 1 ~ 100 )</span></td>
+								</tr>
+								</table>
+								<div id="text_container_bg_preview" class="preview" style="margin-top:7px;width:452px;*width:474px;" file="<?=$gs_settings['text_container_bg']?>"><?php
+									// 등록된 문구전체 배경이미지 출력
+									if($gs_settings['text_container_bg']) {
+										echo sprintf('<img src="%s" align="absmiddle" />', $base_url.$attach->presets['gtext_container_bg']['save']['folder'].$gs_settings['text_container_bg']);
+									}
+									?></div>
+								<div style="margin-top:8px;text-align:center">
+									<span id="tip" style="margin-left:0">문구배경 <b class="orange_b">이미지( jpg,gif,png )</b> 파일을 업로드하여 주십시오.</span>
+								</div>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+			<tr id="webzine_skin_frame" style="display: none">
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;갤러리 스킨</td>
+				<td>
+					<?php
+					// 갤러리 스킨 변경 이벤트 추가
+					if($gs_rows['no']) $event = sprintf(' onClick="webzine.set_skin(this, \'%s\', %d)"', $gs_rows['skin_type'], $gs_rows['no']);
+					?>
+					<input type="radio" name="skin_type" checked value="A" id="skin_type_A"<?=$event?> /><label for="skin_type_A">A형</label>
+					<input type="radio" name="skin_type"<? if($gs_rows['skin_type']=='B') echo ' checked' ?> value="B" id="skin_type_B"<?=$event?> /><label for="skin_type_B">B형</label>
+					<input type="radio" name="skin_type"<? if($gs_rows['skin_type']=='C') echo ' checked' ?> value="C" id="skin_type_C"<?=$event?> /><label for="skin_type_C">C형</label>
+					<input type="radio" name="skin_type"<? if($gs_rows['skin_type']=='D') echo ' checked' ?> value="D" id="skin_type_D"<?=$event?> /><label for="skin_type_D">D형</label>
+				</td>
+			</tr>
+			</table>
+
+			<!-- 웹진 등록폼 -->
+			<style type="text/css"> @import url('gallery_regist.css'); </style>
+			<div id="webzine_frame" style="display:none;padding-top:30px">
+				<div id="sub_title">웹진형 이미지 등록</div>
+				<input type="hidden" id="wno" name="wno" />
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+					<col width="134" />
+					<col />
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 제목</td>
+						<td><input type="text" id="subject" name="subject" required hname="제목" size="60" maxlength="50" class="simpleform" /></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 이미지</td>
+						<td>
+							<?php
+							$attach = new attachment('webzine');
+							?>
+							<span><input type="file" name="_attach_" onChange="webzine.post(this, 'attach3')" /></span>
+							<span id="tip">180 × 120 ( jpg, gif, png 파일만 첨부 가능, 제한크기 : 최대 <b style="letter-spacing:0"><?=$attach->configs['limit_size']?></b> )</span>
+							<input type="hidden" id="on_webzine" name="on_webzine" required hname="이미지" message="이미지를 등록하여 주십시오." nofocus>
+							<input type="hidden" face="attach3" name="mode" value="post_attach" disabled>
+							<input type="hidden" face="attach3" name="kind" value="webzine" disabled>
+							<input type="hidden" face="attach3" name="handler" value="webzine.draw" disabled>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2">
+							<dl>
+								<dt id="webzine_preview"></dt>
+								<dd><textarea id="content" name="content" required hname="상세내용" class="simpleform"></textarea></dd>
+							</dl>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<!-- 웹진 등록폼 -->
+
+		</form>
+
+		<div style="margin-top:10px;text-align:center">
+			<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+			<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" align="absmiddle" alt="뒤로가기" /></a>
+		</div>
+
+		<div id="webzine_lists" style="display:none;margin-top:10px">
+
+<?php
+if($gs_rows['qty']) {
+?>
+			<div id="sub_title">웹진형 이미지 목록</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+				<col width="197" />
+				<col />
+				<col width="90" />
+				<?php
+				$webzine_folder = $attach->presets['webzine']['save']['folder'];
+				echo $gallery->print_webzines($gs_rows['no'], array(
+					'entry' => array(
+						0 => '',
+						1 => '
+						<tr class="blue_bg">
+							<td class="subject" colspan="2">{:rank:}. {:subject:}</td>
+							<td class="tool"><a onClick="webzine.modify({:no:})"><img src="../../Libs/_images/btn_modify_s.gif" align="absmiddle" alt="수정" hspace="1" /></a><a onClick="webzine.del({:no:})"><img src="../../Libs/_images/btn_delete_s.gif" align="absmiddle" alt="삭제" hspace="1" /></a></td>
+						</tr>
+						<tr valign="top">
+							<td class="photo">{:on_attach:}</td>
+							<td class="content" colspan="2">
+								{:content:}
+							</td>
+						</tr>'
+					),
+					'on_attach' => '<img src="'.$base_url.$webzine_folder.'{:attach:}" align="absmiddle" />'
+				));
+				?>
+			</table>
+
+			<div style="margin-top:10px;text-align:center">
+				<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" align="absmiddle" alt="뒤로가기" /></a>
+			</div>
+<?php
+}
+?>
+
+		</div>
+	</div>
+
+	<script type="text/javascript"> color_picker.initialize('color_frame'); </script>
+	<script type="text/javascript">
+	// form initialize
+	change_frame($('gallery_type_<?=$gs_rows['type']?>'));
+	</script>
+
+	<script type="text/javascript">
+	// IMAGE·BOX 초기화
+	image_box.template = new Template('<div class="hover" onMouseOver="$(this).addClassName(\'hover\')" onMouseOut="$(this).removeClassName(\'hover\')" onClick="image_box.selector(this)" name="#{name}"><input type="hidden" name="on_gfiles[]" value="#{name}"><img src="#{domain}#{folder}#{name}" align="absmiddle"></div>');
+	image_box.del = function(notice) {
+		if(this.selected==null) {
+			alert('삭제하실 이미지를 선택하여 주십시오.');
+			return false;
+		}
+		if(notice==undefined) notice = '';
+		if(!confirm(notice +'선택하신 이미지를 삭제하시겠습니까?')) return false;
+		var self = this;
+		var kind = this.frame.select('input[name="kind"]')[0];
+		var name = this.selected.getAttribute('name');
+		var index = this.frame.select('input[name="index"]')[0];
+		var no = index ? index.value : '';
+		proc.parameters({mode: 'del_attach', kind: kind.value, name: name, index: no});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				var obj = self.frame.select('dt')[0].select('div[name="'+ name +'"]')[0];
+				if(obj) {
+					obj.remove();
+					self.set(), self.apply(true);
+				}
+				alert('삭제되었습니다.');
+			}
+		}, false);
+	}
+	image_box.initialize('image_frame');
+
+	// 문구배경 정의
+	var text_container_bg = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_text_container_bg').value = name;
+				$('text_container_bg_preview').update('<img src="'+ domain + folder + name +'" align="absmiddle" />');
+			}
+		},
+		del: function(index) {
+			var preview = $('text_container_bg_preview');
+			if(!preview.select('img')[0]) {
+				alert('등록된 문구전체 배경이미지가 없습니다.');
+				return false;
+			}
+			if(!confirm('문구전체 배경이미지를 삭제하시겠습니까?')) return false;
+			var name = preview.getAttribute('file');
+			proc.parameters({mode: 'del_attach', kind: 'gtext_container_bg', name: name, index: index});
+			proc.process(function(trans) {
+				if(!trans.responseText.blank()) proc.response(trans);
+				else {
+					preview.update('');
+					$('text_container_bg_del').remove();
+					alert('삭제되었습니다.');
+				}
+			}, false);
+		}
+	}
+
+	// 웹진형 이미지 등록
+	var webzine = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_webzine').value = name;
+				$('webzine_preview').update('<img src="'+ domain + folder + name +'" align="absmiddle" />');
+			}
+		},
+		modify: function(no) {
+			var self = this;
+			proc.parameters({ mode: 'load_webzine', no: no });
+			proc.process(function(trans) {
+				$('webzine_frame').scrollTo();
+				$('subject').focus();
+				$w('wno subject content attach').each(function(field) {
+					var item = trans.responseXML.getElementsByTagName(field)[0];
+					var value = item.firstChild.nodeValue;
+					if(field=='attach') self.draw({ domain: domain, folder: item.getAttribute('folder'), name: value });
+					else $(field).value = value;
+				});
+			}, false);
+		},
+		set_name: function() {
+			var no = $('no').value;
+			var name = $('gallery_name').value;
+			if(!confirm('갤러리명을 변경하시겠습니까?')) return false;
+			proc.parameters({ mode: 'set_gallery_name', name: name, no: no });
+			proc.process(function(trans) {
+				if(!trans.responseText.blank()) proc.response(trans);
+				else alert('변경되었습니다.');
+			}, false);
+		},
+		set_skin: function(el, oskin, no) {
+			if(el.value==oskin) return;
+			if(!confirm('갤러리 스킨을 변경하시겠습니까?')) {
+				$(el.name +'_'+ oskin).checked = true;
+				return false;
+			}
+			proc.parameters({ mode: 'set_webzine_skin', skin: el.value, no: no });
+			proc.process(function(trans) {
+				if(!trans.responseText.blank()) proc.response(trans);
+				else alert('변경되었습니다.');
+			}, false);
+		},
+		del: function(no) {
+			if(!confirm('선택하신 내용을 삭제하시겠습니까?')) return false;
+			proc.parameters({ mode: 'del_webzine', no: no });
+			proc.process(function(trans) {
+				if(!trans.responseText.blank()) proc.response(trans);
+				else {
+					alert('삭제되었습니다.');
+					location.reload();
+				}
+			}, false);
+		}
+	}
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_gallery'};
+	$form.handler = function(trans) { proc.response(trans) }
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

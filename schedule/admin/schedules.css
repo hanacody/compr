@@ -1,0 +1,33 @@
+/* calendar styles */
+#calendar_frame {width:100%;border:0}
+#calendar_title td {font-weight:bold;text-align:center}
+#calendar_body td {width:auto;height:105px;font-size:11px}
+#calendar_body .day {width:93px;overflow:hidden;white-space:nowrap;margin-bottom:5px}
+#calendar_body .day span {width:45px;display:inline;overflow:hidden;white-space:nowrap;font-size:11px;letter-spacing:-1px}
+#calendar_body div.sat, .sat {color:#3366ff}
+#calendar_body div.rest, .rest {color:#ff6600}
+
+/* schedule styles */
+#item {margin:0}
+#item ul {position:relative;margin:0;padding:0;list-style:none;width:100%}
+#item ul li {width:80px;overflow:hidden;margin:0;padding:0;white-space:nowrap;height:21px;line-height:21px;vertical-align:middle;*padding-top:4px}
+#item ul li input {width:13px;height:13px;margin:0 0 2px 4px;vertical-align:middle;display:}
+#item ul li a {display:inline;padding:5px 0;margin:0 2px 0 3px;font-size:11px;letter-spacing:-1px}
+#item ul li.tool {position:absolute;top:0;right:0;width:auto;text-align:left}
+#item ul li.tool a {display:inline;color:#666;font-size:12px;text-decoration:none}
+
+/* category styles */
+#cates p {display:inline-block;padding:2px 2px 0 2px;margin-bottom:1px;height:15px;line-height:15px;vertical-align:middle;margin-right:1px;white-space:nowrap;font-size:11px;letter-spacing:-1px;*display:inline;zoom:1}
+
+/* schedule frame */
+#schedule_frame form {width:730px;margin:10px;padding:0}
+#schedule_frame {position:absolute;background-color:#fff;border:2px black solid;width:750px;z-index:2}
+#schedule_frame .titlebar {position:relative;height:20px;padding:0}
+
+#xdate_tab {position:absolute;height:16px;line-height:16px;margin-top:-16px;right:25px;width:100px;text-align:center;background-color:#eee;padding:3px 0 2px 0;border:1px #dedede solid;border-bottom:0;z-index:3;font-size:11px;color:black;letter-spacing:-1px}
+#xdate_tab a {font-weight:normal;font-family:dotum;color:gray}
+#xdate_frame {position:relative;font-size:0;letter-spacing:0;margin-top:5px;background-color:#eee;padding:4px;border:1px #dedede solid}
+#xdate_frame p {display:inline;padding:4px 0;margin:0;white-space:nowrap}
+#xdate_frame input.d {width:95px;text-align:center;margin:1px;height:22px;line-height:1.0em;padding-right:15px;font-size:11px;font-family:verdana;font-weight:bolder;letter-spacing:-1px;border:1px #ccc solid;vertical-align:middle;*padding-top:5px}
+#xdate_frame a.tool {position:absolute;margin:0;margin-left:-15px;height:24px;line-height:24px;text-decoration:none;color:#aaa;*padding-top:5px}
+#xdate_frame a.tool:hover {color:#333}

@@ -1,0 +1,48 @@
+<?php
+/**
+ * 성인인증 페이지 디자인
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './rankup_authentic.class.php';
+$auth = new rankup_authentic;
+
+include_once 'top_menu.inc.php';
+?>
+<script type="text/javascript"> var direct_board = true; </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<center>
+<div style="width:770px;text-align:left;">
+
+	<form id="save_form" name="save_form" onSubmit="return false">
+		<div id="sub_title">인트로 페이지 디자인</div>
+		<div style="margin-top:3px">
+			<textarea type="editor" name="adult_content" style="width:100%;height:350px" class="simpleform" nofocus><?=$auth->get_configs('adult_content')?></textarea>
+		</div>
+	</form>
+
+	<div style="margin-top: 10px;text-align:center;">
+		<a onClick="$form.submit(this, 'save_form', '입력하신 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" alt="저장하기" align="absmiddle" /></a>
+	</div>
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+Wysiwyg.createELM();
+
+// $form submit setting
+$form.debug = false;
+$form.hashes = {mode: 'save_design'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+</script>
+
+</body>
+</html>

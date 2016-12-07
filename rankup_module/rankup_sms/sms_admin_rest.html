@@ -1,0 +1,52 @@
+<?php
+include_once '../../rankup_module/rankup_sms/rankup_sms_config.class.php';
+$rankup_sms_config = new rankup_sms_config();
+?>
+<html>
+<head>
+<script type='text/javascript'>
+var client_id_value='<?= $rankup_sms_config->info['client_id'];?>';
+var client_pw_value='<?= $rankup_sms_config->info['client_pw'];?>';
+	function make_info_from_rankup(){
+	var client_id = encodeURI(client_id_value);
+	var client_pw = encodeURI(client_pw_value);
+	var domain = encodeURI('<?= $_SERVER['HTTP_HOST'];?>');
+	var page = encodeURI('<?= $_SERVER['PHP_SELF'];?>');
+
+
+	//var param='type=communication&client_id='+client_id+'&client_pw='+client_pw+'&domain='+domain+'&page='+page;
+
+	var url = '<?= $rankup_sms_config->iframe_domain;?>';
+
+	var frm_obj = document.getElementById("make_form");
+
+	var frm = "<form name='send_rankup' action = "+url+" method=post target = 'iframe_reply' style='margin:0'>";
+	frm += "<input type='hidden' name = client_id value= '"+client_id+"'>";
+	frm += "<input type='hidden' name = client_pw value = '"+client_pw+"'>";
+	frm += "<input type='hidden' name = domain value = '"+domain+"'>";
+	frm += "<input type='hidden' name = page value = '"+page+"'>";
+	frm += "<input type='hidden' name = from value = user>";
+	frm += "<input type='hidden' name='rest' value='yes'>";
+	frm += "</form>";
+
+	frm_obj.innerHTML = frm;
+
+	document.forms['send_rankup'].submit();
+}
+
+if(window.addEventListener)	window.addEventListener('load', make_info_from_rankup, false);
+else if(window.attachEvent)	window.attachEvent('onload', make_info_from_rankup);
+</script>
+</head>
+<body style="margin:0">
+<table cellspacing=1 cellpadding=4 width=100% bgcolor=d4d4d4 style=margin-top:-1px;>
+<tr bgcolor=ffffff align=center>
+<td bgcolor=f4f4f4  width=120><b>SMS사용여부</b></td>
+<td width=110><?php echo ($rankup_sms_config->info['use_sms']=='yes') ? "사용" : "미사용";?></td>
+<td bgcolor=f4f4f4 width=120><b>SMS잔여건수</b></td>
+<td align="left"><span id = "make_form"></span><iframe name="iframe_reply" id="iframe_reply"  frameborder=0 scrolling=no style="width :160px; height:20;margin-left:15px;"></iframe></td>
+<td width="70" align="center"><a href="#" onClick="location.href='../../rankup_module/rankup_sms/sms_config.html';"><img src="../../Libs/_images/btn_set.gif" alt="환경설정"></a></td>
+</tr>
+</table>
+</body>
+</html>

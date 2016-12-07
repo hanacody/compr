@@ -1,0 +1,91 @@
+<?php
+/**
+ * 고객문자상담관리 - 기본환경설정
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'rankup_lconsult.class.php';
+$lconsult = new rankup_lconsult;
+$ls_rows = $lconsult->get_settings();
+
+include_once 'top_menu.inc.php';
+?>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+	<div id="sub_title">기본환경설정</div>
+	<form name="save_form" id="save_form" action="javascript:void(0)" onSubmit="return $form.submit(this, 'save_form', '설정하신 사항을 저장하시겠습니까?')">
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+			<col width="137" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 사용여부 설정</td>
+				<td>
+					<input type="radio" name="letter_consult_use" checked value="yes" id="letter_consult_use_yes"><label for="letter_consult_use_yes">사용함</label>
+					<input type="radio" name="letter_consult_use"<? if($config_info['letter_consult_use']!='yes') echo ' checked' ?> value="no" id="letter_consult_use_no"><label for="letter_consult_use_no">사용안함</label>
+
+					<span id="tip">+ 서브페이지 좌측메뉴 하단에 문자상담 등록폼이 노출됩니다.</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 관리자 통보 설정</td>
+				<td>
+					<input type="radio" name="use_alarm" checked value="yes" id="use_alarm_yes" /><label for="use_alarm_yes">사용함</label>
+					<input type="radio" name="use_alarm"<? if($ls_rows['use_alarm']=='no') echo ' checked' ?> value="no" id="use_alarm_no" /><label for="use_alarm_no">사용안함</label>
+					<span id="tip">+ 문의글이 등록 되었을때 휴대전화로 통보 받을 수 있습니다.</span>
+					<table width="100%" cellpadding="4" cellspacing="0" border="1" bordercolor="#dedede" class="table1" style="margin-top:5px">
+						<col width="120" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 통보받을 휴대전화</td>
+							<td><input type="text" name="alarm_phone" value="<?=$ls_rows['alarm_phone']?>" option="hphone" maxlength="13" class="simpleform" /><span id="tip">+ 숫자만 입력</span></td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 통보받을 메시지</td>
+							<td>
+
+								<input type="text" name="alarm_message" value="<?=htmlspecialchars($ls_rows['alarm_message'])?>" maxlength="80" class="simpleform" style="width:90%" />
+
+								<table style="margin-top:5px">
+									<td><b class="tip2">{이름}</b></td>
+									<td>문의글을 등록한 회원의 이름으로 치환됩니다.</td>
+								</tr>
+								<tr>
+									<td><b class="tip2">{연락처}</b></td>
+									<td>문의글을 등록한 회원의 연락처로 치환됩니다.</td>
+								</tr>
+								</table>
+
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+		<div style="margin-top:10px;text-align:center">
+			<input type="image" src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" />
+		</div>
+	</form>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+$form.hashes = {mode:'save_settings'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+//]]>
+</script>
+
+
+</body>
+</html>

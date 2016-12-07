@@ -1,0 +1,60 @@
+<script>
+function chk(){
+	var F = document.Form;
+	if(!F.adminid.value){
+		alert('관리자아이디를입력해주세요');
+		F.adminid.focus();
+		return false;
+	}
+	if(!F.adminpw.value){
+		alert('관리자관리자패스워드를입력해주세요');
+		F.adminpw.focus();
+		return false;
+	}
+	if(!F.adminpwhw.value){
+		alert('패스워드를확인해주세요');
+		F.adminpwhw.focus();
+		return false;
+	}
+	if(F.adminpw.value != F.adminpwhw.value){
+		alert('패스워드가일치하지않습니다');
+		F.adminpwhw.focus();
+		return false;
+	}
+}
+</script>
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" background='images/bg.gif'>
+<link rel="stylesheet" type="text/css" href="style/style.css">
+<table width="500" border="0" cellpadding="0" cellspacing="0" align='center'>
+<tr><td><img src='images/log_bg01.gif'></td></tr>
+<tr><td background='images/log_bg02.jpg'><br><br>
+
+<table width="350" align=center bgcolor="#f7f7f7" cellpadding="5" cellspacing="1" border="0"><tr><td>
+<table width="350" align=center bgcolor="#dddddd" cellpadding="30" cellspacing="1" border="0"><tr><td bgcolor="#ffffff" >
+<img src='images/log_bar.gif'>
+<table border=0 cellpadding=5 cellspacing=1 bgcolor='dddddd' width='500' align='center'>
+<form name=Form method=post action=rankuplog_install.php onsubmit="return chk();">
+	<tr>
+		<td bgcolor='f7f7f7' width='130'><img src='images/icon05.gif'><font color='000000'>관리자아이디</font></td>
+		<td bgcolor='ffffff'><input type=text name=adminid> + 사용할 아이디 입력</td>
+	</tr>
+	<tr>
+		<td bgcolor='f7f7f7'><img src='images/icon05.gif'><font color='000000'>관리자비밀번호</font></td>
+		<td bgcolor='ffffff'><input type=password name=adminpw> + 사용할 비밀번호 입력</td>
+	</tr>
+	<tr>
+		<td bgcolor='f7f7f7'><img src='images/icon05.gif'><font color='000000'>비밀번호확인</font></td>
+		<td bgcolor='ffffff'><input type=password name=adminpwhw> + 사용할 비밀번호 확인</td>
+	</tr>
+	<tr>
+		<td bgcolor='ffffff' colspan=2 align=center>
+		<input type=image src='images/button_submit.gif'>
+		</td>
+	</tr>
+</form>
+</table></td></tr></table></td></tr></table><br><br></td></tr>
+<tr><td>
+<img src="images/log_bg03.jpg" width="825" height="49" border="0" usemap="#Map"></td></tr>
+<map name="Map">
+  <area shape="rect" coords="317,2,558,23" href="http://www.rankup.co.kr" target="_blank">
+</map></table>

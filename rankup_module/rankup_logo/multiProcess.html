@@ -1,0 +1,116 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+
+if(!$rankup_admin->is_admin()) exit;
+$rankup_banner = new rankup_banner;
+
+switch($_POST['mode']) {
+
+	#################################################################################
+	## 첨부파일 등록 - iframe 에서 처리
+	case "post_attached":
+	#################################################################################
+		$attached = $rankup_banner->post_attached($_FILES['attached'], true);
+		if(!empty($attached['name'])) {
+			list($width, $height, $type, $attr) = $attached['infos'];
+			$on_attached = array_pop(explode("/", $attached['name']));
+			$info = "$width × $height, ".strtoupper($type);
+			echo "
+			<script type='text/javascript'>
+			<!--
+			// 미리보기 처리
+			parent.logo.registFrm.on_attached.value = '$on_attached';
+			parent.logo.preview_attached('$attached[name]?garbage=".$rankup_control->uniqueTimeStamp()."', {
+				'width': $width,
+				'height': $height,
+				'type': '$type',
+				'text': '$info'
+			});
+			//-->
+			</script>";
+		}
+		exit;
+		break;
+
+	#################################################################################
+	## 로고 등록/수정 - iframe 에서 처리
+	case "insert":
+	case "update":
+	#################################################################################
+		include_once $wysiwyg_dir."wysiwyg_Class.php";
+
+		$_POST['content'] = $Wysiwyg->wysiwyg_result_func(stripslashes($_POST['content']));
+
+		$result = $rankup_banner->regist_banner($_POST, $_POST['mode']);
+		if($_POST['mode']=="insert") $message = $result ? $_STRINGSET[202] : $_STRINGSET[402]; // 등록성공 | 실패
+		else $message = $result ? $_STRINGSET[203] : $_STRINGSET[403]; // 수정성공 | 실패
+
+		// 생성/수정한 로고 정보를 생성해서 해당 노드에 innerHTML 시킨 후 rebuild_event() 시킴
+		$banner_datas = $rankup_banner->get_banner(array("no"=>$result), false);
+		$banner_item = $rankup_banner->get_html_formalize($banner_datas, true, true);
+		$banner_item = str_replace(array('"', "\r", "\n"), array('\"', "\\\r", "\\\n"), $banner_item);
+
+		echo "
+		<script type='text/javascript'>
+		<!--
+		alert('$message          ');
+		var banner_item = {'no': $result, 'item': \"$banner_item\"};
+		parent.logo.append_banner_item('$_POST[mode]', banner_item);
+		//-->
+		</script>";
+		exit;
+		break;
+
+	#################################################################################
+	## 로고 순위/바인드 값 갱신(전체) - iframe 에서 처리
+	case "save_settings":
+	#################################################################################
+		$result = $rankup_banner->set_banner();
+		exit;
+		break;
+
+
+	#################################################################################
+	# Ajax 처리 루틴 - GET 방식
+	default:
+	#################################################################################
+
+		// 인코딩 변환
+		$rankup_control->change_encoding($_GET, "IN");
+		switch($_GET['mode']) {
+			#######################################################################
+			## 로고 삭제
+			case "delete":
+			#######################################################################
+				$result = $rankup_banner->delete_banner($_GET['data']);
+				$message = $result ? $_STRINGSET[205] : $_STRINGSET[405]; // 삭제성공 | 실패
+				break;
+
+			#######################################################################
+			## 로고 출력/새창모드 값 변경
+			case "view":
+			case "target":
+			case "outline": // 배너 테두리 설정 - 2010.12.20 added
+			#######################################################################
+				$result = $rankup_banner->set_banner($_GET['mode']);
+				$message = $result ? $_STRINGSET[204] : $_STRINGSET[404]; // 적용성공 | 실패
+				break;
+
+			#######################################################################
+			## 로고 순위/바인드 값 변경 - 건별
+			case "save_setting":
+			#######################################################################
+				$result = $rankup_banner->set_banner($_GET['kind']);
+				break;
+		}
+		$results = array(0=>"failure", 1=>"success");
+		$result = $results[$result];
+
+		// 인코딩 변환
+		$rankup_control->change_encoding($message, "OUT");
+
+		header("Content-type: text/xml; charset=utf-8");
+		echo "<?xml version='1.0' encoding='utf-8'?>\n";
+		echo "<resultData result='$result'>$message</resultData>\n";
+}
+?>

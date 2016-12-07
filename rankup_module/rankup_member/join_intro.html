@@ -1,0 +1,83 @@
+<?php
+/**
+ * 회원가입 - 인트로
+ *@note: 1 단계
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+
+if($config_info['membership_use']=='no' || $rankup_member->is_member()) {
+	scripts('location.replace("'.$base_url.'main/index.html")');
+	exit;
+}
+
+// 페이지 제너레이터 - 필수
+include_once '../../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../../include/top.html';
+
+include_once '../rankup_authentic/rankup_authentic.class.php';
+$auth = new authentic('join');
+
+// join step
+include_once 'join_step.inc.php';
+?>
+
+<table width="900" cellpadding="0" cellspacing="0" border="0" align="center">
+	<tr>
+		<td align="center">
+			<img src="./img/join1.png" alt="회원가입" />
+		</td>
+	</tr>
+	<tr>
+		<td height="40"></td>
+	</tr>
+	<tr>
+		<td align="center">
+			<?php
+			$_type_counts = 0;
+			foreach(explode(',', $config_info['membership_types']) as $type) {
+				if($auth->pin_check()) { // 인증된 값이 있는 경우
+					if($auth->infos['foreigner']=='1' && strpos($type, '14')===false) continue;
+					else if($auth->infos['foreigner']=='2' && $type!='inforeigner') continue;
+				}
+				if($type=='14under' && $config_info['membership_age']!='nolimit') continue;
+				echo sprintf(' <a onClick="joint.go(\'%s\')"><img src="./img/btn_%s.gif" alt="%s" /></a>', $type, $type, $rankup_member->member_types[$type]);
+				$_type_counts++;
+			}
+			// 가입유형이 없는 경우 - 취소 버튼 노출
+			if(!$config_info['membership_types'] || !$_type_counts) {
+				echo '<a onClick="location.replace(\'../../main/index.html\')"><img src="./img/btn_cancel.gif" alt="가입취소" /></a>';
+			}
+			?>
+		</td>
+	</tr>
+</table>
+<br />
+
+<script type="text/javascript">
+//<!CDATA[
+var joint = {
+	go: function(type) {
+		proc.parameters({mode:'verify_join', step: 1, type:type});
+		proc.process(function(trans) { proc.response(trans) });
+	}
+}
+//]]>
+</script>
+
+<?php
+include_once '../../include/bottom.html';
+
+// 가입된 정보가 있는지 확인
+if($auth->infos['di_code']) {
+	if($rankup_member->check_di_code($auth->infos['di_code'])) {
+		scripts('blind.draw(); alert("죄송합니다. 회원님은 이미 가입된 상태입니다.\n\n아이디/비밀번호 찾기를 이용해 주시기 바랍니다."); location.replace("find_login_info.html");');
+		exit;
+	}
+}
+?>

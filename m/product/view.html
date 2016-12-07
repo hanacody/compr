@@ -1,0 +1,184 @@
+<?php
+/**
+ * 제품상세보기
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+include_once '../../product/class/product.class.php';
+$product = new product;
+
+$ps_rows = $product->get_settings();
+$rows = $product->get_product($_GET['no']);
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid'], true, array('component'=>''));
+
+// 페이지 타이틀 수정
+if($gen->infos['component']!='view') {
+	$gen->page_title .= '(제품상세보기)'; // 현재위치 + 윈도우 타이틀 출력부분
+	$gen->infos['base_name'] .= '(제품상세보기)'; // 컨텐트 타이틀 출력부분
+}
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+include_once '../../rankup_module/rankup_builder/attachment.class.php';
+$attach = new attachment('product', $base_dir.'product/');
+?>
+
+<div id="container">
+	<div class="tit0">
+		<div class="tit_t" id="subject"><?=$rows['title']?></div>
+	</div>
+</div>
+
+<style type="text/css" media="all"> @import url('../styles/carousel.css'); </style>
+<div id="carousel">
+	<div style="height:1px;background:url(../images/lite_bg.png);margin-bottom:10px;"></div>
+	<div id="wrapper">
+		<div id="scroller">
+			<ul id="thelist">
+				<?php
+				$attach_count = 0;
+				$attach = new attachment('product', $base_dir.'product/');
+				foreach(glob($base_dir.$attach->configs['save']['folder'].'*') as $file) {
+					echo $product_image = $attach->preview(basename($file), array(
+						'image' => '<li><img src="'.substr($pc_domain, 0, -1).'{:folder:}{:name:}" width="100%"></li>'
+					));
+					if($product_image) $nav .= sprintf('<li%s>%d</li>', $attach_count?'':' class="active"', ++$attach_count);
+				}
+				?>
+			</ul>
+		</div>
+		<ul id="nav">
+			<li id="prev"><a onclick="myScroll.scrollToPage('prev', 0);return false"><span>이전보기</span></a></li>
+			<li>
+				<ul id="indicator">
+					<?php
+					echo $nav;
+					?>
+				</ul>
+			</li>
+			<li id="next"><a onclick="myScroll.scrollToPage('next', 0);return false"><span>다음보기</span></a></li>
+		</ul>
+	</div>
+	<div style="height:1px;background:url(../images/lite_bg.png);margin-top:9px;"></div>
+</div>
+
+<script type="text/javascript" src="../scripts/iscroll.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var myScroll;
+function loaded() {
+	myScroll = new iScroll('wrapper', {
+		snap: true,
+		momentum: false,
+		hScrollbar: false,
+		onBeforeScrollStart: null,
+		onScrollEnd: function () {
+			try {
+				document.querySelector('#indicator > li.active').className = '';
+				document.querySelector('#indicator > li:nth-child(' + (this.currPageX+1) + ')').className = 'active';
+			}
+			catch(e) {
+				alert(e.message);
+			}
+		}
+	});
+}
+Event.observe(document, 'DOMContentLoaded', loaded);
+//]]>
+</script>
+
+<div id="container">
+
+	<div style="margin:10px 0 15px 0;text-align:center">
+		<?php
+		/*
+		// 견적문의버튼
+		if($ps_rows['use_component']) {
+			echo $estimate_button = '<a href="estimate.html'.params('pid='.$_GET['pid'].'&no='.$_GET['no']).'"><img src="'.$pc_domain.'product/img/btn_estimate2.gif" alt="견적문의" /></a>';
+		}
+		*/
+		// 목록버튼 - '상세보기'만 있는 메뉴인 경우에는 출력 안함
+		if($gen->infos['component']!='view') {
+			echo $list_button = ' <a href="list.html'.params('no=').'"><img src="'.$pc_domain.'product/img/btn_list.gif" alt="목록" /></a>';
+		}
+		?>
+	</div>
+
+	<!-- 특징 -->
+	<div id="content">
+		<?=nl2br($rows['comment'])?>
+	</div>
+	<!-- 특징 -->
+
+	<div class="prd_detail">
+<?php
+/**
+ * 탭 정의
+ */
+$tabs = array();
+if($ps_rows['use_feature']=='yes') array_push($tabs, array('tab' => 'tab1', 'name' => '<img src="'.$pc_domain.'product/img/tab1.png" alt="제품특징" />'));
+if($ps_rows['use_purpose']=='yes') array_push($tabs, array('tab' => 'tab2', 'name' => '<img src="'.$pc_domain.'product/img/tab2.png" alt="제품용도" />'));
+if($ps_rows['use_spec']=='yes') array_push($tabs, array('tab' => 'tab3', 'name' => '<img src="'.$pc_domain.'product/img/tab3.png" alt="제품상세정보" />'));
+$tab_entry = array(
+	'entry' => '<li class="{:on_first:}{:on_choice:}"><a{:on_name:} href="#{:tab:}">{:name:}</a></li>',
+	'on_first' => 'first_tab',
+	'on_choice' => ' tab_choice',
+	'on_name' => ' name="{:tab:}"'
+);
+
+if($ps_rows['use_feature']=='yes') {
+?>
+		<div>
+			<ul class="prd_tabs">
+				<?=$product->draw_tabs($tabs, 'tab1', $tab_entry)?>
+			</ul>
+			<div class="prd_txt">
+				<?=rankup_util::prefix_contents($rows['feature'])?>
+			</div>
+		</div>
+
+<?php
+}
+if($ps_rows['use_purpose']=='yes') {
+?>
+		<div>
+			<ul class="prd_tabs">
+				<?=$product->draw_tabs($tabs, 'tab2', $tab_entry)?>
+			</ul>
+			<div class="prd_txt">
+				<?=rankup_util::prefix_contents($rows['purpose'])?>
+			</div>
+		</div>
+
+<?php
+}
+if($ps_rows['use_spec']=='yes') {
+?>
+		<div>
+			<ul class="prd_tabs">
+				<?=$product->draw_tabs($tabs, 'tab3', $tab_entry)?>
+			</ul>
+			<div class="prd_txt">
+				<?=rankup_util::prefix_contents($rows['spec'])?>
+			</div>
+		</div>
+	</div>
+<?php
+}
+?>
+	<div style="margin:10px 0 15px 0;text-align:center">
+		<?php
+		// 견적문의 / 목록버튼 출력
+		echo $estimate_button.$list_button;
+		?>
+	</div>
+</div><!-- prd_detail End -->
+
+<?php
+include_once '../include/bottom.html';
+?>

@@ -1,0 +1,15 @@
+<? if(!empty($menu_name)) { ?>
+		<tr>
+			<td class="left_submenu_title"><img src="<?=$left_skin_url?>icon01.gif"> <?=$menu_name?></td>
+		</tr>
+		<tr><td height="5"></td></tr>
+<? } ?>
+		<tr>
+			<td style="padding-left:8px"> 
+				<table align="center" border="0" cellpadding="3" cellspacing="0" width="100%">
+				<tbody>
+				<?=$board_item_contents?>
+				</tbody>
+				</table>
+			</td>
+		</tr>

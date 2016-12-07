@@ -1,0 +1,144 @@
+<?php
+/**
+ * 제품 리스트
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+
+// 페이지 제너레이터 - 필수
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+// 타이틀, 스타일 출력 / 상단 컨텐츠
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+include_once '../rankup_module/rankup_builder/attachment.class.php';
+include_once 'class/product.class.php';
+
+$product = new product;
+$ps_rows = $product->get_settings();
+$attach = new attachment('', $base_dir.'product/');
+
+if($ps_rows['use_component']) {
+	$on_estimate = '<a href="estimate.html'.params('no={:no:}').'"><img src="img/btn_estimate.gif" alt="견적문의" /></a>';
+}
+
+// 리스트형
+if($gen->infos['component']=='list_normal') {
+	$limits = $ps_rows['list_limits'];
+	$entry = array(
+		'entry' => array(
+			1 => '
+			<tr>
+				<td class="list_num">{:row:}</td>
+				<td class="list_img"><a href="view.html'.params('no={:no:}').'"><span class="l_img_bg"><img src="../{:save_folder:}{:filename:}" align="absmiddle" alt="제품이미지" /></span></a></td>
+				<td class="list_text">
+					<h4 class="prd_list_t"><a href="view.html'.params('no={:no:}').'">{:title:}</a></h4>
+					<div class="sub_text">
+						{:comment:}
+					</div>
+					<div class="btn_group">
+						<a href="view.html'.params('no={:no:}').'"><img src="img/btn_detail.gif" alt="상세보기" /></a>
+						'.$on_estimate.'
+					</div>
+				</td>
+			</tr>'
+		),
+		'save_folder' => $attach->presets['product']['save']['folder']
+	);
+}
+
+// 갤러리형
+else {
+	$limits = $ps_rows['gallery_limits'];
+	$entry = array(
+		'times' => 3,
+		'entry_wrap' => array('<div class="product_list">', '</div><div class="clear"></div>', '<div class="product_list l_end">'),
+		'entry' => array(
+			1 => '
+			<div class="prd_con {:on_end:}">
+				<h4 class="product_tit img_bgc"><a href="view.html'.params('no={:no:}').'"><span>{:title:}</span></a></h4>
+				<dl>
+					<dt class="l_img_bg2">
+						<a href="view.html'.params('no={:no:}').'"><img src="../{:save_folder:}{:filename:}" align="absmiddle" /></a>
+					</dt>
+					<dd class="sub_text2">
+						{:comment:}
+					</dd>
+				</dl>
+				<div class="btn_group">
+					<a href="view.html'.params('no={:no:}').'"><img src="img/btn_detail.gif" alt="상세보기" /></a>
+					'.$on_estimate.'
+				</div>
+			</div>'
+		),
+		'on_end' => 'end',
+		'save_folder' => $attach->presets['product']['save']['folder']
+	);
+}
+
+list($totals, $contents) = $product->print_contents($entry, $limits);
+
+?>
+<div id="con_body">
+
+	<div id="search_frame">
+		<dl class="search_box">
+			<dd class="s_text">총 <span class="sear_num"><?=number_format($totals)?></span>개의 상품이 검색되었습니다.</dd>
+			<dd class="s_input">
+				<form id="search_form" name="search_form" action="list.html" method="GET" onSubmit="return validate(this)">
+					<input type="hidden" name="pid" value="<?=$_GET['pid']?>" />
+					<input type="hidden" name="cate1" value="<?=$_GET['cate1']?>" />
+					<input type="hidden" name="cate2" value="<?=$_GET['cate2']?>" />
+					<img src="img/search_img.png" alt="제품찾기" />
+					<input type="text" id="skey" name="skey" required hname="검색어" value="<?=htmlspecialchars($_GET['skey'])?>" class="search_input" />
+					<input type="submit" class="p_btn" value="검색하기" />
+				</form>
+			</dd>
+		</dl>
+	</div><!-- search_frame End -->
+
+	<div id="list_result_frame">
+<?php
+// 리스트형
+if($gen->infos['component']=='list_normal') {
+?>
+		<table width="100%" cellpadding="0" cellspacing="0" border="0" class="list_result">
+			<colgroup>
+				<col width="46px" />
+				<col width="260px" />
+				<col width="*" />
+			</colgroup>
+			<thead class="table_h">
+				<tr>
+					<th class="img_bgc"><img src="img/tit_no.png" alt="번호" /></th>
+					<th class="img_bgc"><img src="img/tit_image.png" alt="이미지" /></th>
+					<th class="img_bgc end"><img src="img/tit_subject.png" alt="상세내용" /></th>
+				</tr>
+			</thead>
+			<tbody>
+			<?=$contents?>
+			</tbody>
+		</table>
+<?php
+}
+// 갤러리형
+else {
+	echo $contents;
+}
+?>
+
+	</div><!-- list_result_frame End -->
+
+	<div id="paging">
+		<?=rankup_util::print_paging($totals, $limits)?>
+	</div>
+
+</div><!-- con_body End -->
+
+<?php
+include_once '../include/bottom.html';
+?>

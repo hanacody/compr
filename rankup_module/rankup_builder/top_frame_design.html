@@ -1,0 +1,371 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './top_menu.inc.php';
+include_once 'rankup_design.class.php';
+include_once 'attachment.class.php';
+include_once 'rankup_frame.class.php';
+
+$frame = new rankup_frame;
+$attach = new attachment;
+
+$design = new rankup_design;
+$ds_rows = $design->get_settings('top_menu_design');
+
+?>
+
+<?php
+/**
+ * 컬러픽커 로드
+ *@usage: echo color_picker('name', 'value');
+ *@usage: <script> color_picker.initialize('color_frame'); </script> // 컬러픽커 초기화
+ */
+include_once $base_dir.'Libs/_picker/color_picker.inc.php';
+?>
+
+<script type="text/javascript" src="attachment.class.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'basic': case 'html': mode = ['hide', 'hide', 'show']; break;
+		case 'upload': mode = ['show', 'show', 'hide']; break;
+	}
+	$w('upload_frame top_flash_preview detail_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+}
+</script>
+<style type="text/css">
+div.preview {
+	width: 728px;
+	*width: 750px;
+	height: 200px;
+	overflow: auto;
+	padding: 10px;
+	border: 1px #dedede solid;
+	margin-top: -1px;
+	background-color: #f7f7f7;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+#menu_bg_preview {
+	position: absolute;
+	border: 2px black solid;
+	z-index: 2;
+}
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+	<div style="width:750px;text-align:left">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+
+			<div id="sub_title">상단메뉴설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+				<col width="134" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;메뉴설정</td>
+					<td>
+						<input type="radio" name="gnb_type" checked value="basic" onClick="change_frame(this)" id="gnb_type_basic"><label for="gnb_type_basic">랭크업 플래시메뉴</label>
+						<input type="radio" name="gnb_type" value="html" onClick="change_frame(this)" id="gnb_type_html"><label for="gnb_type_html">랭크업 일반메뉴</label>
+						<input type="radio" name="gnb_type" value="upload" onClick="change_frame(this)" id="gnb_type_upload"><label for="gnb_type_upload">사용자제작 플래시메뉴</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;메뉴전체 사이즈</td>
+					<td>
+						<input type="text" name="container_width" required hname="메뉴전체 가로크기" option="number" value="<?=$ds_rows['container_width']?>" size="5" maxlength="4" class="simpleform"> px ⅹ
+						<input type="text" name="container_height" required hname="메뉴전체 세로크기" option="number" value="<?=$ds_rows['container_height']?>" size="5" maxlength="4" class="simpleform"> px
+						<span id="tip">( 가로 ⅹ 세로 )</span>
+					</td>
+				</tr>
+				<tbody id="detail_frame" style="display:">
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;1차메뉴 간격</td>
+					<td><input type="text" name="menu_item_space" required hname="1차메뉴 간격" option="number" value="<?=$ds_rows['menu_item_space']?>" size="5" maxlength="4" class="simpleform"> px <span id="tip">+ 1차메뉴 갯수에 맟추어 메뉴간 간격을 조절하여 주시기 바랍니다.</span></td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 간격</td>
+					<td>
+						<input type="text" name="submenu_item_space" required hname="2차메뉴 간격" option="number" value="<?=$ds_rows['submenu_item_space']?>" size="5" maxlength="4" class="simpleform"> px
+						<span id="tip">+ 2차메뉴 갯수에 맟추어 메뉴간 간격을 조절하여 주시기 바랍니다.</span>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 시작위치</td>
+					<td>
+						<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+						<col width="230" />
+						<col />
+						<tr bgcolor="#eeeeee" align="center">
+							<td>1차 메뉴명</td>
+							<td>2차메뉴 시작위치</td>
+						<tr>
+						<?php
+						// 프레임 로드
+						echo $frame->print_frames(array(
+							'positions' => $ds_rows['submenu_pos'],
+							'use_gnb' => true,
+							'entry' => array(
+								0 => '
+								<tr>
+									<td colspan="2" align="center" onMouseOver="this.bgColor=\'red\';this.style.color=\'white\'" onMouseOut="this.bgColor=\'white\';this.style.color=\'red\'" style="color:red">먼저 상위메뉴를 생성하시기 바랍니다. <b>[ <a href="./index.html" style="letter-spacing:-1px">메뉴 및 페이지설정 바로가기</a> ]</b></td>
+								</tr>',
+								1 => '
+								<tr>
+									<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;{:base_name:}</td>
+									<td><input type="text" name="submenu_pos[{:no:}]" required hname="{:base_name:} 하위 2차메뉴 위치" option="number" value="{:position:}" size="5" maxlength="4" class="simpleform"> px</td>
+								</tr>'
+							)
+						), '', 1, 'yes');
+						?>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;색상 설정</td>
+					<td id="color_frame">
+						<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+						<col width="110" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;1차메뉴 배경</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+								<col width="111" />
+								<col />
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="menu_bg_type" checked value="none" id="menu_bg_type_none"><label for="menu_bg_type_none">배경없음</label>
+									</td>
+									<td>
+										<span id="tip" style="margin:0">+ 배경없음 체크시 외각 테두리 및 배경색이 보이지 않습니다.</span>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="menu_bg_type"<? if($ds_rows['menu_bg_type']=='solid') echo ' checked' ?> value="solid" id="menu_bg_type_solid"><label for="menu_bg_type_solid">단색배경</label>
+									</td>
+									<td>
+										<?=color_picker('menu_bg_scolor', $ds_rows['menu_bg_scolor'])?>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="menu_bg_type"<? if($ds_rows['menu_bg_type']=='gradient') echo ' checked' ?> value="gradient" id="menu_bg_type_gradient"><label for="menu_bg_type_gradient">그라데이션</label>
+									</td>
+									<td>
+										<select name="menu_bg_gtype">
+										<option value="height">상하</option>
+										<option value="width"<? if($ds_rows['menu_bg_gtype']=='width') echo ' selected' ?>>좌우</option>
+										</select>
+										<?=color_picker('menu_bg_gcolor1', $ds_rows['menu_bg_gcolor1'])?> &nbsp; ~&nbsp;
+										<?=color_picker('menu_bg_gcolor2', $ds_rows['menu_bg_gcolor2'])?>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="menu_bg_type"<? if($ds_rows['menu_bg_type']=='image') echo ' checked' ?> value="image" id="menu_bg_type_image"><label for="menu_bg_type_image">이미지업로드</label>
+									</td>
+									<td>
+										<span><input type="file" name="_attach_" hname="이미지" filter="jpg,gif,png" onChange="menu_bg.post(this, 'attach2')"></span>
+										<?php
+										if($ds_rows['menu_bg']) {
+											echo '<a onClick="menu_bg.preview()"><img src="./img/btn_img_view.gif" align="absmiddle" alt="이미지보기" /></a>';
+										}
+										?>
+										<input type="hidden" id="on_menu_bg" name="on_menu_bg" />
+										<input type="hidden" face="attach2" name="mode" value="post_attach" disabled />
+										<input type="hidden" face="attach2" name="kind" value="menu_bg" disabled />
+										<input type="hidden" face="attach2" name="handler" value="menu_bg.draw" disabled />
+										<div id="menu_bg_preview" style="display:none">
+											<?php
+											if($ds_rows['menu_bg']) {
+												$attach = new attachment('menu_bg');
+												echo $attach->preview($ds_rows['menu_bg'], array(
+													'image' => '<a onClick="menu_bg.close()" title="클릭-닫기"><img src="{:folder:}{:name:}" width="{:width:}" height="{:height:}" align="absmiddle" /></a>'
+												), array(750, null));
+											}
+											?>
+										</div>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 배경</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+								<col width="111" />
+								<col />
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="submenu_bg_type" checked value="none" id="submenu_bg_type_none"><label for="submenu_bg_type_none">배경없음</label>
+									</td>
+									<td>
+										<span id="tip" style="margin:0">+ 배경없음 체크시 외각 테두리 및 배경색이 보이지 않습니다.</span>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="submenu_bg_type"<? if($ds_rows['submenu_bg_type']=='solid') echo ' checked' ?> value="solid" id="submenu_bg_type_solid"><label for="submenu_bg_type_solid">단색배경</label>
+									</td>
+									<td>
+										<?=color_picker('submenu_bg_scolor', $ds_rows['submenu_bg_scolor'])?>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">
+										<input type="radio" name="submenu_bg_type"<? if($ds_rows['submenu_bg_type']=='gradient') echo ' checked' ?> value="gradient" id="submenu_bg_type_gradient"><label for="submenu_bg_type_gradient">그라데이션</label>
+									</td>
+									<td>
+										<select name="submenu_bg_gtype">
+										<option value="height">상하</option>
+										<option value="width"<? if($ds_rows['submenu_bg_gtype']=='width') echo ' selected' ?>>좌우</option>
+										</select>
+										<?=color_picker('submenu_bg_gcolor1', $ds_rows['submenu_bg_gcolor1'])?> &nbsp ~&nbsp;
+										<?=color_picker('submenu_bg_gcolor2', $ds_rows['submenu_bg_gcolor2'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;1차메뉴 글자색</td>
+							<td>
+								비활성 : <?=color_picker('menu_text_offcolor', $ds_rows['menu_text_offcolor'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('menu_text_oncolor', $ds_rows['menu_text_oncolor'])?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 글자색</td>
+							<td>
+								비활성 : <?=color_picker('submenu_text_offcolor', $ds_rows['submenu_text_offcolor'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('submenu_text_oncolor', $ds_rows['submenu_text_oncolor'])?>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</tbody>
+				<tr id="upload_frame" style="display:none">
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;플래시 업로드</td>
+					<td>
+						<?php
+						$attach = new attachment('top_flash');
+						?>
+						<span><input type="file" name="_attach_" hname="이미지" filter="swf" onChange="top_flash.post(this, 'attach')"></span>
+						<span id="tip">+ 플래시 파일만 업로드 가능합니다. ( 제한크기 : 최대 <b><?=$attach->configs['limit_size']?></b> )</span>
+						<input type="hidden" id="on_top_flash" name="on_top_flash" />
+						<input type="hidden" face="attach" name="mode" value="post_attach" disabled />
+						<input type="hidden" face="attach" name="kind" value="top_flash" disabled />
+						<input type="hidden" face="attach" name="handler" value="top_flash.draw" disabled />
+					</td>
+				</tr>
+			</table>
+
+			<div id="top_flash_preview" class="preview" style="display:none">
+				<?php
+				echo $attach->preview($ds_rows['top_flash'], array(
+					'image' => '<img src="{:folder:}{:name:}" align="absmiddle" />',
+					'flash' => '<embed src="{:folder:}{:name:}" width="{:width:}" height="{:height:}"></embed>'
+				));
+				?>
+			</div>
+
+		</form>
+	</div>
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script type="text/javascript">
+	change_frame($('gnb_type_<?=$ds_rows['gnb_type']?>'));
+	</script>
+
+	<script type="text/javascript">
+	color_picker.initialize('color_frame');
+
+	// 상단 플래시 메뉴 정의
+	var top_flash = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_top_flash').value = name;
+				var html = '';
+				if(type.match(/image\//i)) html = '<img src="'+ domain + folder + name +'" align="absmiddle" />';
+				else if(type.match(/flash/i)) html = '<embed src="'+ domain + folder + name +'" width="'+ width +'" height="'+ height +'"></embed>';
+				$('top_flash_preview').update(html);
+			}
+		}
+	}
+
+	// 1차 메뉴 배경
+	var menu_bg = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			var resize = [750, 750];
+			with(infos) {
+				if(width>resize[0]) {
+					height = Math.round(height / (width/resize[0]));
+					width = resize[0];
+				}
+				if(height>resize[1]) {
+					width = Math.round(width / (height/resize[1]));
+					height = resize[1];
+				}
+				var dimensions = 'width='+ width +' height=' + height;
+				$('on_menu_bg').value = name;
+				$('menu_bg_preview').update('<a onClick="$(\'menu_bg_preview\').hide();blind.remove();" title="클릭-닫기"><img src="'+ domain + folder + name +'" '+ dimensions +' align="absmiddle" /></a>');
+			}
+		},
+		preview: function() {
+			frame = $('menu_bg_preview');
+			if(!frame.select('img')[0]) {
+				alert('등록된 이미지가 없습니다.');
+				return false;
+			}
+			blind.draw();
+			frame.show();
+			position.center(frame);
+		},
+		close: function() {
+			$('menu_bg_preview').hide();
+			blind.remove();
+		}
+	}
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_design', kind: 'top'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			$('on_top_flash').value = '';
+			$('on_menu_bg').value = '';
+			alert('저장되었습니다.');
+		}
+	}
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

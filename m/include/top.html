@@ -1,0 +1,133 @@
+<?php
+// 모바일 사용여부 체크
+if($mobile->settings['mobile_use']!='yes') {
+	scripts('location.replace("'.$pc_domain.'")');
+	exit;
+}
+include_once $m_dir.'builder/rankup_design.class.php';
+$design = new rankup_design;
+?>
+<body>
+<style type="text/css" media="all">
+@import url(<?=$m_domain?>design/site/site.css?<?=time()?>);
+@import url(<?=$m_domain?>design/top/frame.css?<?=time()?>);
+</style>
+<script type="text/javascript">
+//<![CDATA[
+var menu_handler = function(pid) {
+	proc.parameters({ pid: pid });
+	proc.process(function(trans) { proc.response(trans) }, false, '<?=$m_domain?>design');
+}
+var flip = {
+	toggle: function(el) {
+		var qty = parseInt($('gnb').select('ul')[0].getAttribute('qty'), 10);
+		var items = $('gnb').select('ul')[0].select('li');
+		var more = $('gnb_more');
+		if(more.hasClassName('on')) {
+			more.removeClassName('on');
+			el.select('span')[0].removeClassName('on');
+			// 메뉴치환
+			if(items.length > qty) {
+				items[qty-1].show();
+				items.last().hide();
+			}
+		}
+		else {
+			more.addClassName('on');
+			el.select('span')[0].addClassName('on');
+			// 메뉴치환
+			if(items.length > qty) {
+				items[qty-1].hide();
+				items.last().show();
+			}
+		}
+	}
+}
+Event.observe(window, 'load', function() {
+	setTimeout(scrollTo, 0, 0, 0);
+}, false);
+/*
+// rotaion change
+window.onorientationchange = function() {
+	setTimeout(function() {
+		//alert(window.orientation);
+		location.reload();
+		// 세로 : 0, 가로 : 90, -90
+		//
+	}, 100);
+}
+*/
+//]]>
+</script>
+<ul class="nav">
+	<li class="lbtn"><a onClick="history.back()"><span>뒤로가기</span></a></li>
+	<li>
+		<?php
+		// 로고출력
+		include_once $base_dir.'rankup_module/rankup_builder/attachment.class.php';
+		$attach = new attachment('mobile_logo', $mobile->m_dir.'builder/');
+		echo $attach->preview($mobile->settings['logo'], array(
+			'image' => '<a href="'.$m_domain.'"><img src="{:folder:}{:name:}" vspace="5" /></a>'
+		));
+		?>
+	</li>
+	<li class="rbtn"><a href="tel:<?=$mobile->settings['phone']?>"><span>전화걸기</span></a></li>
+</ul>
+
+<?php
+/**
+ * 메뉴 구현
+ */
+$gnb_rows = $design->get_settings('site_design');
+?>
+<nav>
+	<div id="gnb">
+		<?php
+		include_once $m_dir.'class/tab.class.php';
+		$tab = new tab;
+		echo $tab->draw(1, array(
+			'times' => $gnb_rows['menu_qty'],
+			'entry_wrap' => array('<ul class="gbf" qty="'.$gnb_rows['menu_qty'].'">', '</ul>'),
+			'entry' => array(
+				0 => '<li><a class="gbi"><span></span></a></li>',
+				1 => '<li{:non_display:}><a onClick="menu_handler({:pid:})" class="gbi gbi{:pid:}{:on:}"><span>{:base_name:}</span></a></li>'
+			),
+			'on' => ' on',
+			'non_display' => ' style="display:none"'
+		));
+		?>
+		<button type="button" class="flip" onClick="flip.toggle(this)"><span class="off">메뉴 펼치기</span></button>
+		<div id="gnb_more">
+			<?php
+			echo $tab->draw(2, array(
+				'times' => $gnb_rows['menu_qty'],
+				'entry_wrap' => array('<ul class="gbm">', '</ul>'),
+				'entry' => array(
+					0 => '<li><a class="gbi"><span></span></a></li>',
+					1 => '<li><a onClick="menu_handler({:pid:})" class="gbi gbi{:pid:}{:on:}"><span>{:base_name:}</span></a></li>'
+				),
+				'on' => ' on'
+			));
+			?>
+		</div>
+	</div>
+</nav>
+
+<?php
+/**
+ * 2차메뉴 출력
+ */
+$tab_menus = $gen->tab_menus(array(
+	'entry' => '<li><a onClick="menu_handler({:no:})" class="ti{:on:}"><span>{:base_name:}</span></a></li>',
+	'on' => ' on'
+));
+if($tab_menus) {
+?>
+<div id="container">
+	<ul class="tab">
+		<?=$tab_menus?>
+	</ul>
+</div>
+<?php
+}
+?>

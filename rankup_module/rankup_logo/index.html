@@ -1,0 +1,202 @@
+<?php
+include '../../Libs/_php/rankup_basic.class.php';
+
+$rankup_control->check_admin();
+$rankup_banner = new rankup_banner; // 로고는 로고클래스를 그대로 활용
+
+// 위치값이 없을때 활성화된 로고위치로 설정
+if(empty($_GET['position'])) {
+	$_positions = array_keys($rankup_banner->positions);
+	while($_GET['position']<3) {
+		$_GET['position'] = array_shift($_positions); // { 1 : ci_top, 2 : ci_bottom }
+		break;
+	}
+}
+
+$banner_lists = $rankup_banner->get_banner_list($_GET['position'], true);
+
+// 헤더
+//$rankup_control->print_admin_head("로고등록");
+
+include_once '../rankup_builder/top_menu.inc.php';
+
+?>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="./rankup_logo.js"></script>
+<script type="text/javascript">
+// 로고 클래스 변수 정의
+var logo = classObj = new LOGO;
+// window load 시 tr 에 onClick 이벤트 부여
+Event.observe(window, "load", function() {
+	classObj.registFrm = document.registFrm;
+	classObj.settingFrm = document.settingFrm;
+	classObj.bannerBody = $('bannerBody');
+	classObj.maxWidth = 900; // 가로사이즈 제한 설정
+	classObj.bannerItems = document.getElementsByName("bannerItem");
+	classObj.rebuild_event(); // 로고 리스트에 이벤트 할당
+});
+</script>
+<link rel="stylesheet" type="text/css" href="./rankup_logo.css">
+<!-- 블라인드 -->
+<div id="screenBlindDiv" style="display:none;position:absolute;left:0px;top:0px;width:100%;z-index:90;text-align:center;background-color:black;FILTER:gray alpha(opacity=20 Style=4 FinishOpacity=90)"></div>
+<!-- 블라인드 -->
+
+<center>
+<!-- 프로세스 처리 프레임 -->
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+<!-- 프로세스 처리 프레임 -->
+
+<!-- 등록/수정폼 -->
+<div id="registFrmDiv">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+<form name="registFrm" method="POST" action="./multiProcess.html" target="multiProcessFrame" onSubmit="return (Wysiwyg.submit_start() && validate(this))">
+<input type="hidden" name="position" value="<?=$_GET['position']?>">
+<input type="hidden" name="mode">
+<input type="hidden" name="bind">
+<input type="hidden" name="no">
+<tbody align="center">
+<tr>
+	<td><b>로고등록 / 수정 폼</b></td>
+</tr>
+<tr>
+	<td>
+		<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#D0D0D0" style="table-layout:fixed">
+		<colgroup bgcolor="white"><col align="center" width="60" bgcolor="#F1F4E8"><col></colgroup>
+		<tr height="30">
+			<td>로고종류</td>
+			<td id="banner_type_td">
+				<input type="radio" name="banner_type" value="media" onClick="logo.change_form(this)" checked id="banner_type_id1"><label for="banner_type_id1">이미지/플래시</label>
+				<input type="radio" name="banner_type" value="text" onClick="logo.change_form(this)" id="banner_type_id2"><label for="banner_type_id2">직접입력</label><span id="tip">+ 소스코드 등록시 직접입력 모드 사용</span>
+			</td>
+		</tr>
+		<tr height="30">
+			<td>로고크기</td>
+			<td>
+				<input type="text" name="width" size="3" hname="가로크기" option="number" onKeyUp="logo.set_resize(this)" maxlength="3" class="enable" style="display:none;margin-right:4px;"><select name="width_type" onChange="logo.change_size_type(this)"><option value="pixel">픽셀</option><!option value="percent">퍼센트</option><option value="exact" selected>실제크기</option><!option value="auto">맞춤비율</option></select> × <input type="text" name="height" size="3" hname="세로크기" option="number" onKeyUp="logo.set_resize(this)" maxlength="3" class="enable" style="display:none;margin-right:4px;"><select name="height_type" onChange="logo.change_size_type(this)"><option value="pixel">픽셀</option><!option value="percent">퍼센트</option><option value="exact" selected>실제크기</option><!option value="auto">맞춤비율</option></select><span id="tip">+ 최적사이즈 <span style="font-family:verdana;color:#FF6633">가로<?=$rankup_banner->positions[$_GET['position']]['width']?>픽셀</span>이하</span>　<a onClick="logo.open_size_guide()"><u>맞춤크기설정</u></a>　<a onClick="logo.set_real_size()"><u>실제크기설정</u></a>
+
+				<!-- 로고 위치별 맞춤사이즈 안내-->
+				<div id="bannerSizeGuideDiv" onFocusOut="logo.open_size_guide()">
+				<table width="100%" cellpadding="4" cellspacing="1">
+				<tbody align="center" bgcolor="white">
+				<tr bgcolor="#238BC9"><th width="40%">로고위치</th><th width="40%">맞춤사이즈</th><th width="20%">적용</th></tr>
+				<?=$rankup_banner->print_sizes($_GET['position'], true)?>
+				</table>
+				</div>
+				<!-- 로고 위치별 맞춤사이즈 안내-->
+			</td>
+		</tr>
+		<tr height="30">
+			<td>이동주소</td>
+			<td><input type="text" name="address" hname="이동주소" required style="width:430px;" maxlength="255" value="{:domain:}main/index.html"><input type="checkbox" name="popup_banner" id="popup_banner_id1" onFocus="this.blur()"><label for="popup_banner_id1" onFocus="this.blur()">새창모드</label><span id="tip">+ 로고클릭시 이동할 페이지 주소</span></td>
+		</tr>
+		<tr>
+			<td>로고파일</td>
+			<td><input type="hidden" name="on_attached" required hname="로고파일" nofocus setfocus="attached"><input type="file" name="attached" style="width:430px;" hname="로고파일" maxlength="255" filter="gif,jpg,bmp,png,swf" onChange="logo.post_attached(this)"><span id="tip">+ 로고용 미디어 파일(JPG, GIF, PNG, SWF) 첨부</span></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr id="editorBox" style="display:none">
+	<td style="padding:8px 0px 6px 0px;"><textarea type="editor" name="content" style="word-break:break-all;width:100%;height:200px;" hname="로고내용" nofocus></textarea></td>
+</tr>
+<tr id="previewBox">
+	<td style="padding:8px 0px 6px 0px;">
+		<table width="100%" height="231" cellpadding="3" cellspacing="1" bgcolor="#D0D0D0" border="0" style="table-layout:fixed;">
+		<tbody bgcolor="white" align="center">
+		<tr height="28" bgcolor="#EFECE3">
+			<td disabled>미리보기</td>
+		</tr>
+		<tr>
+			<td bgcolor="#FDFDFD"><div id="previewItemBox"><i disabled style="padding:0px 4px 0px 4px;">NULL</i></div><span id="mediaInfo" disabled>-- × --, --</span><span id="mediaOutline"><input type="checkbox" name="mediaOutlineChecker" id="outline_id1" onClick="logo.set_media_outline()" onFocus="this.blur()"><label for="outline_id1" onFocus="this.blur()">테두리표시</label></span></td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td><a onClick="logo.preview_banner(true)"><img src="./img/bt_preview.gif"></a><input type="image" src="./img/bt_input.gif" style="margin-left:2px"><a onClick="logo.change_display('registFrmDiv', false)"><img src="./img/bt_close_s.gif" style="margin-left:2px"></a></td>
+</tr>
+</tbody>
+</form>
+</table>
+</div>
+<!-- 등록/수정폼 -->
+</center>
+
+<table width="770" cellpadding="2" cellspacing="5" bgcolor="white" border="0" align="center" bgcolor="#dedede">
+	<form name="settingFrm" method="POST" action="./multiProcess.html" target="multiProcessFrame">
+	<input type="hidden" name="mode">
+	<thead id="bannerHeader">
+	<tr>
+		<td style="padding:0px 0px 0px 5px">
+			<table width="100%" cellpadding="0" cellspacing="0">
+			<tr height="40" valign="top">
+				<td colspan="2">
+					<table width="150" cellpadding="0" cellspacing="0" border="0">
+					<tbody>
+					<?=$rankup_banner->print_positions(true)?>
+					</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<div id="sub_title">로고관리</div>  &nbsp;<img src='./img/btn_logo_regist.gif' border='0' align='absmiddle' style="cursor:pointer;" onClick="logo.regist_item()" alt="로고등록"><span id="tip">+ 리스트에 보이는 로고의 스타일과 실제 사이트에 출력되는 로고의 스타일이 다를 수도 있습니다.</span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<th style="padding:5px 0px 0px 0px">
+			<table width="100%" cellpadding="4" cellspacing="1" border="0">
+				<colgroup align="center" bgcolor="#F7F7F7"><col width="45"><col></colgroup>
+				<tr height="2" bgcolor="#6699CC">
+					<td colspan="2" style="padding:0"></td>
+				</tr>
+				<tr height="26">
+					<td><input type="checkbox" style="cursor:pointer;width:12px;height:12px;margin:0px 2px 2px 5px;" id="checkAll_id1" onClick="logo.checkAll(this.checked)" onFocus="this.blur()"><label for="checkAll_id1" onFocus="this.blur()" style="cursor:pointer">선택</label></td>
+					<td>
+						<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td align="center">로고정보</td>
+							<td align="right" width="120"><!-- 2010.12.20 remarked <a onClick="logo.set_banner_outline()"><img src="./img/bt_outline.gif"></a>--></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</th>
+	</tr>
+	</thead>
+	<!-- 로고리스트 -->
+	<tbody id="bannerBody">
+	<?=$banner_lists?>
+	</tbody>
+	<!-- 로고리스트 -->
+	<tfoot>
+	<tr>
+		<th style="padding:0px 0px 0px 0px">
+			<table width="100%" cellpadding="4" cellspacing="1" border="0" bgcolor="white">
+				<colgroup bgcolor="#F7F7F7"><col><col><col></colgroup>
+				<tr height="2" bgcolor="#6699CC"><td style="padding:0"></td></tr>
+				<tr>
+					<td>
+						<table width="100%" height="28" cellpadding="0" cellspacing="0">
+						<tr>
+							<td width="100" style="padding-left:4px">☞ 선택한 로고를</td><td><a onClick="logo.ajax_process('view', true, 'yes')"><img src="./img/bt_use2.gif" style="margin-left:2px"></a><a onClick="logo.ajax_process('view', true, 'no')"><img src="./img/bt_unused2.gif" style="margin-left:2px"></a><a onClick="logo.ajax_process('delete', true)"><img src="./img/bt_del_s2.gif" style="margin-left:2px"></a></td>
+							<td align="right"><!-- 2010.12.20 remarked <a onClick="logo.set_banner_outline()"><img src="./img/bt_outline.gif"></a>--></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</th>
+	</tr>
+	</tfoot>
+	</form>
+</table>
+<br />
+
+</body>
+</html>

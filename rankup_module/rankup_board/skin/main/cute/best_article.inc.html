@@ -1,0 +1,29 @@
+<?
+if($category_infos->sprint['wbest']!=="yes") return;
+?>
+				<tr>
+					<td colspan="2">
+						<!-- 이번주 베스트 -->
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<tr>
+								<td>
+									<table border="0" cellpadding="0" cellspacing="0" width="100%">
+									<tr>
+										<td width="15"><img src="<?=$this->skin_url?>bg04.gif"></td>
+										<td width="14"><img src="<?=$this->skin_url?>besticon.gif"></td>
+										<td background="<?=$this->skin_url?>bg02.gif" class="list_bg_color" width="100%">이번주 BEST</td>
+										<td width="26"><img src="<?=$this->skin_url?>bg03.gif"></td>
+									</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td style="padding:5 0 0 15px"> 
+									<table width="100%" cellpadding="3" cellspacing="0" border="0">
+									<?=$this->get_best_articles("weekly_best", $pcno)?>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>

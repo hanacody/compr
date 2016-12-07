@@ -1,0 +1,117 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+// 오늘, 어제 접속자수
+$todayCount['con'] = $rankup_control->queryR("select num from rankuplog_total where wdate=curdate()");
+$yesterdayCount['con'] = $rankup_control->queryR("select num from rankuplog_total where wdate=DATE_SUB(curdate(), interval 1 day)");
+
+// 오늘, 어제 회원 가입자수
+$todayCount['member'] = $rankup_control->queryRows("select m1.no from rankup_member as m1  LEFT OUTER JOIN rankup_member_extend as m2 ON m1.uid = m2.uid where m2.secession = 'no' and m1.join_time>=curdate()");
+$yesterdayCount['member'] = $rankup_control->queryRows("select no from rankup_member as m1 LEFT OUTER JOIN rankup_member_extend as m2 ON m1.uid = m2.uid where m2.secession = 'no' and m1.join_time between DATE_SUB(curdate(), interval 1 day) and curdate()");
+
+// 오늘통계를 얻기 위해 처리
+$_GET['use_date'] = 'on';
+$_GET['sdate'] = $_GET['edate'] = date("Y-m-d");
+if(empty($_GET['cmd'])) $_GET['cmd'] = "success";
+
+$rankup_control->print_admin_head("오늘사이트통계");
+?>
+<body>
+<script type="text/javascript" src="../rankup_chart/js/swfobject.js"></script>
+<style type="text/css">
+div.hline {
+	padding: 5px 0 0 0;
+	margin-top: 4px;
+	border-top: 1px #dedede dotted;
+	font-size: 11px;
+	color: #777;
+	line-height: 1.4em;
+	font-family: dotum, verdana;
+}
+div.hline.gray_bg {
+	padding-bottom: 4px;
+}
+div {font-weight:normal;}
+</style>
+<div class="bar"><script> titleBar("오늘사이트통계", 270) </script></div>
+<div id="reserve_frame"  style="display:none;position:absolute;width:700px;height:630px;overflow-y:scroll;z-index:100;background-color:white;padding:8px;border:4px #999 solid">
+</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<iframe name="rad_alrimi" width="750" height="120" frameBorder="0" scrolling="no" marginWidth="0" marginHeight="0" src="http://rankup.co.kr/rad_alrimi/index.html"></iframe>
+					<?php include_once $base_dir."rankup_module/rankup_sms/sms_admin_rest.html" ?>
+				</td>
+			</tr>
+			<tr><td height="15"></td></tr>
+			<tr>
+				<td height="25">
+					<div id="sub_title" style="float:left">오늘의 시간대별 방문자통계</div>
+					<div style="float:right">총 접속자 : <b style="color:#ff6633;font-family:verdana;"><? echo number_format($todayCount['con']) ?>명 <a href="<?=$base_url?>rankup_module/rankup_log/rankuplog_main.html"><img src="./img/btn_statistics_more.gif" align="absmiddle"></a></b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<tr>
+							<td align="center">
+								<?
+								$data_file = urlencode("../rankup_log/chart_data/set_chart_time.php");
+								?>
+								<div style="width:730px;overflow:hidden">
+									<div id="my_chart"></div>
+									<script type="text/javascript">
+									swfobject.embedSWF(
+									"../rankup_chart/open-flash-chart.swf", "my_chart", "730", "170",
+									"9.0.0", "expressInstall.swf",
+									{"data-file":"<?=$data_file?>"} );
+									</script>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="15"></td></tr>
+			<tr>
+				<td height="25">
+					<div id="sub_title" style="float:left">사이트 종합현황</div>
+					<div style="float:right"></b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<col width="33%" span="3" />
+						<tbody align="center">
+							<tr class="blue_bg" height="35">
+								<td>구분</td>
+								<td>방문자수</td>
+								<td>회원가입수</td>
+							</tr>
+							<tr>
+								<td class="gray_bg">오늘</td>
+								<td><?=number_format($todayCount['con'])?> 명</td>
+								<td><?=number_format($todayCount['member'])?> 명</td>
+							</tr>
+							<tr>
+								<td class="gray_bg">어제</td>
+								<td><?=number_format($yesterdayCount['con'])?> 명</td>
+								<td><?=number_format($yesterdayCount['member'])?> 명</td>
+							</tr>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+</body>
+</html>

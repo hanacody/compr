@@ -1,0 +1,89 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+include_once $base_dir.'rankup_module/rankup_board/rankup_board.class.php';
+$board = new rankup_board($_GET['id']);
+include_once '../class/rankup_board_mini.class.php';
+$m_board = new rankup_board_mini;
+
+$board_infos = $m_board->get_infos($_GET['no']);
+$board_infos->content = $m_board->prefix_contents($board_infos->content, array(240, 181));
+
+$mobile->print_header($gen->page_title.' - '.$board_infos->subject);
+include_once $m_dir.'include/top.html';
+?>
+<script type="text/javascript">
+var reply_toggle = function(el) {
+	$('reply_frame').toggle();
+	var btn = $(el);
+	btn.hasClassName('on') ? btn.removeClassName('on') : btn.addClassName('on');
+}
+</script>
+
+<div id="container">
+
+	<div class="tit0">
+		<div class="tit_t"><?=$gen->page_title?></div>
+	</div>
+	<div class="bad">
+		<h2><?=(($board_infos->sno<=$board->notice_sno)?'<span class="notice">공지</span> ':'').$board_infos->subject?></h2>
+		<p class="inf bt">
+			<b><?=$board_infos->unick?></b><em class="br">|</em><?=$board_infos->wdate?><em class="br">|</em>
+			<?php
+			if($board->sfunction['use_vote']=='on') {
+				echo '추천: '.$board_infos->gnum.'<em class="br">|</em>';
+				if($board->sfunction['use_only_good']!='on') echo '반대: '.$board_infos->bnum.'<em class="br">|</em>';
+			}
+			?>
+			조회: <?=$board_infos->hnum?>
+		</p>
+
+		<div class="content">
+			<div class="wrap">
+				<?=$board_infos->content?>
+			</div>
+		</div>
+		<div class="near">
+			<ul>
+				<?php
+				// 이전글 다음글
+				if($board_infos->pano) echo '<li><a href="./detail.html'.params('no='.$board_infos->pano).'"><span>이전글</span></a></li>';
+				else echo '<li><a><span class="off">이전글</span></a></li>';
+				echo '<li><a href="./index.html'.params('').'"><span>목록보기</span></a></li>';
+				if($board_infos->nano) echo '<li><a href="./detail.html'.params('no='.$board_infos->nano).'"><span>다음글</span></a></li>';
+				else echo '<li><a><span class="off">다음글</span></a></li>';
+				?>
+			</ul>
+		</div>
+		<div id="reply">
+			<ul class="reply">
+				<li>댓글: <b><?=$board_infos->cnum?></b></li>
+				<?php
+				if($board_infos->cnum) {
+					echo '<li><a onClick="reply_toggle(this)" class="rbt"><span>댓글보기</span></a></li>';
+				}
+				?>
+			</ul>
+			<div id="reply_frame" style="display:none">
+				<?php
+				echo $m_board->print_comments($_GET['no'], array(
+					'entry' => '
+					<ul class="rpl">
+						<li class="face"><img src="'.$pc_domain.'rankup_module/rankup_board/icon/face_{:icon:}.gif"></li>
+						<li class="cont">{:content:}<span class="inf"><b>{:unick:}</b> <em class="br">|</em>{:wdate:}</span></li>
+					</ul>'
+				));
+				?>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php
+include_once $m_dir.'include/bottom.html';
+?>

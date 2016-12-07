@@ -1,0 +1,260 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+
+$rankup_control->check_admin();
+$rankup_control->print_admin_head('메뉴 및 페이지설정');
+
+include_once 'rankup_frame.class.php';
+$frame = new rankup_frame;
+
+include_once '../../Libs/_php/rankup_moduler.class.php';
+$moduler = new rankup_moduler;
+
+?>
+<body>
+<div class="bar"><script> titleBar('메뉴 및 페이지설정') </script></div>
+
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="./rankup_frame.class.js"></script>
+<style type="text/css" media="screen"> @import url('rankup_frame.css'); </style>
+<script type="text/javascript">
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'ready': mode = ['hide', 'hide', 'hide']; break;
+		case 'html': mode = ['show', 'hide', 'hide']; break;
+		case 'module': mode = ['hide', 'show', 'hide']; break;
+		case 'link': mode = ['hide', 'hide', 'show']; break;
+	}
+
+	var oframe = $('option_frame');
+	if(oframe) oframe.hide();
+
+	$w('page_type_html_frame page_type_module_frame page_type_link_frame').each(function(frame, index) {
+		$(frame)[mode[index]]();
+		$A($(frame).select('input')).each(function(field) {
+			if(mode[index]=='hide') field.disabled = true;
+			else field.disabled = false;
+		});
+	});
+}
+// 메뉴 핸들러
+var menu_handler = function(pid) {
+	proc.parameters({ pid: pid, request: 'by_admin' });
+	proc.process(function(trans) { proc.response(trans) }, false, domain +'design');
+}
+</script>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;margin:30px 0;text-align:left">
+
+		<div class="help_bg" style="margin-bottom:20px">
+			<ul class="help_ul">
+				<li>사이트의 메뉴에 대한 페이지생성 및 관리를 할 수 있는 종합 페이지설정 페이지 입니다.</li>
+				<li>메뉴는 최대 3차까지 등록하실 수 있습니다.</li>
+				<li>페이지는 형태에 따라 <b>[준비중] [일반] [모듈] [링크]</b> 로 나눌 수 있습니다.</li>
+			</ul>
+			<ul class="help_ul" style="margin-top:5px;border-top:1px #e09d8f dotted;">
+				<li style="margin: 8px 0 5px 0;">[<b>안내</b>] 메뉴 설정에 따라 다음과 같은 오류메시지가 발생할 수 있습니다.</li>
+			</ul>
+			<div style="border:1px #e09d8f solid;line-height: 1.6em;padding: 5px 10px;background-color:white;">
+				<b>·</b> <font class="blue">페이지가 존재하지 않습니다</font> : 메뉴에 해당 페이지가 등록되어 있지 않은 경우 발생합니다.<br />
+				<b>·</b> <font class="blue">사용하지 않는 페이지 입니다</font> : 메뉴에 해당 페이지를 '사용안함'으로 설정한 경우 발생합니다.<br />
+				<b>·</b> <font class="blue">페이지를 표시할 수 없습니다</font> : '링크' 형태로 설정된 메뉴 중 이동 링크가 중복되는 경우 발생합니다.
+			</div>
+		</div>
+
+		<div style="position:absolute;width:750px;text-align:right;margin-top:-6px;"><a onClick="rankup_frame.open()"><img src="./img/btn_regist.gif" alt="1차메뉴등록"/></a></div>
+		<div id="sub_title">메뉴 및 페이지설정</div>
+		<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" frame="box" rules="" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed">
+			<col width="60" />
+			<col width="50" />
+			<col />
+			<col width="70" />
+			<col width="70" />
+			<col width="70" />
+			<col width="105" />
+			<tr class="gray_bg" align="center">
+				<td>순서</td>
+				<td>단계</td>
+				<td>메뉴명</td>
+				<td>사용여부</td>
+				<td>형태</td>
+				<td>접근권한</td>
+				<td>관리도구</td>
+			</tr>
+			<tbody id="frame_spot" bgcolor="white" align="center">
+			<?php
+			// 프레임 출력
+			echo $frame->print_frames(array(
+				'entry' => '
+					<tr no="{:no:}" class="{:parents:}t{:no:}" id="d{:depth:}">
+						<td><a onClick="rankup_frame.direction.up(this)"><img src="../../Libs/_images/btn_order_up.gif" align="absmiddle" hspace="1"></a><a onClick="rankup_frame.direction.down(this)"><img src="../../Libs/_images/btn_order_down.gif" align="absmiddle" hspace="1"></a></td>
+						<td><span>[{:depth:}차]</span></td>
+						<td align="left"><p>{:base_name:}</p></td>
+						<td>{:used_text:}</td>
+						<td>[{:page_type_text:}]</td>
+						<td>{:on_access_level:}</td>
+						<td align="left">
+							<a onClick="rankup_frame.open(this, \'edit\')"><img src="./img/btn_edit_s.jpg" align="absmiddle" alt="수정" /></a><a onClick="rankup_frame.del(this)"><img src="./img/btn_del_s.jpg" align="absmiddle" hspace="1" alt="삭제" /></a><a onClick="menu_handler({:no:})"><img src="./img/btn_preview_s.jpg" align="absmiddle" hspace="5" alt="미리보기" /></a>{:on_button:}
+						</td>
+					</tr>',
+				'lowest_level_text' => '비회원',
+				'on_access_level' => 'Lv.{:access_level:}',
+				'used_texts' => array(
+					'yes' => '사용함',
+					'no' => '<font color="#ff6600">사용안함</font>'
+				),
+				'page_types' => array(
+					'ready' => '준비중',
+					'html' => '일반',
+					'module' => '모듈',
+					'link' => '링크'
+				),
+				'on_button' => '<a onClick="rankup_frame.open(this)"><img src="./img/btn_regist_s.jpg" align="absmiddle" alt="하위메뉴등록" /></a>'
+			));
+			?>
+			</tbody>
+		</table>
+	</div>
+</div>
+</center>
+<br />
+
+
+<div id="regist_frame" style="position:absolute;width:750px;top:0;text-align:left;border:2px black solid;background-color:white;padding:10px;z-index:2;display:none">
+	<div style="float:right;width:10px;margin-top:-5px"><a onClick="rankup_frame.close()">×</a></div>
+	<div id="sub_title">메뉴설정</div>
+	<input type="hidden" id="no" name="no">
+	<input type="hidden" id="kind" name="kind">
+	<input type="hidden" id="depth" name="depth">
+	<table width="100%" align="center" cellpadding="5" cellspacing="1" bgcolor="#cccccc" class="list_top" style="table-layout:fixed">
+		<col width="120" />
+		<col />
+		<tbody bgcolor="white">
+			<tr>
+				<td class="gray_bg">한글메뉴명</td>
+				<td><input type="text" name="base_name" required hname="한글메뉴명" maxlength="15" class="simpleform"></td>
+			</tr>
+			<tr id="extra_frame">
+				<td class="gray_bg">영문메뉴명</td>
+				<td>
+					<input type="text" name="extra_name" required hname="영문메뉴명" maxlength="15" class="simpleform">
+					<span id="tip">+ 해당 메뉴가 활성화 됐을때 표시되는 메뉴명입니다.</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg">사용여부</td>
+				<td>
+					<input type="radio" name="used" value="yes" checked id="used_yes"><label for="used_yes">사용함</label>
+					<input type="radio" name="used" value="no" id="used_no"><label for="used_no">사용안함</label>
+					<span id="tip">+ 사용안함 설정시에는 하위메뉴까지 영향을 받습니다.</span>
+				</td>
+			</tr>
+			<tr id="gnb_frame">
+				<td class="gray_bg">상단메뉴출력</td>
+				<td>
+					<input type="radio" name="use_gnb" value="yes" checked id="use_gnb_yes"><label for="use_gnb_yes">출력함</label>
+					<input type="radio" name="use_gnb" value="no" id="use_gnb_no"><label for="use_gnb_no">출력안함</label>
+					<span id="tip">+ 출력안함 설정시에는 하위메뉴까지 상단메뉴에 출력 되지 않습니다.</span>
+				</td>
+			</tr>
+			<tr id="lnb_frame">
+				<td class="gray_bg">좌측메뉴출력</td>
+				<td>
+					<input type="radio" name="use_lnb" checked value="yes" id="use_lnb_yes"><label for="use_lnb_yes">출력함</label>
+					<input type="radio" name="use_lnb" value="no" id="use_lnb_no"><label for="use_lnb_no">출력안함</label>
+					<span id="tip">+ 출력안함 설정시에는 서브페이지의 좌측메뉴부(메뉴/좌측배너) 전체가 출력되지 않습니다.</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg">타겟설정</td>
+				<td>
+					<input type="radio" name="target" value="_self" checked id="target_self"><label for="target_self">현재창열기</label>
+					<input type="radio" name="target" value="_blank" id="target_blank"><label for="target_blank">새창열기</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg">접근권한</td>
+				<td>
+					<select name="access_level">
+					<?php
+					$datas = array();
+					foreach($config_info['smlevel'] as $key=>$name) { array_push($datas, compact('key', 'name')); }
+					echo fetch_contents($datas, '<option value="{:key:}">Lv.{:key:}　l　{:name:}</option>');
+					?>
+					</optgroup>
+					</select>
+					<span id="tip">+ 비회원제로 운영하실 경우 접근권한 설정은 적용되지 않습니다.</span>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<br>
+
+	<div id="sub_title">페이지설정</div>
+	<table width="100%" align="center" cellpadding="5" cellspacing="1" bgcolor="#cccccc" class="list_top" style="table-layout:fixed">
+		<col width="120" />
+		<col />
+		<tbody bgcolor="white">
+		<tr>
+			<td class="gray_bg">형태설정</td>
+			<td>
+				<input type="radio" name="page_type" checked value="ready" onClick="change_frame(this)" id="page_type_ready"><label for="page_type_ready">준비중</label>
+				<input type="radio" name="page_type" value="html" onClick="change_frame(this)" id="page_type_html"><label for="page_type_html">일반HTML</label>
+				<input type="radio" name="page_type" value="module" onClick="change_frame(this)" id="page_type_module"><label for="page_type_module">모듈</label>
+				<input type="radio" name="page_type" value="link" onClick="change_frame(this)" id="page_type_link"><label for="page_type_link">링크</label>
+			</td>
+		</tr>
+		<tr id="page_type_module_frame" style="display:none">
+			<td class="gray_bg">모듈설정</td>
+			<td>
+				<select id="module" name="module" onChange="rankup_frame.load_components(this.value, 'component')">
+				<option value="">모듈선택</option>
+				<?php
+				// 모듈 출력
+				echo $moduler->print_modules('<option value="{:key:}">{:name:}</option>');
+				?>
+				</select>
+				<select id="component" name="component" onChange="rankup_frame.load_options(this.value)">
+				<option value="">컴포넌트선택</option>
+				</select>
+				<span id="option_html"></span>
+				<script type="text/javascript" id="option_js"></script>
+			</td>
+		</tr>
+		<tr id="page_type_link_frame" style="display:none">
+			<td class="gray_bg">링크설정</td>
+			<td>
+				<select id="link" name="link" onChange="rankup_frame.check_url(this)" style="width:200px">
+				<option value="">URL직접입력</option>
+				</select>
+				<span id="url_frame">
+					<input type="text" name="url" value="http://" defalut="http://" size="60" maxlength="250" class="simpleform">
+				</span>
+			</td>
+		</tr>
+		</tbody>
+	</table>
+	<div id="page_type_html_frame" style="display:none;margin-top:-1px">
+	<table width="100%" align="center" cellpadding="5" cellspacing="1" bgcolor="#cccccc" style="table-layout:fixed">
+		<tr>
+			<td bgcolor="white">
+				<textarea type="editor" id="page_body_content" name="page_body_content" style="width:100%;height:200px"></textarea>
+			</td>
+		</tr>
+	</table>
+	</div>
+	<div style="text-align:center;margin-top:10px">
+		<a onClick="rankup_frame.save()"><img src="../../Libs/_images/btn_save.gif" align="absmiddle" alt="저장하기" /></a>
+		<a onClick="rankup_frame.close()"><img src="../../Libs/_images/btn_close.gif" align="absmiddle" alt="창닫기" /></a>
+	</div>
+
+</div>
+<script type="text/javascript"> rankup_frame.initialize('regist_frame', 'frame_spot') </script>
+
+</body>
+</html>

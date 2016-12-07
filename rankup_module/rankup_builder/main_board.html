@@ -1,0 +1,230 @@
+<??><?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../../Libs/_php/rankup_board_mini.class.php';
+$board = new rankup_board_mini;
+
+include_once './rankup_design.class.php';
+include_once './attachment.class.php';
+
+$design = new rankup_design;
+$ds_rows = $design->get_settings('main_board_design');
+
+$rankup_control->print_admin_head('멀티게시판관리 - 게시판 메인설정');
+?>
+<body>
+
+<div class="bar" style="margin-bottom:30px"><script> titleBar('멀티게시판관리 - 게시판 메인설정', 300) </script></div>
+<script type="text/javascript" src="attachment.class.js"></script>
+<style type="text/css">
+input.tac {
+	text-align: center;
+}
+div.preview {
+	width: 728px;
+	*width: 750px;
+	height: 150px;
+	overflow: auto;
+	padding: 10px;
+	border: 1px #dedede solid;
+	margin-top: -1px;
+	text-align: center;
+	background-color: #f7f7f7;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+</style>
+
+<?php
+/**
+ * 컬러픽커 로드
+ *@usage: echo color_picker('name', 'value', 'handler');
+ *@usage: <script> color_picker.initialize('color_frame'); </script> // 컬러픽커 초기화
+ */
+include_once $base_dir.'Libs/_picker/color_picker.inc.php';
+?>
+
+<center>
+<div class="content_wrap">
+
+	<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+	<div style="width:750px;text-align:left">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+
+			<div id="sub_title">리스트형 게시물 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<col width="120" />
+			<col />
+			<col />
+			<col />
+			<tr class="blue_bg" align="center">
+				<td>구분</td>
+				<td>TAB(1)</td>
+				<td>TAB(2)</td>
+				<td>TAB(3)</td>
+			</tr>
+			<tbody id="color_frame" align="center">
+			<tr>
+				<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif"> 연결게시판</td>
+				<td>
+					<select id="tab1_board" name="tab1_board">
+					<?php
+					// 생성된 게시판 출력
+					echo $board_options = $board->print_boards('<option value="{:id:}">{:name:}</option>');
+					?>
+					</select>
+				</td>
+				<td>
+					<select id="tab2_board" name="tab2_board">
+					<option value="">사용안함</option>
+					<?=$board_options?>
+					</select>
+				</td>
+				<td>
+					<select id="tab3_board" name="tab3_board">
+					<option value="">사용안함</option>
+					<?=$board_options?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif"> 게시글수</td>
+				<td><input type="text" name="tab1_limits" required hname="게시글 수" option="number" value="<?=$ds_rows['tab1']['limits']?>" size="4" maxlength="2" class="simpleform tac" /></td>
+				<td><input type="text" name="tab2_limits" required hname="게시글 수" option="number" value="<?=$ds_rows['tab2']['limits']?>" size="4" maxlength="2" class="simpleform tac" /></td>
+				<td><input type="text" name="tab3_limits" required hname="게시글 수" option="number" value="<?=$ds_rows['tab3']['limits']?>" size="4" maxlength="2" class="simpleform tac" /></td>
+			</tr>
+			<tr>
+				<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif"> 제목길이</td>
+				<td><input type="text" name="tab1_length" required hname="제목길이" option="number" value="<?=$ds_rows['tab1']['length']?>" size="4" maxlength="2" class="simpleform tac" /></td>
+				<td><input type="text" name="tab2_length" required hname="제목길이" option="number" value="<?=$ds_rows['tab2']['length']?>" size="4" maxlength="2" class="simpleform tac" /></td>
+				<td><input type="text" name="tab3_length" required hname="제목길이" option="number" value="<?=$ds_rows['tab3']['length']?>" size="4" maxlength="2" class="simpleform tac" /></td>
+			</tr>
+			<!--<tr>
+				<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif"> 게시물간 상하여백</td>
+				<td><input type="text" name="tab1_margin" required hname="상하여백" option="number" class="simpleform" /></td>
+				<td><input type="text" name="tab2_margin" required hname="상하여백" option="number" class="simpleform" /></td>
+				<td><input type="text" name="tab3_margin" required hname="상하여백" option="number" class="simpleform" /></td>
+			</tr>-->
+			<tr>
+				<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif"> 타이틀 글자색</td>
+				<td>
+					비활성 : <?=color_picker('tab1_text_offcolor', $ds_rows['tab1']['text_offcolor'])?><br />
+					활성화 : <?=color_picker('tab1_text_oncolor', $ds_rows['tab1']['text_oncolor'])?>
+				</td>
+				<td>
+					비활성 : <?=color_picker('tab2_text_offcolor', $ds_rows['tab2']['text_offcolor'])?><br />
+					활성화 : <?=color_picker('tab2_text_oncolor', $ds_rows['tab2']['text_oncolor'])?>
+				</td>
+				<td>
+					비활성 : <?=color_picker('tab3_text_offcolor', $ds_rows['tab3']['text_offcolor'])?><br />
+					활성화 : <?=color_picker('tab3_text_oncolor', $ds_rows['tab3']['text_oncolor'])?>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif"> 타이틀 배경색</td>
+				<td>
+					비활성 : <?=color_picker('tab1_bg_offcolor', $ds_rows['tab1']['bg_offcolor'])?><br />
+					활성화 : <?=color_picker('tab1_bg_oncolor', $ds_rows['tab1']['bg_oncolor'])?>
+				</td>
+				<td>
+					비활성 : <?=color_picker('tab2_bg_offcolor', $ds_rows['tab2']['bg_offcolor'])?><br />
+					활성화 : <?=color_picker('tab2_bg_oncolor', $ds_rows['tab2']['bg_oncolor'])?>
+				</td>
+				<td>
+					비활성 : <?=color_picker('tab3_bg_offcolor', $ds_rows['tab3']['bg_offcolor'])?><br />
+					활성화 : <?=color_picker('tab3_bg_oncolor', $ds_rows['tab3']['bg_oncolor'])?>
+				</td>
+			</tr>
+			</tbody>
+			</table>
+			<br />
+
+			<div id="sub_title">갤러리형 게시물 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<col width="120" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 연결게시판</td>
+				<td>
+					<select id="gallery_board" name="gallery_board">
+					<?=$board_options?>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 타이틀업로드</td>
+				<td>
+					<?php
+					$attach = new attachment('gallery_title');
+					?>
+					<span><input type="file" name="_attach_" onChange="gallery_title.post(this)" /></span>
+					<span id="tip">( 제한크기 : 최대 <b style="letter-spacing:0"><?=$attach->configs['limit_size']?></b> )</span>
+					<input type="hidden" id="on_gallery_title" name="on_gallery_title" />
+					<input type="hidden" face="attach" name="mode" value="post_attach" disabled />
+					<input type="hidden" face="attach" name="kind" value="gallery_title" disabled />
+					<input type="hidden" face="attach" name="handler" value="gallery_title.draw" disabled />
+				</td>
+			</tr>
+			</table>
+			<div id="gallery_title_preview" class="preview">
+			<?php
+			echo $attach->preview($ds_rows['gallery_title'], array(
+				'image' => '<img src="{:folder:}{:name:}" align="absmiddle" />'
+			));
+			?>
+			</div>
+
+		</form>
+	</div>
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script style="text/javascript">
+	color_picker.initialize('color_frame');
+
+	// 갤러리형 게시판 설정
+	var gallery_title = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_gallery_title').value = name;
+				$('gallery_title_preview').update('<img src="'+ domain + folder + name +'" align="absmiddle" />');
+			}
+		}
+	}
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_design', kind: 'main_board'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			$('on_gallery_title').value = '';
+			alert('저장되었습니다.');
+		}
+	}
+
+	// initialize
+	var boards = ['<?=$ds_rows['tab1']['board']?>', '<?=$ds_rows['tab2']['board']?>', '<?=$ds_rows['tab3']['board']?>', '<?=$ds_rows['gallery_board']?>'];
+	$w('tab1_board tab2_board tab3_board gallery_board').each(function(item, index) {
+		if(boards[index]) $(item).value = boards[index];
+	});
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

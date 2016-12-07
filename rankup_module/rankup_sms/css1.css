@@ -1,0 +1,24 @@
+A:active {
+	COLOR: #000000; TEXT-DECORATION: none
+}
+A:hover {
+	COLOR: #0d9eff; TEXT-DECORATION: none
+}
+A:link {
+	COLOR: #000000; TEXT-DECORATION: none
+}
+A:visited {
+	COLOR: #000000; TEXT-DECORATION: none
+}
+TD {
+	FONT-SIZE: 12px
+}
+.phonemsgbox {
+	BORDER-TOP: 0px; FONT-SIZE: 9pt; BACKGROUND: none transparent scroll repeat 0% 0%; OVERFLOW: hidden; WIDTH: 100px; BORDER-BOTTOM: 0px; FONT-FAMILY: µ¸¿òÃ¼; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; HEIGHT: 84px
+}
+.phonemsglen {
+	BORDER-TOP: 0px; FONT-SIZE: 9pt; BACKGROUND: none transparent scroll repeat 0% 0%; OVERFLOW: hidden; BORDER-BOTTOM: 0px; FONT-FAMILY: µ¸¿òÃ¼; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none
+}
+.smsmsgbox {
+	BORDER-TOP: 0px; FONT-SIZE: 9pt; BACKGROUND: none transparent scroll repeat 0% 0%; OVERFLOW: hidden; WIDTH: 100px; CURSOR: hand; BORDER-BOTTOM: 0px; FONT-FAMILY: µ¸¿òÃ¼; BORDER-RIGHT-STYLE: none; BORDER-LEFT-STYLE: none; HEIGHT: 70px
+}

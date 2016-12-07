@@ -1,0 +1,373 @@
+<?php
+if($rankup_control->check_resource($rankup_post_extend->service_configs['map_api_key'])) {
+	foreach($rankup_post_extend->service_configs['map_api_key'] as $mapkey_infos) {
+		$mapkey_items .= "<li class='attachNormalItem'><div>디렉토리 : $mapkey_infos[mapurl]</div><div>지도키 : $mapkey_infos[mapkey]</div></li>";
+	}
+}
+$domain_infos = parse_url($config_info['domain']);
+$map_directory = str_replace("www.", "", $domain_infos['host'].$domain_infos['path']);
+?>
+<body>
+<script type="text/javascript">
+<!--
+// 랭크업 서비스 클래스
+var RANKUP_SERVICE = function() {
+	this.designMode = 2;
+	this.baseDesign = 1;
+	this.picker_items = new Array("menu_bg_color", "menu_item_color");
+	this.picker = null;
+	this.target = null;
+	this.preview = null;
+	this.sColor = '';
+	this.sRGB = '';
+	this.selectAttach = null;
+	this.selectKey = null;
+}
+// 등록 및 수정시 리스트 블럭킹
+RANKUP_SERVICE.prototype.screen_blind = function(mode) {
+	var blind = $('screenBlindDiv');
+	if(mode===true) {
+		var _height = parseInt(document.body.clientHeight,10);
+		if(parseInt(document.body.scrollHeight,10)>_height) _height = parseInt(document.body.scrollHeight,10);
+		blind.style.height = _height + "px";
+		blind.style.marginTop = "-" + parseInt(document.body.scrollTop,10) + "px";
+		this.change_display("screenBlindDiv", true);
+
+		// SELECT 객체 숨기기
+		this.sb_selects = document.getElementsByTagName("select");
+		for(var i=0; i<this.sb_selects.length; i++) this.sb_selects[i].style.visibility = "hidden";
+	}
+	else {
+		this.change_display("screenBlindDiv", false);
+		if(this.sb_selects!=null) for(var i=0; i<this.sb_selects.length; i++) this.sb_selects[i].style.visibility = "visible";
+	}
+}
+// 레이어 토글
+RANKUP_SERVICE.prototype.change_display = function(el, val) {
+	if(val===true||val===false) {
+		var obj = $(el);
+		obj.style.display = val ? "block" : "none";
+		if(val===false) {
+			if(el!=="screenBlindDiv") this.screen_blind(false);
+			return false;
+		}
+		// 페이지 중앙에 띄우기
+		obj.style.top = (obj.offsetHeight>document.body.clientHeight) ? document.body.scrollTop : document.body.scrollTop+(document.body.clientHeight-obj.offsetHeight)/2 + "px";
+		obj.style.left = (obj.offsetWidth>document.body.clientWidth) ? document.body.scrollLeft : document.body.scrollLeft+(document.body.clientWidth-obj.offsetWidth)/2 + "px";
+		if(el!=="screenBlindDiv") this.screen_blind(true);
+	}
+	else {
+		var _val = $(el).style.display;
+		$(el).style.display = (_val=="none") ? "block" : "none";
+		this.screen_blind(false);
+	}
+}
+// 지도키 관리기
+RANKUP_SERVICE.prototype.open_mapkey_manager = function() {
+	this.change_display('mapkeyManagerTable', true);
+	var form = document.mapkeyManagerFrm;
+	if(this.selectKey!=null) {
+		this.selectKey.removeAttribute("selected");
+		this.selectKey.className = "attachNormalItem";
+		this.selectKey = null;
+	}
+	form.reset();
+}
+// 지도키 선택 - 수정/삭제시
+RANKUP_SERVICE.prototype.select_mapkey = function(event) {
+	var el = event.type=="click" ? Event.element(event) : event;
+	while(el.tagName.indexOf("LI")==-1) el = el.parentNode;
+	if(el===rankup_service.selectKey) return false;
+	if(rankup_service.selectKey!=null) {
+		rankup_service.selectKey.removeAttribute("selected");
+		rankup_service.selectKey.className = "attachNormalItem";
+	}
+	var items = el.getElementsByTagName('div');
+	var form = document.mapkeyManagerFrm;
+	var select_row = 0;
+	$$('#mapkey_item_box li').each(function(item) {
+		if(item===el) form.key.value = select_row;
+		select_row++;
+	});
+	form.mapurl.value = items[0].firstChild.nodeValue.replace(/디렉토리 : /, '');
+	form.mapkey.value = items[1].firstChild.nodeValue.replace(/지도키 : /, '');
+	el.className = "attachSelectItem";
+	el.setAttribute("selected", "selected");
+	rankup_service.selectKey = el;
+}
+// 지도키등록처리
+RANKUP_SERVICE.prototype.apply_mapkey = function() {
+	var form = document.mapkeyManagerFrm;
+	var new_mapkey = document.createElement('li');
+	new_mapkey.innerHTML = "<div>디렉토리 : "+form.mapurl.value+"</div><div>지도키 : "+form.mapkey.value+"</div>";
+	if(form.key.value=="null") $('mapkey_item_box').appendChild(new_mapkey);
+	else rankup_service.selectKey.replaceNode(new_mapkey);
+	form.reset();
+}
+// 지도키삭제
+RANKUP_SERVICE.prototype.delete_mapkey = function() {
+	var form = document.mapkeyManagerFrm;
+	if(form.key.value=="null") {
+		alert("삭제하실 지도키를 선택하여 주십시오."+SPACE);
+		return false;
+	}
+	if(!confirm("선택하신 지도키를 삭제하시겠습니까?"+SPACE)) return false;
+	var url = "<?php echo $base_url;?>rankup_module/rankup_post/multiProcess.ajax.html?mode=delete_mapkey&key="+form.key.value;
+	var myRequest = new Ajax.Request(url, {
+		method: 'get',
+		onSuccess: function(transport) {
+			var resultData = transport.responseXML.getElementsByTagName('resultData')[0];
+			eval(resultData.firstChild.nodeValue);
+		},
+		onComplete: function() {myRequest=null}
+	});
+}
+// 아이템 마우스오버/아웃시
+RANKUP_SERVICE.prototype.toggle_className2 = function(event) {
+	this.className = event.type!="mouseover" ? this.getAttribute("selected")!=null ? "attachSelectItem" : "attachNormalItem" : this.getAttribute("selected")!=null ? "attachSHoverItem" : "attachHoverItem";
+}
+// 지도키 아이템에 이벤트 할당
+RANKUP_SERVICE.prototype.append_event = function() {
+	var classObj = this;
+	$$('#mapkey_item_box li').each(function(item) {
+		Event.stop
+		Event.observe(item, 'mouseover', classObj.toggle_className2);
+		Event.observe(item, 'mouseout', classObj.toggle_className2);
+		Event.observe(item, 'click', classObj.select_mapkey);
+	});
+}
+// 사이트디자인 클래스 변수 생성
+var rankup_service = new RANKUP_SERVICE;
+//-->
+</script>
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+<!-- 지도키 관리 -->
+<table id="mapkeyManagerTable" style="position:absolute;left:0px;display:none" width="100%" cellpadding="5" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:500px;border:#acacac 1px solid;padding:10px;text-align:left;background-color:white;">
+		<img src="<?php echo $base_url;?>rankup_module/images/icon03.gif"><span class="sub_title">네이버 지도키 관리</span>
+		<table width="100%" cellpadding="5" cellspacing="1" border="0" bgcolor="#dedede" style="margin-top:4px;">
+		<tbody bgcolor="white">
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="0">
+				<form name="mapkeyManagerFrm" action="<?php echo $base_url;?>rankup_module/rankup_post/multiProcess.ajax.html" target="multiProcessFrame" method="POST" onSubmit="return validate(this)">
+				<input type="hidden" name="mode" value="set_mapkey">
+				<input type="hidden" name="key" value="null">
+				<tr>
+					<td width="70"><img src="<?php echo $base_url;?>rankup_module/images/icon01.gif"> <b>디렉토리</b></td>
+					<td><input type="text" name="mapurl" required hname="디렉토리" value="<? echo $map_directory ?>" tabindex="1" class="simpleform" style="width:100%" maxlength="40"></td>
+					<td width="65" rowspan="2" align="right" valign="bottom"><input  type="image" value=""  src="<?php echo $base_url;?>rankup_module/rankup_post/img/btn_mapkey_save.gif"  tabindex="3"></td>
+				</tr>
+				<tr>
+					<td><img src="<?php echo $base_url;?>rankup_module/images/icon01.gif"> <b>지도키</b></td>
+					<td><input type="text" name="mapkey" required hname="지도키" tabindex="2" class="simpleform" style="width:100%" maxlength="40"></td>
+				</tr>
+				</form>
+				</table>
+			</td>
+		</tr>
+		<tr height="200">
+			<td style="padding:0px" valign="top">
+				<div id="mapkey_item_box">
+				<? echo $mapkey_items ?>
+				</div>
+				<script type="text/javascript"> rankup_service.append_event() </script>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td>
+						<img src="<?php echo $base_url;?>rankup_module/rankup_post/img/bt_choose_del.gif" style="cursor:pointer;" onClick="rankup_service.delete_mapkey()" align="absmiddle">
+					</td>
+					<td align="right" width="250">
+						<a href="http://openapi.naver.com/register.nhn" target="_blank"><img src="<?php echo $base_url;?>rankup_module/rankup_post/img/btn_naverkey.gif" border="0" align="absmiddle" alt="네이버키값 발급받기"></a>
+						<img src="<?php echo $base_url;?>rankup_module/rankup_post/img/bt_close_s.gif" style="cursor:pointer;" onClick="rankup_service.change_display('mapkeyManagerTable', false)" align="absmiddle">
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		</div>
+	</td>
+</tr>
+</table>
+<!-- 지도키 관리 -->
+<form name="registFrm" method="POST" target="multiProcessFrame" action="<?php echo $base_url;?>rankup_module/rankup_post/multiProcess.ajax.html" onSubmit="return (validate(this)&&confirm('변경하신 사항을 저장하시겠습니까?'+SPACE))" style="margin:0px;">
+<input type="hidden" name="mode" value="set_service_configs">
+<table width="750" border="0" cellpadding="5" cellspacing="1" align="center" bgColor="#dddddd">
+<tr bgColor="#ffffff">
+	<th width="150" bgColor="#fffeee">네이버 지도 API</th>
+	<td align="left">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed;">
+		<tr valign="top">
+			<td colspan="2">
+				<input type="radio" name="map_api_use" checked value="yes" id="map_api_use_yes"><label for="map_api_use_yes">사용함</label>
+				<input type="radio" name="map_api_use"<? if($rankup_post_extend->service_configs['map_api_use']=="no") echo " checked" ?> value="no" id="map_api_use_no"><label for="map_api_use_no">사용안함</label>
+				<a onclick="rankup_service.open_mapkey_manager()" onFocus="blur()"><img src="<?php echo $base_url;?>rankup_module/rankup_post/img/btn_mapkey_manager.gif" align="absmiddle"></a>
+				<div id="tip" style="margin:10px 0px 5px 5px">+ 네이버 지도를 사용하시려면 지도키를 등록하셔야 합니다.</div>
+			</td>
+			<td width="50" align="right"><a onClick="help_map_api.style.display=help_map_api.style.display=='none' ? 'block' : 'none';"><img src="<?php echo $base_url;?>rankup_module/images/icon_help.gif" border="0" align="absmiddle" alt="도움말"></a></td>
+		</tr>
+		<tr>
+			<td colspan="3">
+				<input type="radio" name="map_api_view" checked value="yes" id="map_api_view_yes"><label for="map_api_view_yes">출력함</label>
+				<input type="radio" name="map_api_view"<? if($rankup_post_extend->service_configs['map_api_view']=="no") echo " checked" ?> value="no" id="map_api_view_no"><label for="map_api_view_no">출력안함</label>
+				<span id="tip">+ 광고정보 상세페이지에 출력할지 여부</span>
+			</td>
+		</tr>
+
+		<tr id="help_map_api" style="display:none">
+			<td colspan="3">
+				<table width="100%" cellspacing="0" cellpadding="0" border="0" style="margin-top:6px;">
+				<tr>
+					<td  style="padding:19px;border:#dedede 1px solid;background-color:#f7f7f7;line-height:2;">
+						<img src="<?php echo $base_url;?>rankup_module/rankup_post/img/employ_detail_naver_capture.gif" style="border:solid 1px #ebebeb;margin-bottom:20px;"><br>
+						지도API는 웹사이트에 지도를 표시할 수 있도록 네이버에서 제공하는 무료서비스입니다.
+						생활정보 광고 위치가 표시될 수 있도록 프로그램 되어 있으며, 이
+						를 활성화하기 위해서는 네이버에서 지도키값을 발급받아 솔루션에 등록해 주셔야 합니다. 다음의
+						안내1)을 참고하시면서 설정하시기 바랍니다.<br><br>
+
+						<font color="#ff6600"><b>안내1)</b></font><span id="tip">+ 실제서비스 페이지와 안내사항이 다를 수도 있습니다.</span><br>
+						1. 아래 '네이버키값 발급받기' 버튼 클릭하여 열리는 사이트에서 <b style="color:#ff6600">지도키발급</b> 탭을 클릭하여 지도키발급 페이지로 전환합니다.<br>
+						2. 다음으로 디렉토리 지정란에 <font color="#0099FF"><b><? echo $map_directory ?></b></font> 값을 입력하고 <b style="color:#ff6600">지도key추가</b> 버튼을 클릭하여 지도키를 추가합니다.<br>
+						3. 발급받은 키값을 복사하여 <a onclick="rankup_service.open_mapkey_manager()" onFocus="blur()"><img src="<?php echo $base_url;?>rankup_module/rankup_post/img/btn_mapkey_manager.gif" align="absmiddle"></a><span id="tip" style="margin:0px">◀Click</span> 툴에 추가합니다.<br><br>
+
+						<font color="#ff6600"><b>안내2)</b></font><br>
+						네이버지도 API의 경우 <b><u>일일 100,000 페이지</u></b> 요청까지 지원하고 있으며 초과시 서비스가 중단될 수도 있습니다. 일일 제한량을 초과하는 활용을 위해서는 <a href="http://dev.naver.com/openapi/cooperation" target="_blank"><b style="color:#0099FF">네이버 오픈API 제휴</b></a> 페이지를 통해 제휴신청을 하시기 바랍니다.<br><br>
+
+						<font color="#ff6600"><b>안내3)</b></font><br>
+						네이버에서 지도 API의 서비스환경을 변경할 경우 지도 이용에 불편이 생길 수 있습니다.<br>
+						네이버지도 이용에 문제가 발생했을 경우 랭크업 기술지원센터에 문의해주세요.<br><br>
+
+						<div style="float:right"><a href="http://openapi.naver.com/register.nhn" target="_blank"><img src="<?php echo $base_url;?>rankup_module/rankup_post/img/btn_naverkey.gif" border="0" align="absmiddle" alt="네이버키값 발급받기"></a></div>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr bgcolor="#ffffff">
+		<td height="50" ><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;지도검색</td>
+		<td>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<input type="radio" name="use_map" checked value="yes" id="use_map_yes"><label for="use_map_yes">사용함</label>
+						<input type="radio" name="use_map"<? if($service_configs['use_map']=='no') echo ' checked' ?> value="no" id="use_map_no"><label for="use_map_no">사용안함</label> &nbsp; &nbsp;
+						로딩시 초기지역 설정 :
+						<select name="map_start_area" >
+						<?php
+							$start_area = explode("_",$rankup_post_extend->service_configs['map_start_area']);
+							$area1_sel = "select * from R_life_classification where view='yes' and code='area' and depth ='1' order by rank asc";
+							$area1_result = mysql_query($area1_sel);
+							for($i=0; $i<$area1_Row = mysql_fetch_Array($area1_result); $i++){?>
+							<?
+							if($start_area[1] ==$area1_Row[subject])
+								echo "<option value='".$area1_Row[pno_series].$area1_Row[no]."_".$area1_Row[subject]."' selected>".$area1_Row[subject]."</option>";
+							else echo "<option value='".$area1_Row[pno_series].$area1_Row[no]."_".$area1_Row[subject]."'>".$area1_Row[subject]."</option>";
+							?>
+							<?php }?>
+
+						</select>
+						&nbsp;
+
+						로딩시 카테고리 설정 :
+						<select name="map_start_cate" >
+						<option value=""> 모집 분류 </option>
+						<option value="sell">부동산</option>
+						<option value="job">구인구직</option>
+						<option value="alba">아르바이트</option>
+						<option value="goods">생활정보</option>
+						<option value="servies">지역정보 </option>
+						</select>
+
+					</td>
+					<td ><a onClick="$('map_help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></td>
+				</tr>
+					<tr id="map_help" style="display:none">
+						<td colspan="2">
+							<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin:5px 0px">
+							<tr>
+								<td class="help_bg">
+									<img src="../../Libs/_images/ic_arrow2.gif" vspace="5" align="absmiddle">지도검색을 사용하지 않으려면 '사용안함' 으로 설정하시기 바랍니다.<br>
+									<img src="../../Libs/_images/ic_arrow2.gif" vspace="5" align="absmiddle">아래의 네이버지도API를 사용함으로 체크하여야하며 네이버에 지도키 세팅이 필요합니다.
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+
+				</table>
+			</td>
+		</tr>
+</table>
+
+<?PHP
+	include_once "../../Libs/_php/rankup_sns.class.php";
+	$rankup_sns = new rankup_sns;
+	$sns_settings = $rankup_sns->sns_settings;
+?>
+	<table width="750" cellpadding="7" cellspacing="0" border="0" bordercolor="dddddd" bgcolor="#ffffff" style="border-collapse:collapse;">
+		<form name="registFrm" method="POST" target="multiProcessFrame" action="./multiProcess.ajax.html" onSubmit="return (validate(this)&&confirm('변경하신 사항을 저장하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="set_sns_settings">
+		<tr>
+			<td>
+				<script type="text/javascript" src="./rankup_watermark.js"></script>
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td><img src="./img/ic_bullet1.gif"><strong class="sub_title">SNS 설정하기</strong></td>
+				</tr>
+				<tr>
+					<td style="padding-top:5px">
+						<table id="watermark_frame" width="100%" cellpadding="5" cellspacing="1" bgcolor="#dedede">
+						<tbody bgcolor="white">
+						<tr>
+							<td width="120" bgcolor="#f7f7f7">사용여부</td>
+							<td height="35">
+								<input type="radio" name="use_sns" value="yes" checked id="use_sns_yes"><label for="use_sns_yes">사용함</label>
+								<input type="radio" name="use_sns" value="no"<? if($sns_settings['use_sns']=="no") echo " checked" ?> id="use_sns_no"><label for="use_sns_no">사용안함</label>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7" class="fvls0">구글 bit.ly 사용자</td>
+							<td>
+								<input type="text" size="15" name="bitly_name" value="<?=$sns_settings['bitly_name']?>" hname="사용자 이름" option="userid" class="simpleform">
+								<span id="tip">+ 구글 <span class="fvls0">bit.ly</span> 회원가입시 입력한 <span class="fvls0">username</span> 값입니다.</span><br>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7" class="fvls0">구글 bit.ly API key</td>
+							<td height="35">
+								<input type="text" name="bitly_apikey" value="<?=$sns_settings['bitly_apikey']?>" size="60" hname="apikey" class="simpleform">
+								<div id="tip" style="margin:5px 0 0 0;">+ 구글 <span class="fvls0">bit.ly</span> 회원가입후 <span class="fvls0">settings</span> 정보에서 확인이 가능합니다.</div>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7" class="fvls0">SNS 버튼 출력</td>
+							<td height="35">
+								<?=$rankup_sns->sns_use_setting($sns_settings['use_sns_type']);?><br/>
+								<div id="tip" style="margin:5px 0 0 0">+ 사용하실 SNS 서비스를 선택하시기 바랍니다.</div>
+							</td>
+						</tr>
+						</tbody>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+
+<table width="750" border="0" cellpadding="5" cellspacing="1" align="center">
+<tr align="center">
+	<td><input type="image" src="<?php echo $base_url;?>rankup_module/rankup_post/img/bt_save.gif" align="absmiddle"></td>
+</tr>
+</table>
+</form>

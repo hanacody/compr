@@ -1,0 +1,48 @@
+<?php
+/**
+ * 회원가입 - 실명인증
+ *@note: 3 단계
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+
+if($config_info['membership_use']=='no' || $rankup_member->is_member()) {
+	scripts('location.replace("'.$base_url.'main/index.html")');
+	exit;
+}
+
+// 페이지 제너레이터 - 필수
+include_once '../../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../../include/top.html';
+
+// 실명인증
+include_once '../rankup_authentic/rankup_authentic.class.php';
+$auth = new authentic('join');
+
+// join step
+include_once 'join_step.inc.php';
+?>
+
+<div style="width:900px;margin:0 auto">
+	<?php
+	// 실명인증 폼 로드
+	include_once '../rankup_authentic/'.PIN_MODULE.'/verify_join.inc.php';
+	?>
+</div>
+
+<?php
+include_once '../../include/bottom.html';
+
+// 가입된 정보가 있는지 확인
+if($auth->infos['di_code']) {
+	if($rankup_member->check_di_code($auth->infos['di_code'])) {
+		scripts('blind.draw(); alert("죄송합니다. 회원님은 이미 가입된 상태입니다.\n\n아이디/비밀번호 찾기를 이용해 주시기 바랍니다."); location.replace("find_login_info.html");');
+		exit;
+	}
+}
+?>

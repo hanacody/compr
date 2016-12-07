@@ -1,0 +1,116 @@
+<?php
+/**
+ * 실명인증설정
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './rankup_authentic.class.php';
+$auth = new rankup_authentic;
+
+// 데모용 처리 - 2012.04.17 added
+if(rankup_basic::is_demo()) {
+	$auth->configs = array_merge($auth->configs, array(
+		'jumin_id1' => '******',
+		'jumin_id2' => '******',
+		'ipin_id' => '******',
+		'ipin_sikey' => '************',
+		'ipin_keystr' => '********************************************************************************'
+	));
+	$save_btn_event = "alert('데모버전에서는 저장하실 수 없습니다.')";
+}
+else {
+	$save_btn_event = "\$form.submit(this, 'save_form', '입력하신 사항을 저장하시겠습니까?')";
+}
+
+include_once '../rankup_member/top_menu.inc.php';
+?>
+<style type="text/css">
+.w100 { width: 100%; }
+</style>
+
+<center>
+<div style="width:760px;margin-top:30px;text-align:left;">
+
+	<form id="save_form" name="save_form" onSubmit="return false">
+		<div style="position:relative">
+			<div id="sub_title">실명인증</div>
+			<div style="position:absolute;top:0;right:0"><a href="http://rankup.co.kr/etc/real.html" target="_blank"><img src="../../Libs/_images/btn_help.gif" /></a></div>
+		</div>
+		<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="margin-top:3px">
+		<col width="150" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 사용여부</td>
+			<td>
+				<input type="radio" name="use_jumin" checked value="yes" id="use_jumin_yes"><label for="use_jumin_yes">사용함</label>
+				<input type="radio" name="use_jumin"<? if($auth->configs['use_jumin']=='no') echo ' checked' ?> value="no" id="use_jumin_no"><label for="use_jumin_no">사용안함</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 회원사 ID <span class="tip">(내국인)</span></td>
+			<td>
+				<input type="text" name="jumin_id1" value="<?=$auth->configs['jumin_id1']?>" class="simpleform" />
+				<span id="tip">+ 주민등록번호 인증시 사용되는 회원사 아이디 입니다.</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 회원사 ID <span class="tip">(국내외국인)</span></td>
+			<td>
+				<input type="text" name="jumin_id2" value="<?=$auth->configs['jumin_id2']?>" class="simpleform" />
+				<span id="tip">+ 외국인등록번호 인증시 사용되는 회원사 아이디 입니다. <font color="#ff6600">(아이디가 없으면 비워 두세요)</font></span>
+			</td>
+		</tr>
+		</table>
+		<br />
+		<br />
+
+
+		<div id="sub_title">아이핀(I-Pin)인증</div>
+		<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="margin-top:3px">
+		<col width="150" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 사용여부</td>
+			<td>
+				<input type="radio" name="use_ipin" checked value="yes" id="use_ipin_yes"><label for="use_ipin_yes">사용함</label>
+				<input type="radio" name="use_ipin"<? if($auth->configs['use_ipin']=='no') echo ' checked' ?> value="no" id="use_ipin_no"><label for="use_ipin_no">사용안함</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 회원사 ID</td>
+			<td><input type="text" name="ipin_id" value="<?=$auth->configs['ipin_id']?>" class="simpleform" /></td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 사이트식별정보</td>
+			<td><input type="text" name="ipin_sikey" value="<?=$auth->configs['ipin_sikey']?>" class="simpleform" /></td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 키스트링</td>
+			<td><input type="text" name="ipin_keystr" value="<?=$auth->configs['ipin_keystr']?>" size="90" class="simpleform" /></td>
+		</tr>
+		</table>
+
+	</form>
+
+	<div style="margin-top: 10px;text-align:center;">
+		<a onClick="<?=$save_btn_event?>"><img src="../../Libs/_images/btn_save1.gif" alt="저장하기" align="absmiddle" /></a>
+	</div>
+
+</div>
+</center>
+
+<script type="text/javascript">
+// $form submit setting
+$form.debug = false;
+$form.hashes = {mode: 'set_configs'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+</script>
+
+</body>
+</html>

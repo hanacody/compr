@@ -1,0 +1,259 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "./rankup_sms_config.class.php";
+$rankup_control->check_admin();
+
+$rankup_sms_config = new rankup_sms_config();
+
+$merge_list = $rankup_sms_config->print_sms_merge();
+$setting_list = $rankup_sms_config->print_sms_setting();
+
+$rankup_control->print_admin_head("SMS연동/환경설정");
+?>
+<body>
+<script type="text/javascript" src="./rankup_ajax.class.js"></script>
+<script type="text/javascript" src="./rankup_util.class.js"></script>
+<script type="text/javascript">
+<!--
+var client_id_value = "<?= $rankup_sms_config->info['client_id'];?>";
+var client_pw_value = "<?= $rankup_sms_config->info['client_pw'];?>";
+var send_config = function() {
+	var use_sms = get_val("use_sms");
+	var client_id = client_id_value;
+	var client_pw = client_pw_value;
+	var callback = get_val("callback");
+	var sleeping_mode = get_val("sleeping_mode");
+	var send_sms = get_val("send_sms");
+	var send_call = get_val("send_call");
+	var send_authentic = get_val("send_authentic");
+	var sleeping_mode_time = '';
+	if(sleeping_mode=="yes") {
+		var sleeping_mode_start = get_val("sleeping_mode_start");
+		var sleeping_mode_end = get_val("sleeping_mode_end");
+		if(sleeping_mode_start && sleeping_mode_end) sleeping_mode_time = sleeping_mode_start + "-" + sleeping_mode_end;
+	}
+	var send_call_obj = document.getElementsByName('send_call')[0];
+	if(send_sms=="yes") send_call_obj.setAttribute("REQUIRED", "REQUIRED");
+	else send_call_obj.removeAttribute("REQUIRED");
+	if(!validate(document.settingFrm)) return void(0);
+
+	try {
+		new net.content_loader("./regist.php", "type=config&use_sms="+use_sms + "&client_id="+client_id+"&client_pw="+client_pw+"&callback="+callback+"&sleeping_mode="+sleeping_mode+"&sleeping_mode_time="+sleeping_mode_time+"&send_sms="+send_sms+"&send_call="+send_call+"&send_authentic="+send_authentic);
+		client_id_value = client_id;
+		client_pw_value = client_pw;
+		make_info_from_rankup(); //프레임을 다시 리로드
+	}
+	catch(e) {
+		alert(e.message);
+	}
+}
+// 메시지를 입력한후 해당 내용을 디비에 저장
+var set_message = function(name) {
+	var obj = document.forms['regist'].elements[name];
+	var obj2_name = name+"_txt";
+	var obj2 = document.getElementById(obj2_name);
+	var use = (obj.checked==true) ? "yes" : "no";
+	try {
+		new net.content_loader("./regist.php", "type=message&name="+name+"&use="+use+"&message="+obj2.value);
+	}
+	catch(e) {
+		alert(e.message);
+	}
+}
+// 값 추출
+var get_val = function(name) {
+	switch(name) {
+		case "use_sms": case "sleeping_mode":
+			var result = check_radio(name);
+			break;
+		case "sleeping_mode_start":
+		case "sleeping_mode_end":
+			var result = check_select(name);
+			break;
+		case "send_sms":
+			var result = check_radio(name);
+			break;
+		case "send_authentic":
+			var result = check_radio(name);
+			break;
+		default:
+			var result = document.getElementsByName(name)[0].value;
+	}
+	return result;
+}
+// 라디오 체크값 리턴
+var check_radio = function(name) {
+	var obj = document.getElementsByName(name);
+	for(var i = 0; i<obj.length;i++) if(obj[i].checked==true) return obj[i].value;
+	return '';
+}
+// 셀렉트박스 선택값 리턴
+var check_select = function(name) {
+	var obj= document.getElementsByName(name)[0];
+	return obj.options[obj.options.selectedIndex].value;
+}
+// 잔여건수 조회
+var make_info_from_rankup = function() {
+	var client_id = encodeURI(client_id_value);
+	var client_pw = encodeURI(client_pw_value);
+	var domain = encodeURI('<?= $_SERVER['HTTP_HOST'];?>');
+	var page = encodeURI('<?= $_SERVER['PHP_SELF'];?>');
+	var url = '<?= $rankup_sms_config->iframe_domain;?>';
+	var frm_obj = document.getElementById("make_form");
+	var frm = "<form name='send_rankup' action = "+url+" method=post target = 'iframe_reply'>";
+	frm += "<input type='hidden' name = client_id value= '"+client_id+"'>";
+	frm += "<input type='hidden' name = client_pw value = '"+client_pw+"'>";
+	frm += "<input type='hidden' name = domain value = '"+domain+"'>";
+	frm += "<input type='hidden' name = page value = '"+page+"'>";
+	frm += "<input type='hidden' name = from value = user>";
+	frm += "</form>";
+	frm_obj.innerHTML = frm;
+	document.forms['send_rankup'].submit();
+}
+// 새창을 띄우기
+var win_open = function(url, x, y, left, top) {
+	//새창의 크기
+	var cw = x;
+	var ch = y;
+	//스크린의 크기
+	var sw = screen.availWidth;
+	var sh = screen.availHeight;
+	//열 창의 포지션
+	var px = !left ? (sw-cw)/2 : Number(left)+20;
+	var py = !top ? (sh-ch)/2 : Number(top)+20;
+	return window.open(url, "win_pop", "left="+px+",top="+py+",width="+cw+",height="+ch+",toolbar=no,menubar=no,status=no,scrollbars=yes,resizable=no");
+}
+// 이용방법 보기
+var show_manual = function() {
+	var modal = win_open("./show_manual.html", 657, 630);
+	modal.focus();
+}
+window.onload = make_info_from_rankup;
+//-->
+</script>
+<style type="text/css">
+.iframe_reply { width:265px; height:20px; border:0px; }
+#tip { margin-left:6px;color:#3399FF;font-size:8pt;font-family:dotum;letter-spacing:-1px; }
+</style>
+<div class="bar"><script> titleBar("SMS연동/환경설정", 270) </script></div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<div id="make_form" style="font-size:0px"></div>
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr><td height="25"><div id="sub_title">랭크업SMS연동</div> <a onClick="show_manual();"><img src="./img/btn_useguide.gif"  align="absmiddle" alt="이용방법안내"></a></td></tr>
+			<form name="settingFrm">
+			<tr>
+				<td>
+					<table id="sms" width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+					<tr>
+						<td width="130" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;SMS 사용여부</td>
+						<td>
+							<input type="radio" name="use_sms" value="no" <?if($rankup_sms_config->info["use_sms"]=="no") echo "checked"?> id="use_sms_id1"><label for="use_sms_id1">사용안함</label>
+							<input type="radio" name="use_sms" value="yes" <?if($rankup_sms_config->info['use_sms']=="yes") echo "checked"?> id="use_sms_id2"><label for="use_sms_id2">사용함</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;SMS 상점 아이디</td>
+						<td><input type='text' class='simpleform' name="client_id" required hname="상점 아이디" id="client_id" value="<?= $rankup_sms_config->info['client_id'];?>" onChange="client_id_value=this.value;"><span id="tip">+ 랭크업SMS에서 발급받은 상점ID를 입력해주십시오.</span></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;SMS 상점 비밀번호</td>
+						<td><input name='client_pw' type='password' class='simpleform' id="client_pw" required hname="상점 비밀번호" value="<?= $rankup_sms_config->info['client_pw'];?>" onchange="client_pw_value=this.value;"><span id="tip">+ 랭크업SMS에서 설정한 비밀번호를 입력해주십시오.</span></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;조회된 잔여건수 </td>
+						<td><iframe name="iframe_reply" id="iframe_reply" frameborder=0 scrolling=no class="iframe_reply"></iframe><!--a onClick="show_manual()"><img src="./img/sms_bt00.gif" border="0" align="absmiddle"></a--></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;회신전화번호 </td>
+						<td><input type="text" name='callback' required hname="회신 전화번호" class='simpleform' value="<?= $rankup_sms_config->info['callback'];?>" onkeyup="rankup_util.onlyDigit(this);"><span id="tip">+ SMS발송시 회신할 전화번호를 입력해주십시오.</span></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;SMS취침모드</td>
+						<td>
+							<input type='radio' name="sleeping_mode" value="no" onclick="sleep_time.style.display='none';" <?if($rankup_sms_config->info['sleeping_mode']=='no') echo 'checked'?> id="sleeping_mode_id1"><label for="sleeping_mode_id1">사용안함</label>
+							<input type='radio' name= "sleeping_mode" value="yes" onclick="sleep_time.style.display='';" <?if($rankup_sms_config->info['sleeping_mode']=='yes' || $rankup_sms_config->info['sleeping_mode']=='') echo 'checked'?> id="sleeping_mode_id2"><label for="sleeping_mode_id2">사용함</label>
+							<span id="sleep_time" style="margin-left:10px;">
+							<select class='simpleform' name="sleeping_mode_start">
+							<?php
+							foreach(range(0,23) as $hour) {
+								$hour = sprintf("%02d", $hour);
+								$_selected = ($hour==$rankup_sms_config->info['sleeping_mode_start']) ? " selected" : "";
+								echo "<option value='$hour'$_selected>$hour:00</option>";
+							}
+							?>
+							</select> 부터
+							<select class='simpleform' name="sleeping_mode_end">
+							<?php
+							foreach(range(0,23) as $hour) {
+								$hour = sprintf("%02d", $hour);
+								$_selected = ($hour==$rankup_sms_config->info['sleeping_mode_end']) ? " selected" : "";
+								echo "<option value='$hour'$_selected>$hour:00</option>";
+							}
+							?>
+							</select> 까지</span>
+							<div style="margin-top:5px;font-size:1px"></div><span id="tip">+ 취침모드 사용시 해당시간대에는 문자를 발송하지 않고, 취침모드가 지나면 자동으로 발송됩니다. </span>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;관리자통보기능</td>
+						<td>
+							<input type='radio' name= "send_sms" value="no" <?if($rankup_sms_config->info['send_sms']=='no') echo 'checked'?> id="send_sms_id1"><label for="send_sms_id1">사용안함</label>
+							<input type='radio' name= "send_sms" value="yes" <?if($rankup_sms_config->info['send_sms']=='yes' || $rankup_sms_config->info['send_sms']=='') echo 'checked'?> id="send_sms_id2"><label for="send_sms_id2">사용함</label>
+							&nbsp;&nbsp;통보받을 핸드폰번호 <input type="text" name="send_call" class='simpleform' hname="통보받을 핸드폰번호" value="<?= $rankup_sms_config->info['send_call'];?>" onkeyup="rankup_util.onlyDigit(this);">
+							<div style="margin-top:5px;font-size:1px"></div><span id="tip">+ 관리자통보기능을 사용하시면, 고객에게 전달되는 문자와 동일한 문자가 관리자에게도 전송됩니다. </span>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td height="40" align="center"><a onClick="send_config()"><img src='../../Libs/_images/btn_save.gif' alt='저장'></a></td>
+			</tr>
+			</form>
+			<tr><td height="10"></td></tr>
+			<tr><td height="25"><div id="sub_title">SMS메세지 설정</div></td></tr>
+			<tr><td height="6" class="list_top" style="font-size:0">&nbsp;</td></tr>
+			<tr>
+				<td class="help_bg">
+					<table cellpadding="0" cellspacing="5" border="0" width="100%">
+					<tr>
+						<td><img src="../../Libs/_images/ic_arrow2.gif">최대 글자수는 80Byte 입니다. 80Byte초과시 메시지 뒷부분이 삭제되어 발송됩니다.</td>
+					</tr>
+					<tr>
+						<td><img src="../../Libs/_images/ic_arrow2.gif">머지문자(중괄호<b>{}</b> 로 감싸져 있는 문자)를 임의대로 수정할 경우 메시지 전달이 제대로 되지 않을 수 있습니다.</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--
+			<tr><td height="7"></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<?=$merge_list?>
+					</table>
+				</td>
+			</tr>-->
+			<tr><td height="10"></td></tr>
+			<tr>
+				<td align="center">
+					<table cellpadding="0" cellspacing="0" border="0" width="100%">
+					<form name="regist" action="./regist.php" method="POST">
+					<?=$setting_list?>
+					</form>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td height="40" align="center"><a href="./regist.php?type=init"><img src="../../Libs/_images/btn_reset.gif" alt="초기화"></a></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+</body>
+</html>

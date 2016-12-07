@@ -1,0 +1,186 @@
+<?php
+/**
+ * 제품상세보기
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once 'class/product.class.php';
+$product = new product;
+
+$ps_rows = $product->get_settings();
+$rows = $product->get_product($_GET['no']);
+
+// 페이지 제너레이터 - 필수
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid'], true, array('component'=>''));
+
+include_once '../rankup_module/rankup_builder/attachment.class.php';
+$attach = new attachment('product');
+
+// 페이지 타이틀 수정
+if($gen->infos['component']!='view') {
+	$gen->page_title .= '(제품상세보기)'; // 현재위치 + 윈도우 타이틀 출력부분
+	$gen->infos['base_name'] .= '(제품상세보기)'; // 컨텐트 타이틀 출력부분
+}
+
+// 타이틀, 스타일 출력 / 상단 컨텐츠
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+?>
+<div id="con_body">
+	<div class="prd_info">
+		<dl class="pic_box">
+			<dd class="pic">
+				<?php
+				echo $attach->print_attachments('', array(
+					'limits' => 1,
+					'entry' => '{:content:}',
+					// content
+					'image' => '<img src="'.$base_url.'{:folder:}{:name:}" align="absmiddle" />'
+				));
+				?>
+			</dd>
+			<dd class="util"><a onClick="products.view()"><img src="img/btn_detail2.gif" alt="이미지상세보기" /></a></dd>
+		</dl>
+		<div class="info_box">
+			<dl>
+				<dt class="product_tit img_bgc"><span><?=$rows['title']?></span></dt>
+				<dd class="sub_text3">
+					<?=nl2br($rows['comment'])?>
+				</dd>
+			</dl>
+			<div class="btn_group">
+				<?php
+				// 견적문의버튼
+				if($ps_rows['use_component']) {
+					echo $estimate_button = '<a href="estimate.html'.params('pid='.$_GET['pid'].'&no='.$_GET['no']).'"><img src="img/btn_estimate2.gif" alt="견적문의" /></a>';
+				}
+				// 목록버튼 - '상세보기'만 있는 메뉴인 경우에는 출력 안함
+				if($gen->infos['component']!='view') {
+					echo $list_button = ' <a href="list.html'.params('no=').'"><img src="img/btn_list.gif" alt="목록" /></a>';
+				}
+				?>
+			</div>
+		</div>
+		<div class="clear"></div>
+	</div><!-- prd_info End -->
+
+	<div class="prd_detail">
+<?php
+/**
+ * 탭 정의
+ */
+$tabs = array();
+if($ps_rows['use_feature']=='yes') array_push($tabs, array('tab' => 'tab1', 'name' => '<img src="img/tab1.png" alt="제품특징" />'));
+if($ps_rows['use_purpose']=='yes') array_push($tabs, array('tab' => 'tab2', 'name' => '<img src="img/tab2.png" alt="제품용도" />'));
+if($ps_rows['use_spec']=='yes') array_push($tabs, array('tab' => 'tab3', 'name' => '<img src="img/tab3.png" alt="제품상세정보" />'));
+$tab_entry = array(
+	'entry' => '<li class="{:on_first:}{:on_choice:}"><a{:on_name:} href="#{:tab:}">{:name:}</a></li>',
+	'on_first' => 'first_tab',
+	'on_choice' => ' tab_choice',
+	'on_name' => ' name="{:tab:}"'
+);
+
+if($ps_rows['use_feature']=='yes') {
+?>
+		<div>
+			<ul class="prd_tabs">
+				<?=$product->draw_tabs($tabs, 'tab1', $tab_entry)?>
+			</ul>
+			<div class="prd_txt">
+				<?=$rows['feature']?>
+			</div>
+		</div>
+
+<?php
+}
+if($ps_rows['use_purpose']=='yes') {
+?>
+		<div>
+			<ul class="prd_tabs">
+				<?=$product->draw_tabs($tabs, 'tab2', $tab_entry)?>
+			</ul>
+			<div class="prd_txt">
+				<?=$rows['purpose']?>
+			</div>
+		</div>
+
+<?php
+}
+if($ps_rows['use_spec']=='yes') {
+?>
+		<div>
+			<ul class="prd_tabs">
+				<?=$product->draw_tabs($tabs, 'tab3', $tab_entry)?>
+			</ul>
+			<div class="prd_txt">
+				<?=$rows['spec']?>
+			</div>
+		</div>
+<?php
+}
+?>
+	</div><!-- prd_detail End -->
+	<div style="margin:10px 0 15px 0;text-align:center">
+		<?php
+		// 견적문의 / 목록버튼 출력
+		echo $estimate_button.$list_button;
+		?>
+	</div>
+</div><!-- con_body End -->
+
+<div id="pop_wrap" style="position:absolute;z-index:2;display:none">
+	<div id="pop_frame" class="img_bgc">
+		<div class="prd_bg">
+			<p class="close_btn"><a onClick="products.close()"><img src="img/btn_close.png" alt="닫기" /></a></p>
+			<div class="prd_view">
+				<h2><span class="prd_name"><?=$rows['title']?></span><span class="prd_s_name"><?/*echo $rows['comment']*/?></span></h2>
+				<p class="thumb_img">
+					<?php
+					// 고정값
+					$ps_settings = array(
+						'container_width' => 680,
+						'container_height' => 460
+					);
+					scripts(sprintf(
+						"flashDraw('%s','%s','%s','%s','%s','%s')",
+							'product',
+							$base_url.'design/gallery.swf',
+							$ps_settings['container_width'],
+							$ps_settings['container_height'],
+							'transparent',
+							'xmlPath=./product_xml.php?no='.$_GET['no'].'&dummy='.rand()
+						)
+					);
+					?>
+				</p>
+			</div>
+		</div>
+	</div>
+</div><!-- pop_wrap End -->
+
+<script type="text/javascript">
+//<![CDATA[
+var products = {
+	frame: null,
+	view: function() {
+		blind.draw();
+		this.frame = $('pop_wrap');
+		this.frame.show();
+		position.center(this.frame);
+		$esc.add('products.close()');
+	},
+	close: function() {
+		this.frame.hide();
+		blind.remove();
+		$esc.remove('products.close()');
+	}
+}
+//]]>
+</script>
+
+<?php
+include_once '../include/bottom.html';
+?>

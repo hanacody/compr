@@ -1,0 +1,254 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "./rankup_board.class.php";
+include_once "./rankup_board_admin.class.php";
+
+$rankup_board = new rankup_board_admin($_GET['id']);
+
+switch($_POST['mode']) {
+##########################################################################
+## POST 방식
+##########################################################################
+	//SNS 환경설정
+	case "set_sns_settings":
+		$rankup_control->check_admin();
+		include_once "../../Libs/_php/rankup_sns.class.php";
+		$rankup_sns = new rankup_sns;
+		$result = $rankup_sns->set_sns_settings($_POST);
+		if($result) $rankup_control->popup_msg_js("저장 되었습니다.", "VOID");
+		else $rankup_control->popup_msg_js("저장이 실패하였습니다.", "VOID");
+		exit;
+		break;
+	// 워터마크 설정 - 2010.10.22 added
+	case "set_wm_settings":
+		$rankup_control->check_admin();
+		$result = $rankup_board->set_wm_settings($_POST);
+		if($result) $rankup_control->popup_msg_js("저장 되었습니다.", "VOID");
+		else $rankup_control->popup_msg_js("저장이 실패하였습니다.", "VOID");
+		exit;
+		break;
+	// 워터마크 등록 - iframe - 2009.09.22 added
+	case "post_watermark":
+		$attached = $_FILES['watermark'];
+		$ext = array_pop(explode(".", strtolower($attached['name'])));
+		if(!empty($ext)) $ext = ".$ext";
+
+		// 정크파일 삭제
+		$image_dir = $base_dir."rankup_module/rankup_board/watermark/";
+		foreach(glob($image_dir."_junk_.*") as $junk) unlink($junk);
+		$file_name = "_junk_.watermark".$ext;
+		$save_name = $image_dir.$file_name;
+		move_uploaded_file($attached['tmp_name'], $save_name);
+		list($width, $height) = rankup_util::get_optimize_size($save_name, array(170, 170));
+		echo "
+		<script type='text/javascript'>
+		parent.rankup_watermark.draw_wmark('$file_name', [$width, $height]);
+		</script>";
+		break;
+	// 워터마크 미리보기 - Ajax - 2009.09.22 added
+	case "preview_watermark":
+		$watermarkImage = $_POST['on_watermark'] ? $_POST['on_watermark'] : rankup_util::get_watermark_image($base_dir."rankup_module/rankup_board/watermark/");
+		list($canvasImage, $resultImage) = array($base_dir."rankup_module/rankup_board/watermark/sample.jpg", $base_dir."rankup_module/rankup_board/watermark/sample_result.jpg");
+		copy($canvasImage, $resultImage);
+		rankup_util::watermark_image(
+			$resultImage,
+			$base_dir."rankup_module/rankup_board/watermark/".$watermarkImage,
+			$_POST['watermark_location'],
+			$_POST['watermark_transcolor'],
+			$_POST['watermark_opacity'],
+			$_POST['watermark_margin']
+		);
+		break;
+	// 카테고리 재설정
+	case "reset_category":
+		$rankup_control->check_admin();
+		$result = $rankup_board->reset_category();
+		if(!$result) $rankup_board->popup_msg_js($_STRINGSET[404], "VOID"); // 404 - 적용 실패
+		else {
+			echo "
+			<script type='text/javascript'>
+			try {
+				alert(\"$_STRINGSET[204]\"+parent.SPACE);
+				parent.rankup_board.reset_menu_option('step1');
+			}
+			catch(e) {
+				//alert(e.message);
+			}
+			</script>";
+		}
+		exit;
+		break;
+	//생성된 게시판 형태별로 수정
+	case "board_config_setting":
+			$rankup_control->check_admin();
+			$result = $rankup_board->board_type_config_setting($_POST);
+			if($result) {
+			echo "
+			<script type='text/javascript'>
+			try {
+				alert(\"$_STRINGSET[204]\"+parent.SPACE);
+				parent.location.reload();
+			}
+			catch(e) {
+				//alert(e.message);
+			}
+			</script>";
+			exit;
+			}
+		break;
+	// 게시판 등록/수정
+	case "regist_board":
+		$rankup_control->check_admin();
+		$result = $rankup_board->regist_board($_POST);
+		// 추가시 bval 갱신, 게시판 리스트 갱신
+		if($result) {
+			echo "
+			<script type='text/javascript'>
+			try {
+				alert(\"$_STRINGSET[204]\"+parent.SPACE);
+				parent.rankup_board.apply_registered_board($_POST[cno]);
+			}
+			catch(e) {
+				//alert(e.message);
+			}
+			</script>";
+			exit;
+		}
+		break;
+
+	// 게시판 설정 미리보기 - Ajax - 2009.08.31
+	case "preview_board":
+		$rankup_control->check_admin();
+		$rankup_board->change_encoding($_POST, 'IN');
+		$result = $rankup_board->regist_board($_POST);
+		break;
+
+	// 분류/권한/포인트 설정
+	case "update_board":
+		$rankup_control->check_admin();
+		$result = $rankup_board->update_board($_POST);
+		if($result) {
+			switch($_POST['cmd']) {
+				case "set_point": $xDiv = "setPointTable"; break;
+				case "set_permission": $xDiv = "setPermissionTable"; break;
+				case "set_direction": exit; break; // 게시판 순위 변경은 백그라운드 작업이라서 결과 메시지를 출력하지 않음
+				case "set_layout": $rankup_board->popup_msg_js("저장 되었습니다.", "VOID"); exit; break; // 메인페이지설정
+			}
+			echo "
+			<script type='text/javascript'>
+			alert(\"$_STRINGSET[204]\"+parent.SPACE);
+			parent.rankup_board.change_display('$xDiv', false);
+			parent.rankup_board.get_board_items($_POST[cno]);
+			</script>";
+		}
+		exit;
+		break;
+
+
+##########################################################################
+## GET 방식 : Ajax 프로세스
+##########################################################################
+	default:
+		if(!$rankup_control->is_admin()) {
+			$message = $_STRINGSET[505]; // 505 - 로그인이 되어 있지 않음
+			$result = false;
+		}
+		else {
+			// 인코딩 변환
+			$rankup_board->change_encoding($_GET, "IN");
+
+			switch($_GET['mode']) {
+				// 메뉴(카테고리) 추출
+				case "load_category":
+					$message = $rankup_board->get_category($_GET, empty($_GET['cmd']));
+					$result = !empty($message);
+					break;
+
+				// 메뉴(카테고리) 등록/수정
+				case "regist_category":
+					$no = $rankup_board->regist_category($_GET);
+					$result = !empty($no);
+					break;
+
+				// 메뉴(카테고리) 삭제
+				case "delete_category":
+					$result = $rankup_board->delete_category($_GET);
+					break;
+
+				// 게시판 리스트 로드 - 메뉴(카테고리) 선택시
+				case "load_board":
+					$message = $rankup_board->get_board($_GET['cno']);
+					$result = !empty($message);
+					break;
+
+				// 게시판 아이디 중복 체크
+				case "verify_board":
+					$message = $rankup_board->verify_board($_GET['bid']);
+					$result = !empty($message);
+					break;
+
+				// 게시판 삭제
+				case "delete_board":
+					$result = $rankup_board->delete_board($_GET['id'], $_GET['cno']);
+					$message = $result ? $_STRINGSET[205] : $_STRINGSET[405]; // 205 - 삭제성공 : 405 - 삭제실패
+					break;
+
+				// 게시판 설정 갱신
+				case "update_board":
+					$result = $rankup_board->update_board($_GET);
+					switch($_GET['cmd']) {
+						case "set_category":
+							if(empty($_GET['cname'])) $message = $result ? $_STRINGSET[205] : $_STRINGSET[405]; // 205 - 삭제성공 : 405 - 삭제실패
+							else $message = $result ? $_STRINGSET[204] : $_STRINGSET[404]; // 204 - 적용성공 : 404 - 적용실패
+							break;
+						default:
+							$message = $result ? $_STRINGSET[204] : $_STRINGSET[404]; // 204 - 적용성공 : 404 - 적용실패
+					}
+					break;
+
+				// 게시판 설정 로드 - 메인게시판 설정시
+				case "load_setting":
+					$message = $rankup_board->get_setting($_GET['category']);
+					$result = !empty($message);
+					break;
+
+				// 게시물 이동 - 2009.09.09 added
+				case "move_articles":
+					$message = $rankup_board->move_articles($_GET);
+					$result = !empty($message);
+					break;
+
+				// 게시판 분류 - 2009.09.09 added
+				case "board_categories":
+					$message = $rankup_board->get_board_categories($_GET);
+					$result = !empty($message);
+					break;
+
+				// 게시판 분류 순위 저장 - 2009.09.18 added
+				case "reset_category_rank":
+					echo $rankup_board->reset_category_rank($_GET);
+					exit;
+					break;
+
+				// 회원정보보기 - 2009.09.09 move-in
+				case "member_info":
+					$message = $rankup_board->get_member_info($_GET['uid'], true, $_GET['name']);
+					$result = !empty($message);
+					break;
+
+				// 댓글 선택삭제 - 2009.09.09 move-in
+				case "delete_comments":
+					$message = $rankup_board->delete_comments($_GET);
+					$result = !empty($message);
+					break;
+			}
+		}
+		// 인코딩 변환
+		$rankup_board->change_encoding($message, "OUT");
+		$result = $result ? "success" : "failure";
+
+		header("Content-type: text/xml; charset=utf-8");
+		echo "<?xml version='1.0' encoding='utf-8'?>\n";
+		echo "<resultData result='$result' no='$no'>$message</resultData>";
+}
+?>

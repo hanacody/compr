@@ -1,0 +1,36 @@
+<?
+if($category_infos->sprint['wbest']!=="yes") return;
+?>
+				<tr>
+					<td colspan="2">
+						<!-- 이번주 베스트 -->
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<tr>
+								<td height="31" width="5"><img src="<?=$this->skin_url?>best01.gif"></td>
+								<td background="<?=$this->skin_url?>best02.gif" width="100%"> 
+									<table border="0" cellpadding="0" cellspacing="0">
+										<tr>
+											<td><img align="absmiddle" src="<?=$this->skin_url?>besticon.gif"></td>
+											<td style="padding:5 0 0 3 px"><b>이번주 BEST</td>
+										</tr>
+									</table>
+								</td>
+								<td width="5"><img src="<?=$this->skin_url?>best03.gif"></td>
+							</tr>
+							<tr>
+								<td background="<?=$this->skin_url?>best04.gif"></td>
+								<td style="padding-top:5px"> 
+									<table width="100%" cellpadding="3" cellspacing="0" border="0">
+									<?=$this->get_best_articles("weekly_best", $pcno)?>
+									</table>
+								</td>
+								<td background="<?=$this->skin_url?>best05.gif"></td>
+							</tr>
+							<tr>
+								<td width="5"><img src="<?=$this->skin_url?>best06.gif"></td>
+								<td background="<?=$this->skin_url?>best07.gif" width="100%"></td>
+								<td width="5"><img src="<?=$this->skin_url?>best08.gif"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>

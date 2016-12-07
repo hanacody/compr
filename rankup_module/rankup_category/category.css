@@ -1,0 +1,225 @@
+/**
+ * frame
+ */
+#category_frame {
+	width: 100%;
+	background-color: #F6F9FB;
+	text-align: center;
+	padding: 10px;
+	border: 1px #E1ECF4 solid;
+}
+#category_frame * {
+	font-size: 8pt;
+	letter-spacing: -1px;
+}
+#category_frame table {
+	width: 100%;
+}
+#category_frame table td.next {
+	width: 50px;
+	font-size: 10pt;
+	padding-top: 22px;
+}
+#category_frame h2 {
+	font-size: 12pt;
+	line-height: 1.0em;
+	height: 22px;
+	margin: 0;
+}
+#category_frame ul {
+	margin: 0;
+	padding: 0;
+	width: 220px;
+	border: 1px #547D9A solid;
+	background-color: white;
+	vertical-align: top;
+}
+#category_frame li {
+	list-style: none;
+}
+
+/**
+ * head : title section
+ */
+#category_frame li.head {
+	height: 18px;
+	border-bottom: 1px #547D9A solid;
+}
+#category_frame li.head dl {
+	margin: 0;
+	padding: 0;
+	background-color: #E1ECF4;
+	height: 18px;
+}
+#category_frame li.head dd.cbox {
+	clear: both;
+	float: left;
+	margin: 0;
+	width: 22px;
+	height: 16px;
+	*width: 25px;
+	*height: 18px;
+	text-align: center;
+	padding: 3px 0 0 0;
+	border-right: 1px #547D9A solid;
+}
+#category_frame li.head dd.cbox input {
+	width: 12px;
+	height: 12px;
+	margin: 0 2px;
+	vertical-align: middle;
+}
+#category_frame li.head dt {
+	float: left;
+	margin: 0;
+	width: 180px;
+	height: 16px;
+	*height: 18px;
+	text-align: left;
+	padding: 3px 0 0 3px;
+	border-right: 1px #547D9A solid;
+}
+#category_frame li.head dd.used {
+	float: left;
+	margin: 0;
+	width: 30px;
+	height: 16px;
+	*height: 18px;
+	text-align: center;
+	font-size: 8pt;
+	padding: 3px 0 0 0;
+	border-right: 1px #547D9A solid;
+}
+#category_frame li.head dd.child {
+	float: left;
+	margin: 0;
+	width: 30px;
+	height: 16px;
+	*height: 18px;
+	text-align: center;
+	font-size: 8pt;
+	padding: 3px 0 0 0;
+	border-left: 0;
+}
+
+/**
+ * body : content section
+ */
+#category_frame li.body {
+	clear: both;
+	height: 200px;
+	overflow-y: scroll;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+#category_frame li.body span {
+	line-height: 1.0em;
+	padding: 0;
+	margin: 0;
+}
+#category_frame li.body dl {
+	clear: both;
+	width: 100%;
+	margin: 0;
+	height: 24px;
+	cursor: pointer;
+	border-top: 1px inherit solid;
+	border-bottom: 1px #F7F7F7 solid;
+}
+/* choosed item */
+#category_frame li.body dl.hover {
+	background-color: #d6e3f1;
+	border-top: 0px #547D9A solid;
+	border-bottom: 1px white solid;
+	padding-top: 0;
+}
+#category_frame li.body dd.cbox {
+	clear: both;
+	float: left;
+	margin: 0;
+	width: 22px;
+	height: 18px;
+	*width: 25px;
+	*height: 24px;
+	text-align: center;
+	padding: 6px 0 0 0;
+	border-right: 1px #F7F7F7 solid;
+}
+#category_frame li.body dd.cbox input {
+	width: 12px;
+	height: 12px;
+	margin: 0 2px;
+	vertical-align: middle;
+}
+#category_frame li.body dt {
+	float: left;
+	margin: 0;
+	width: 180px;
+	height: 18px;
+	*height: 24px;
+	overflow: hidden;
+	text-align: left;
+	padding: 6px 0 0 3px;
+	border-right: 1px #F7F7F7 solid;
+}
+#category_frame li.body dd.used {
+	float: left;
+	margin: 0;
+	width: 30px;
+	height: 18px;
+	*height: 24px;
+	text-align: center;
+	font-size: 8pt;
+	color: #547D9A;
+	padding-top: 5px;
+	border-right: 1px #F7F7F7 solid;
+}
+#category_frame li.body dd.child {
+	float: left;
+	margin: 0;
+	width: 14px;
+	height: 18px;
+	*width: 16px;
+	*height: 24px;
+	text-align: center;
+	font-size: 7pt;
+	color: #8EB984;
+	padding-top: 7px;
+	border-right: 0;
+}
+
+/**
+ * tool_box
+ */
+div.tool_box {
+	width: 300px;
+	border: 1px #547D9A solid;
+	background-color: #547D9A;
+	white-space: nowrap;
+}
+div.tool_box button {
+	width: 30px;
+	margin: 5px 1px;
+	*margin: 5px 1px;
+	padding: 3px 0;
+	*padding-top: 5px;
+	border: 1px #547D9A solid;
+	background-color: #547D9A;
+	color: white;
+	font-size: 8pt;
+	font-family: dotum;
+	cursor: pointer;
+}
+div.tool_box button.save {
+	border: 1px black solid;
+	background-color: #ff9900;
+	color: yellow;
+}
+div.tool_box button.gap {
+	margin-left: 25px;
+}

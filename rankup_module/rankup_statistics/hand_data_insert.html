@@ -1,0 +1,57 @@
+<?php
+include '../../Libs/_php/rankup_basic.class.php';
+
+$rankup_control->check_admin();
+
+$mode=$rankup_control->getParam('mode');
+$rankup_control->print_admin_head();
+?>
+<body leftmargin=0 topmargin=0 onload="document.Form.content.focus();">
+<script>{window.top.resizeTo(350,300)}</script>
+<script language="javascript" src="../../Libs/_js/form.js"></script>
+<div class="bar"><script> titleBar("등록하기", 270) </script></div>
+
+
+<table width="100%" border="0" align="center" cellspacing="0" cellpadding='0'>
+<tr><td>
+<table border=0 align='center'>
+<form name=Form method=post action="./hand_data_insert.html" onSubmit="return validate(this)">
+<input type=hidden name=mode value=insert>
+<br>
+  <tr>
+    <td height='50'><img src='<?=$base_url?>Libs/_images/ic_dot1.gif'> 키워드 입력 <input type=text name="content" hname="내용" required class=simpleform></td>
+	</tr>	
+	<tr>
+	  <td align=center height='35'><input type=image src="<?=$base_url?>Libs/_images/btn_regist.gif"></td>
+	</tr>
+</form>
+</table>
+</td>
+</tr>
+</table>
+<?php
+
+if($mode == 'insert') {
+
+	$result=$rankup_control->insert_search_table($rankup_control->getParam('content'),'hand');
+
+	if($result) {
+	echo"
+			<script type='text/javascript'>
+			opener.window.location.reload();
+			var move = './hand_data_insert.html';
+			self.close();
+			</script>
+		";
+	} else {
+		echo	"
+			<script type='text/javascript'>
+				alert('등록하는데 실패했습니다');
+				self.close();
+			</script>
+		";
+	}
+
+
+}
+?>

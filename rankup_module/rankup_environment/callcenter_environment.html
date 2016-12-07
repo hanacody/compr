@@ -1,0 +1,53 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+$c_width = $rankup_control->get_config_field('callcenter_width');
+$c_height = $rankup_control->get_config_field('callcenter_height');
+$c_view = $rankup_control->get_config_field('callcenter_view');
+
+$rankup_control->print_admin_head("환경설정");
+?>
+<body>
+<div class="bar"><script> titleBar("고객센터 환경설정", 270) </script></div>
+<table width="100%" cellpadding=0 cellspacing=0 border="0">
+<tr><td>
+	<table width="350" border="0"  align='center' cellpadding="0" cellspacing="0">
+	<tr><td height='30'></td></tr>
+	<tr><td>
+
+		<table width="350" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+		<form name="form1" method="post" action="./e_regist.php" onSubmit="return validate(this)">
+		<input type=hidden name='type' value="callcenter_edit">
+		<tr> 
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;가로사이즈</td>
+		<td><input type=text name="callcenter_width" value="<?php echo $c_width; ?>" hname="가로사이즈" option="number" required class="simpleform"></td>
+		</tr>
+		<tr> 
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;세로사이즈</td>
+		<td><input type=text name="callcenter_height" value="<?php echo $c_height; ?>" hname="세로사이즈" option="number" required class="simpleform"></td>
+		</tr>
+		<tr> 
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;출력여부</td>
+		<td>
+		<input type=radio name="callcenter_view" value="yes" <?php echo ($c_view=='yes')?'checked':'';?>> 출력 &nbsp;&nbsp;&nbsp;
+		<input type=radio name="callcenter_view" value="no" <?php echo ($c_view=='no')?'checked':'';?>> 미출력
+		</td>
+		</tr>
+		</table>
+
+	</td></tr>
+	<tr><td>&nbsp;</td></tr>
+	<tr> 
+	<td align="center" height='40'>               
+	<input type="image" src='../../Libs/_images/btn_regist.gif' alt="등록">  
+	<a href='javascript:self.close();'><img src='../../Libs/_images/btn_close.gif' border=0 alt="닫기"></a>  
+	</td>
+	</tr>
+	</form>
+	</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

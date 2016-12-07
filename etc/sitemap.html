@@ -1,0 +1,78 @@
+<?php
+/**
+ * 사이트맵
+ *@note: 스타일은 lnb와 동일함.
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+include_once './class/sitemap.class.php';
+$sitemap = new sitemap;
+?>
+
+<style type="text/css"> @import url('../design/left/lnb.css'); </style>
+<table id="css_sitemap_frame" cellpadding="0" cellspacing="0" border="0" align="center" width="100%">
+	<colgroup>
+		<col width="26%" />
+		<col width="26%" />
+		<col width="26%" />
+		<col width="*%" />
+	</colgroup>
+	<tbody valign="top">
+	<?php
+	// 사이트맵 출력
+	echo $sitemap->draw(array(
+		'times' => 4,
+		'entry_wrap' => array('<tr>', '</tr>'),
+		// 1차메뉴
+		'entry' => '
+		<td>
+			<div id="left_wrap" style="width:220px;">
+				<div id="left_menu" style="width:220px;">
+					<div class="l_tit_box">
+						<div class="text_menu">
+							<h2><span class="l_tit">{:base_name:}</span><span class="l_tit2">{:extra_name:}</span></h2>
+						</div>
+					</div>
+					<div class="h20"></div>
+					<div class="l_menu_box">
+						<ul class="lmenu">
+							{:on_child:}
+						</ul>
+					</div>
+				</div>
+			</div>
+		</td>',
+
+		// 2차메뉴
+		'child_entry' => array(
+			'entry' => '
+				<li><p pid="{:pid:}" class="secon_m {:on_hover:}" hover="{:on_hover:}" onMouseOver="sitemap.over(this)" onClick="menu_handler({:pid:})">{:base_name:}</p></li>
+				{:on_child:}',
+			'on_hover' => 'hover',
+			'on_child' => '<li><dl class="third_m">{:on_child:}</dl></li>',
+
+			// 3차 메뉴
+			'child_entry' => array(
+				'entry' => '
+					<dd parent="{:parent:}" pid="{:pid:}" class="{:on_hover:}" hover="{:on_hover:}" onMouseOver="sitemap.over(this)" onClick="menu_handler({:pid:})">{:base_name:}</dd>',
+				'on_hover' => 'hover'
+			)
+		)
+	));
+	?>
+	</tbody>
+</table>
+<script type="text/javascript" src="sitemap.js"></script>
+<script type="text/javascript"> sitemap.initialize('css_sitemap_frame') </script>
+
+<?php
+include_once '../include/bottom.html';
+?>

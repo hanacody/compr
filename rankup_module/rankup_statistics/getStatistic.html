@@ -1,0 +1,73 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+
+if(!$rankup_control->is_admin()) {
+	$message = $_STRINGSET[505]; // 505 - 로그인이 되어 있지 않음
+
+}
+else {
+
+	// 인코딩 변환
+	$rankup_control->change_encoding($_GET, "IN");
+	$rankup_payment = new rankup_payment;
+
+
+
+	// 검색어
+	if($_GET[sd1]) {
+		if($_GET[sd2]) $addWhere .= " wdate between '$_GET[sd1]' and '$_GET[sd2] 23:59:59'";
+		else $addWhere .= " wdate>='$_GET[sd1]'";
+	} else if($_GET[sd2]) $addWhere .= " wdate<='$_GET[sd2] 23:59:59'";
+
+
+	## 총방문자수 ##
+	if($addWhere) $_addWhere = "where ".$addWhere;
+	$totalCount[con] = $rankup_control->queryR("select sum(num) from rankuplog_total $_addWhere");
+
+	## 총회원수 ##
+	if($addWhere) $_addwhere = " and ".str_replace("wdate", "m.wdate", $addWhere);
+	$totalCount[member] = $rankup_control->queryR("select count(no) from $rankup_member->member_table as m, $rankup_member->member_table2 as me where me.uid=m.uid and me.secession='no'$_addwhere");
+
+	## 총컨텐츠수 ##
+	if($addWhere) $_addwhere = " and ".$addWhere;
+	$totalCount[contents] = $rankup_control->queryR("select count(no) from $rankup_contents->data_table where open='sell' and del='no'$_addwhere");
+
+	## 총결제건수 ##
+	if($addWhere) $addWhere = " and ".$addWhere;
+	$totalCount[payment] = $rankup_control->queryR("select count(no) from $rankup_payment->table where pay_method!='commission' and is_payed='yes'$addWhere");
+	$totalCount[income] = $rankup_control->queryR("select sum(goods_total_price) from $rankup_payment->table where pay_method!='commission' and is_payed='yes'$addWhere");
+
+	## 서비스 결제 현황##
+	$DATA = $rankup_control->queryFetchRows("select kind, goods_total_price from $rankup_payment->table where is_payed='yes' and pay_method!='commission' $addWhere order by kind");
+	if(is_array($DATA) && count($DATA)) {
+		foreach($DATA as $ROW) {
+			$service[totRows][$ROW[kind]] += 1; // 갯수카운트
+			$service[payment][$ROW[kind]] += $ROW[goods_total_price]; // 결제금액계산
+		}
+	}
+	$message = "
+	<info>
+		<totalCount>".number_format($totalCount[con])."</totalCount>
+		<totalMember>".number_format($totalCount[member])."</totalMember>
+		<totalContents>".number_format($totalCount[contents])."</totalContents>
+		<totalPayment>".number_format($totalCount[payment])."</totalPayment>
+		<totalIncome>".number_format($totalCount[income])."</totalIncome>
+		<services totalRows='".number_format(@array_sum($service[totRows]))."' totalPayment='".number_format(@array_sum($service[payment]))."'>
+			<content totalRows='".number_format($service[totRows][content])."'>".number_format($service[payment][content])."</content>
+			<cash totalRows='".number_format($service[totRows][cash])."'>".number_format($service[payment][cash])."</cash>
+		</services>
+	</info>";
+
+}
+
+$result = $message ? "success" : "falilure";
+
+
+// 인코딩 변환
+$rankup_control->change_encoding($message, "OUT");
+
+
+header("Content-type: text/xml");
+echo "<?xml version='1.0' encoding='utf-8'?>\n";
+echo "<resultData result='$result'>$message</resultData>";
+?>

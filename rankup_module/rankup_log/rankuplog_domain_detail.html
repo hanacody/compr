@@ -1,0 +1,181 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+
+$db = new db_class;
+$often = new often_class;
+
+$todayyear = date("Y");
+$todaydate = date("m");
+$todayday = date("d");
+$today = $todayyear."-".$todaydate."-".$todayday;
+
+if($_GET['mode'] == 'search') {
+	$searchday1 = $_GET['day1yy']."-".$_GET['day1mm']."-".$_GET['day1dd'];
+	$searchday2 = $_GET['day2yy']."-".$_GET['day2mm']."-".$_GET['day2dd'];
+	$connection = "and wdate >= '$searchday1' and wdate <= '$searchday2'";
+}
+else {
+	$connection = "and wdate >= '$today' and wdate <= '$today'";
+}
+
+//$content = str_replace("http://","",$content);
+$select = $db->sel("rankuplog_domain","where content like '%$content%' $connection order by num desc");
+echo $select['view'];
+
+function search_text($site) {
+	$val = array();
+	$site = parse_url($site);
+	$val = explode("&",$site[query]);
+	if(eregi("yahoo",$site[host])) { // 야후
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("p=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("naver",$site[host])) { // 네이버
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("query=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("empas",$site[host])) { // 엠파스
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("q=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("daum",$site[host])) { // 다음
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("q=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("hanafos",$site[host])) { // 하나포스
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("query=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("nate",$site[host])) { // 네이트
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("query=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("altavista",$site[host])) { // 알타비스타
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("q=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else if(eregi("google",$site[host])) { // 구글
+		for($j=0;$j < count($val);$j++) {
+			if(eregi("q=",$val[$j])) {
+				list($a,$b) = explode("=",$val[$j]);
+				return $b;
+			}
+		}
+	}
+	else {
+		return 0;
+	}
+}
+
+function Jun_wordcut($str, $len, $tail="...") {
+	if(strlen($str)>$len) {
+		for($i=0; $i<$len; $i++) if(ord($str[$i])>127) $i++;
+		$str=substr($str,0,$i);
+		$str .= $tail;
+	}
+	return $str;
+}
+
+include_once "./rankup_toplink.html";
+?>
+<div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">2005년1월1일 하루 날짜를 알고 싶을때는 2005-1-1~2005-1-1 선택하시고 검색하시면 됩니다</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name=form method=get action=<?php echo $_SERVER['PHP_SELF'];?>>
+					<input type=hidden name=content value="<?php echo $content;;?>">
+					<input type=hidden name=mode value=search>
+					<tr>
+						<td class="gray_bg" align="center"><?php $often->calendar("form","day1"); echo"~"; $often->calendar("form","day2");?>&nbsp;&nbsp;<input type=image src=../../Libs/_images/btn_search.gif border=0 align=absmiddle alt='검색'></td></tr>
+					</form>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="20"></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<tr class="gray_bg" align=center>
+						<td width=70 height=25>날짜</td>
+						<td width=435>상세주소</td>
+						<td width=75>접속수</td>
+						<td width=105>검색어</td>
+					</tr>
+			<?php while($row = mysql_fetch_array($select['result'])){ ?>
+					<tr onMouseOver=this.style.backgroundColor='#faf6ec' onMouseOut=this.style.backgroundColor='#ffffff'>
+						<td align=center  height=30><?php echo $row['wdate']; ?></td>
+						<td>&nbsp;&nbsp;<a href="<?=$row[content]?>"  target=_blank>
+							<?php
+							$dotitle =  urldecode($row['content']);
+							$dotitle = Jun_wordcut($dotitle,65);
+							echo $dotitle;
+							?> </a>
+						</td>
+						<td align=center><?php echo $row['num']; ?> 명</td>
+						<td align=center><?php echo urldecode(search_text($row['content'])); ?></td>
+					</tr>
+			<? } ?>
+					</table>
+				</td>
+			</tr>
+			<tr><td align="center" height="40"><a href=# onclick="history.go(-1)" style=cursor:hand><img src=../../Libs/_images/btn_back.gif  alt="뒤로"></a></td></tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

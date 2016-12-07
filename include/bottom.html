@@ -1,0 +1,42 @@
+<?php
+include_once $base_dir.SKIN.'bottom.inc.php';
+
+// 푸터 클래스 적용(모두 적용으로 수정)
+$footer_class = isset($gen) ? ' class="fbg_col"' : '';
+?>
+
+	<div id="footer" class="fbg_col">
+		<div class="copyright" >
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr valign="top">
+					<?php
+					// 하단로고
+					$ci_bottom = $rankup_control->print_logo('ci_bottom');
+					if($ci_bottom) echo '<td align="left" width="170">'.$ci_bottom.'</td><td width="15"></td>';
+					?>
+					<td>
+						<?=$rankup_control->get_config_info('copyright')?>
+					</td>
+				</tr>
+			</table>
+		</div><!-- copyright End -->
+	</div><!-- footer End -->
+
+</div><!-- body_wrap End -->
+<?php
+// 구글 Analytics 스크립트 출력
+include_once $base_dir.'rankup_module/rankup_analytics/rankup_analytics.class.php';
+$analytics = new rankup_analytics;
+echo $analytics->configs['google_scripts'];
+?>
+</body>
+</html>
+<?php
+// 솔루션 설치시 제거
+if(rankup_basic::is_demo()) {
+	//스케쥴 일정 조정
+	$rankup_control->query("update rankup_schedule set sdate = replace(sdate, substring(sdate, 1, 7), '".date("Y-m")."'), edate = replace(edate, substring(edate, 1, 7), '".date("Y-m")."')");
+	include_once "/home/rankup/public_html/copyright/div_popup.html";
+	include_once "/home/rankup/public_html/include/demo_customer.html";
+}
+?>

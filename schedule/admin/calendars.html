@@ -1,0 +1,129 @@
+<?php
+/**
+ * 달력관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+$category = new rankup_category;
+
+include_once '../class/calendar.class.php';
+$calendar = new calendar;
+
+$rankup_control->print_admin_head('달력관리');
+?>
+<body>
+<div class="bar"><script> titleBar('달력관리') </script></div>
+<style type="text/css">
+#calendar_list td div {font-size:12px;font-family:dotum}
+#calendar_list p {display:inline-block;padding:2px 2px 0 2px;margin-bottom:1px;height:15px;line-height:15px;vertical-align:middle;margin-right:1px;white-space:nowrap;font-size:11px;letter-spacing:-1px;*display:inline;zoom:1}
+div.pl4 {padding-left:4px}
+</style>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+	<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top">
+	<col width="20" />
+	<col />
+	<col width="100" />
+	<col width="100" />
+	<col width="40" />
+	<col width="40" />
+	<tr class="gray_bg" align="center">
+		<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+		<td>달력정보</td>
+		<td>스킨형태</td>
+		<td>접근권한</td>
+		<td>수정</td>
+		<td>삭제</td>
+	</tr>
+	<tbody align="center" valign="top" id="calendar_list">
+	<?php
+	echo $calendar->print_calendars(array(
+		'entry' => array(
+			0 => '',
+			1 => '
+			<tr>
+				<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+				<td align="left">
+					<a href="./calendar_regist.html?no={:no:}"><b>{:subject:}</b></a>
+					<div class="hline gray_bg">
+						<div class="pl4">{:print_type_text:}{:on_holyday:}</div>
+						<div class="hline pl4">
+							{:categories:}
+						</div>
+					</div>
+				</td>
+				<td>{:skin_type_text:}</td>
+				<td>비회원 이상 {:read_level_text:}</td>
+				<td><a href="./calendar_regist.html?no={:no:}"><img src="../../Libs/_images/btn_modify_s.gif" /></a></td>
+				<td><a onClick="calendar.del(\'{:no:}\')"><img src="../../Libs/_images/btn_delete_s.gif" /></a></td>
+			</tr>'
+		),
+		'on_holyday' => ' &nbsp;<font color="#cccccc">l</font>&nbsp; 국경일표시',
+		'skin_type_texts' => array(
+			'basic' => '달력형',
+			'list' => '리스트형',
+			'both' => '달력+리스트형'
+		),
+		'print_type_texts' => array(
+			'cate' => '분류명',
+			'title' => '제목',
+			'both' => '[분류명] 제목'
+		),
+		'cate_entry' => array(
+			'entry' => array(
+				0 => '<span style="color:#ccc">분류사용안함</span>',
+				1 => '<p style="background-color:{:bgcolor:};color:{:color:}">{:item:}</p>'
+			)
+		)
+	));
+	?>
+	</tbody>
+	</table>
+
+	<div style="position:relative;margin-top:8px;padding-right:120px">
+		<div style="position:absolute">
+			<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+			<a onClick="calendar.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+		</div>
+		<div style="position:absolute;right:0">
+			<a href="./calendar_regist.html">[달력등록하기+]</a>
+		</div>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+checker.initialize('calendar_list', 'input[name="no[]"]');
+
+var calendar = {
+	del: function(no) {
+		var nos = no ? no : checker.get();
+		if(!nos.length) {
+			alert('삭제하실 달력을 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('선택하신 달력을 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_calendar', nos: nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				try { top.frames['left'].location.reload(); } catch(e) { }
+				location.reload();
+			}
+		}, false);
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+/**
+ * 실명인증 CSS
+ *@author: kurokisi
+ *@authDate: 2012.01.12
+ */
+
+h1 {display:none}
+div.tip {float:right;padding-top:4px;font-size:11px;font-family:dotum;letter-spacing:-1px;text-decoration:underline;color:#3366cc}
+#ipin_tip {position:absolute;width:338px;border:2px #336699 solid;background-color:#fff;line-height:1.5em}
+#ipin_tip div.wrap {margin:15px}
+#ipin_tip div.close {float:right;width:20px;font-size:14px;margin-top:5px}
+#ipin_tip b {color:#3366cc}
+#ipin_tip p {margin:5px 0 0 0;font-size:11px;letter-spacing:-1px;white-space:nowrap}
+
+span.tip {font-size:11px;letter-spacing:-1px;color:#999}
+
+ul.hint {border:1px #dedede dotted;padding:10px 30px;margin:0;line-height:1.5em}
+ul.hint li {list-style:disc;margin:0;padding:0;font-size:11px;letter-spacing:-1px;color:#777}
+
+div.tab {position:relative;width:100%;z-index:1}
+.tab ul {list-style:none;display:table;margin:0;padding:0}
+.tab li {display:table-cell;vertical-align:top;padding:5px 15px 5px 10px;border:1px #dedede solid;width:auto;background-color:#f1f1f1;*float:left}
+.tab li.on {border-bottom:1px #fff solid;background-color:#fff;font-weight:bolder;letter-spacing:-1px;}
+.tab li.end {border-left:0}
+
+div.box {clear:both;border:1px #dedede solid;margin-top:-1px;padding:20px;z-index:0}
+div.box dl.box{margin:10px 0 20px 0;border:1px #dedede dotted;padding:15px 10px;background-color:#f7f7f7}
+dl.box dl {display:table;white-space:nowrap}
+dl.box dt {display:table-cell;text-align:right;padding-left:10px;padding-right:10px;vertical-align:middle;*display:inline}
+dl.box dd {display:table-cell;margin-left:0;vertical-align:middle;*display:inline}
+#userno_text {width:110px;padding-left:0;}
+
+div.box input.input {width:160px;border:1px #ccc solid;background-color:#fff;color:#000;font-size:12px;padding:3px;font-family:verdana;font-weight:bold;line-height:1.4em;*line-height:1.4em}
+div.box input.sno {width:130px;text-align:center}
+div.box p.box {text-align:center;margin-bottom:14px;border:1px #dedede dotted;background-color:#f7f7f7;padding:30px;line-height:1.6em;color:#333}
+
+/*회원가입 프로세스*/
+#join_title{margin-bottom:20px;}
+#join_title h2{color:#333;font-size:1.7em;line-height:1.4em;}
+#join_title h3{color:#999;font-size:1.1em;padding-left:2px;}
+
+/*해외외국인회원 가입인증 안내문구*/
+.hint_mass{height:90px;margin:0 25px 0 0;padding:10px 15px 0 15px;border:1px #dedede dotted;}
+.hint_mass{.width:375px;.height:96px;}/*ie6,7용*/
+.hint_mass li{list-style:disc outside none;color:#777;font-size:11px;letter-spacing:-1px;margin-left:15px;}
+.hint_mass span{color: #ff6600;font-weight:bold;font-size:11px;letter-spacing:-1px;}

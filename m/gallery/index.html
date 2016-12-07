@@ -1,0 +1,121 @@
+<?php
+/**
+ * 갤러리 페이지
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+include_once $base_dir.'rankup_module/rankup_builder/attachment.class.php';
+include_once '../class/gallery.class.php';
+
+$gallery = new gallery;
+$gs_rows = $gallery->get_gallery($_GET['no']);
+
+// 갤러리형
+if($gs_rows['type']=='gallery') {
+?>
+
+<div id="container">
+	<div class="tit0">
+		<div class="tit_t"><?=$gen->page_title?></div>
+	</div>
+</div>
+<style type="text/css" media="all"> @import url('../styles/carousel.css'); </style>
+<div id="carousel">
+	<div style="height:1px;background:url(../images/lite_bg.png);margin-bottom:10px;"></div>
+	<div id="wrapper">
+		<div id="scroller">
+			<ul id="thelist">
+				<?php
+				$attach_count = 0;
+				$attach = new attachment('gallery', $base_dir.'gallery/admin/');
+				foreach(explode(',', $gs_rows['settings']['attach']) as $file) {
+					echo $gallery_image = $attach->preview($file, array(
+						'image' => '<li><img src="'.substr($pc_domain, 0, -1).'{:folder:}{:name:}" width="100%"></li>'
+					));
+					if($gallery_image) $nav .= sprintf('<li%s>%d</li>', $attach_count?'':' class="active"', ++$attach_count);
+				}
+				?>
+			</ul>
+		</div>
+		<ul id="nav">
+			<li id="prev"><a onclick="myScroll.scrollToPage('prev', 0);return false"><span>이전보기</span></a></li>
+			<li>
+				<ul id="indicator">
+					<?=$nav?>
+				</ul>
+			</li>
+			<li id="next"><a onclick="myScroll.scrollToPage('next', 0);return false"><span>다음보기</span></a></li>
+		</ul>
+	</div>
+	<div style="height:1px;background:url(../images/lite_bg.png);margin-top:9px;"></div>
+</div>
+
+<script type="text/javascript" src="../scripts/iscroll.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var myScroll;
+function loaded() {
+	myScroll = new iScroll('wrapper', {
+		snap: true,
+		momentum: false,
+		hScrollbar: false,
+		onScrollEnd: function () {
+			document.querySelector('#indicator > li.active').className = '';
+			document.querySelector('#indicator > li:nth-child(' + (this.currPageX+1) + ')').className = 'active';
+		}
+	});
+}
+Event.observe(document, 'DOMContentLoaded', loaded);
+//]]>
+</script>
+
+<?php
+}
+
+// 웹진형
+else {
+?>
+
+<div id="container">
+	<div class="tit0">
+		<div class="tit_t"><?=$gen->page_title?></div>
+	</div>
+	<div class="gallery">
+		<?php
+		// 웹진형 갤러리 출력
+		$attach = new attachment('webzine', $base_dir.'gallery/admin/');
+		echo $gallery->print_contents($gs_rows['no'], array(
+			'entry' => array(
+				1 => '
+				<div class="gc" onClick="location.href=\'./view.html?pno={:pno:}&no={:no:}\'">
+					<div class="gt"><span>{:subject:}</span></div>
+					<ul class="gi">
+						<li class="gp">{:on_attach:}</li>
+						<li><span>{:content:}</span></li>
+						<li class="gb"><span>더보기</span></li>
+					</ul>
+				</div>',
+				2 => '<div class="mbr"></div>'
+			),
+			'content_length' => 500, // 500자
+			'folder' => $attach->configs['save']['folder'],
+			'on_attach' => '<img src="'.substr($pc_domain, 0, -1).'{:attach:}" />',
+			'non_attach' => '<img src="./img/frame_no_img.gif" />',
+		));
+		?>
+	</div>
+</div>
+
+<?php
+}
+
+include_once $m_dir.'include/bottom.html';
+?>

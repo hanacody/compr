@@ -1,0 +1,126 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../class/gallery.class.php';
+include_once '../class/gallery_admin.class.php';
+$gallery = new gallery_admin;
+
+$rankup_control->print_admin_head('갤러리관리');
+?>
+<body>
+
+<div class="bar"><script> titleBar('갤러리관리') </script></div>
+
+<center>
+<div class="content_wrap" style="width:750px;margin-top:30px">
+	<table width="100%" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<div style="position:absolute;width:750px;text-align: right;"><a onClick="$('help').toggle()"><img src="../../Libs/_images/btn_help.gif" align="absmiddle" /></a></div>
+			<div id="sub_title">갤러리관리</div>
+			<div id="help" class="help_bg" style="display: none;margin-bottom: 5px;">
+				등록한 갤러리를 사이트에 노출하려면 <a href="../../rankup_module/rankup_builder/index.html" target="_blank"><b class="orange_b">[메뉴 및 페이지설정]</b></a> 페이지에서 해당 메뉴를 다음과 같이 설정해주셔야 합니다.
+				<ul class="help_ul" style="margin-top:5px">
+					<li>① 메뉴 수정 클릭</li>
+					<li>② 형태설정 > '<b>모듈</b>' 선택</li>
+					<li>③ 모듈설정 > '<b>갤러리</b>' 선택</li>
+					<li>④ 등록된 갤러리 컴포넌트 선택</li>
+				</ul>
+			</div>
+			<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+				<col width="35" />
+				<col />
+				<col width="100"/>
+				<col width="60"/>
+				<col width="80"/>
+				<col  width="70"/>
+				<col  width="45"/>
+				<col  width="45"/>
+				<tr align="center" class="gray_bg">
+					<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)"></td>
+					<td>갤러리명</td>
+					<td>형태</td>
+					<td>등록</td>
+					<td>등록일</td>
+					<td>미리보기</td>
+					<td>수정</td>
+					<td>삭제</td>
+				</tr>
+				<tbody id="content_frame" align="center">
+				<?php
+				//
+				echo $gallery->print_contents(array(
+					'entry' => array(
+						0 => '
+						<tr>
+							<td><input type="checkbox" disabled /></td>
+							<td colspan="7"><span disabled>등록된 갤러리가 존재하지 않습니다.</span></td>
+						</tr>',
+						1 => '
+						<tr>
+							<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+							<td align="left"><a href="./gallery_regist.html?no={:no:}">{:name:}</a></td>
+							<td>{:type_text:}{:skin_type_text:}</td>
+							<td>{:qty:}개</td>
+							<td>{:regist_time:}</td>
+							<td><a href="../index.html?no={:no:}" target="_blank"><img src="./img/btn_preview.gif" align="absmiddle"></a></td>
+							<td><a href="./gallery_regist.html?no={:no:}"><img src="./img/btn_modify.gif" align="absmiddle"></a></td>
+							<td><a href="javascript:void(0)" onClick="gallery.del(\'{:no:}\')"><img src="./img/btn_board_del.gif" align="absmiddle"></a></td>
+						</tr>'
+					),
+					'type_texts' => array('gallery' => '<font color="#3366cc">갤러리형</font>', 'webzine' => ''),
+					'skin_type_texts' => array(
+						'A' => '<font color="#ff6600">웹진(A형)</font>',
+						'B' => '<font color="#ff6600">웹진(B형)</font>',
+						'C' => '<font color="#ff6600">웹진(C형)</font>',
+						'D' => '<font color="#ff6600">웹진(D형)</font>'
+					),
+					'time_format' => 'Y.m.d'
+				));
+				?>
+				</tbody>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	<div style="position:relative;margin-top:10px;text-align:left">
+		<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle"></a>
+		<a onClick="gallery.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle"></a>
+		<div style="position:absolute;right:0;top:0"><a href="gallery_regist.html"><img src="./img/btn_gallery_regist.gif" align="absmiddle"></a></div>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+checker.initialize('content_frame', 'input[name="no[]"]')
+
+// 갤러리삭제
+var gallery = {
+	del: function(nos) {
+		if(nos==undefined) nos = checker.get();
+		if(nos.blank()) {
+			alert('삭제하실 갤러리를 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('선택하신 갤러리를 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_gallery', nos: nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				location.reload();
+			}
+		}, false);
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

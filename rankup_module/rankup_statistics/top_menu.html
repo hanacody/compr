@@ -1,0 +1,19 @@
+<?php
+switch($_SERVER['PHP_SELF']) {
+	case '/rankup_module/rankup_statistics/day_statistic.html': $cmd_text = '날짜별통계'; $key=0; break;
+	case '/rankup_module/rankup_statistics/month_statistic.html': $cmd_text = '월별통계'; $key=1; break;
+	case '/rankup_module/rankup_statistics/year_statistic.html': $cmd_text = '연별통계'; $key=2; break;
+	default: $cmd_text = '종합사이트 통계'; $key=3; break;
+}
+$bold_style[$key] = ' style="font-weight:bold"';
+?>
+<div class="bar"><script> titleBar("<?=$cmd_text?>", 270) </script></div>
+<!--
+<div id="topmenu">
+	<ul class="menu2">
+		<li><a href="<?=$base_url?>rankup_module/rankup_statistics/total_statistic.html"<?=$bold_style[3]?>>종합사이트 통계</a></li>
+		<li><a href="<?=$base_url?>rankup_module/rankup_statistics/day_statistic.html"<?=$bold_style[0]?>>날짜별 통계</a></li>
+		<li><a href="<?=$base_url?>rankup_module/rankup_statistics/month_statistic.html"<?=$bold_style[1]?>>월별 통계</a></li>
+		<li><a href="<?=$base_url?>rankup_module/rankup_statistics/year_statistic.html"<?=$bold_style[2]?>>연별통계</a></li>
+	</ul>
+</div>-->

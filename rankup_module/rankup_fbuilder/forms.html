@@ -1,0 +1,202 @@
+<?php
+/**
+ * 등록폼관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+$rows = $fbuilder->get_settings($_GET['no']);
+
+$rankup_control->print_admin_head('등록폼관리 - '.$rows['form_name']);
+?>
+<body>
+<div class="bar"><script> titleBar("등록폼관리 - <?=$rows['form_name']?>", 400) </script></div>
+
+<style type="text/css">
+.fv {font-family:verdana;font-size:11px}
+</style>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+<?php
+list($totals, $contents) = $fbuilder->draw_list($_GET['no'], array(
+	'entry' => array(
+		0 => '
+			<tr>
+				<td height="40" colspan="6" valign="middle"><span disabled>등록된 문의글이 없습니다.</span></td>
+			</tr>',
+		1 => '
+			<tr>
+				<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+				<td align="left">
+					<b>{:name:}</b>{:on_uid:}
+					<div class="hline tip">{:phone:}</div>
+					<div class="hline">{:email:}</div>
+				</td>
+				<td>
+					<a href="view.html?fno='.$_GET['no'].'&no={:no:}"><b>문의내용보기</b></a>
+					<div class="hline">{:on_answered:}</div>
+				</td>
+				<td><a onClick="fbuilder.mail({:no:})">메일발송</a></td>
+				<td class="fv">
+					{:regist_time:}
+					<div class="hline tip">{:answered_time:}</div>
+				</td>
+				<td>
+					<select onChange="fbuilder.status(this.value, {:no:})">
+					{:status_options:}
+					</select>
+				</td>
+				<td><a onClick="fbuilder.memo.open(this, {:no:})">{:memo_text:}</a></td>
+				<td><a onClick="fbuilder.del(\'{:no:}\')"><img src="../../Libs/_images/btn_delete_s.gif" align="absmiddle" /></a></td>
+			</tr>'
+	),
+	'on_uid' => ' (<a href="../rankup_member/member_detail.html?uid={:uid:}" target="_blank">{:uid:}</a>)',
+	'on_answered' => '<a href="view.html?fno='.$_GET['no'].'&no={:no:}"><b class="orange_b">답변내용보기</b></a>',
+	'status_options' => '<option value="{:value:}"{:selected:}>{:text:}</option>',
+	'status_texts' => array(
+		'request' => '미확인',
+		'hold' => '글확인',
+		'answered' => '답변완료'
+	),
+	'on_selected' => ' selected',
+	'memo_texts' => array(
+		0 => '메모',
+		1 => '<font color="red">메모</font>'
+	)
+), $limits=15);
+
+?>
+	<div id="sub_title">총 <b class="orange_b"><?=number_format($totals)?>건</b>의 문의글이 접수되었습니다.</div>
+	<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+	<col width="35" />
+	<col />
+	<col width="100" />
+	<col width="70" />
+	<col width="145" />
+	<col width="95" />
+	<col width="45" />
+	<col width="45" />
+	<tr class="gray_bg" align="center">
+		<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+		<td>이름(아이디)/연락처/이메일</td>
+		<td>문의/답변내용</td>
+		<td>메일발송</td>
+		<td>등록일시/처리일시</td>
+		<td>답변상태</td>
+		<td>메모</td>
+		<td>삭제</td>
+	</tr>
+	<tbody id="list_frame" valign="top" align="center">
+	<?=$contents?>
+	</tbody>
+	</table>
+
+	<div style="position:relative;margin-top:8px">
+		<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+		<a onClick="fbuilder.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+		<div style="position:absolute;top:0;right:0"><a href="form_builder.html?no=<?=$_GET['no']?>">[폼(FORM)관리]</a></div>
+	</div>
+	<div id="paging">
+		<?=rankup_util::print_paging($totals, $limits)?>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<div id="memo_frame" style="position:absolute;display:none;width:700px;border:1px #555 solid;padding:10px;background-color:#fff;z-index:2">
+	<div style="position:relative">
+		<div id="sub_title">메모입력</div>
+		<div style="position:absolute;width:10px;top:0;right:0;*right:10px"><a onClick="fbuilder.memo.close()">×</a></div>
+	</div>
+	<form id="memo_form" name="memo_form" style="margin-top:5px;*margin:0">
+		<textarea type="editor" id="memo" name="memo" style="width:100%;height:300px" class="simpleform"></textarea>
+		<div style="margin-top:8px;text-align:center">
+			<a onClick="fbuilder.memo.save()"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" /></a>
+			<a onClick="fbuilder.memo.close()"><img src="../../Libs/_images/btn_close.gif" align="absmiddle" /></a>
+		</div>
+	</form>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+checker.initialize('list_frame', 'input[name="no[]"]');
+
+var fbuilder = {
+	fno: null,
+	mail: function(no) {
+		var pop = window.open('send_mail.html?fno='+this.fno+'&no='+no, 'pop', 'width=740,height=600,top=0,left=0,scrollbars=1');
+		pop.focus();
+	},
+	status: function(status, no) {
+		if(!confirm('답변상태를 변경하시겠습니까?')) return false;
+		proc.parameters({mode:'set_status', fno:this.fno, no:no, status:status});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('변경되었습니다.');
+			}
+		}, false);
+	},
+	del: function(no) {
+		var nos = no || checker.get();
+		if(!nos.length) {
+			alert('삭제하실 글을 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('선택하신 글을 삭제하시겠습니까?')) return false;
+		proc.parameters({mode:'del_articles', fno:this.fno, nos:nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				location.reload();
+			}
+		}, false);
+	},
+	memo: {
+		no: null,
+		elem: null,
+		frame: 'memo_frame',
+		open: function(el, no) {
+			this.elem = el, this.no = no;
+			var frame = $(this.frame);
+			proc.parameters({mode:'load_memo', fno:fbuilder.fno, no:no});
+			proc.process(function(trans) {
+				blind.draw();
+				var json = trans.responseText.evalJSON();
+				var memo = frame.select('textarea[name="memo"]')[0];
+				frame.show();
+				position.center(frame);
+				memo.focus(), memo.value = json.memo;
+				$esc.add('fbuilder.memo.close()');
+			}, false);
+		},
+		save: function() {
+			var self = this, memo = $F('memo');
+			if(!confirm('메모를 저장하시겠습니까?')) return false;
+			proc.parameters({mode:'save_memo', fno:fbuilder.fno, no:this.no, memo:memo});
+			proc.process(function(trans) {
+				self.elem.innerHTML = memo.blank() ? '메모' : '<font color="#ff6600">메모</font>';
+				alert('저장되었습니다.');
+				self.close();
+			}, false);
+		},
+		close: function() {
+			$(this.frame).hide();
+			blind.remove();
+			$esc.remove('fbuilder.memo.close()');
+		}
+	}
+}
+fbuilder.fno = "<?=$_GET['no']?>";
+//]]>
+</script>
+
+</body>
+</html>

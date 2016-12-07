@@ -1,0 +1,149 @@
+<?php
+/**
+ * 회원정보 조회
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+
+if($config_info['membership_use']=='no') {
+	scripts('location.replace("'.$base_url.'main/index.html")');
+	exit;
+}
+
+$rankup_control->check_member();
+
+// 페이지 제너레이터 - 필수
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+// 회원가입폼 설정 로드
+$mfs_rows = $design->get_settings('member_form_options');
+$rows = $rankup_member->get_member_info();
+?>
+
+<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed">
+	<col width="134" />
+	<col />
+	<tr><td class="Form_top" colspan="2">&nbsp;</td></tr>
+	<tr>
+		<td class="Form_ess">이름</td>
+		<td class="Form_right"><b><?=$rows['name']?></b></td>
+	</tr>
+	<tr>
+		<td class="Form_ess">아이디</td>
+		<td class="Form_right"><b><?=$rows['uid']?></b></td>
+	</tr>
+	<tr>
+		<td class="Form_ess">생년월일(성별)</td>
+		<td class="Form_right"><?=date('Y 년 n월 j일', strtotime($rows['birthday'])).' ('.$rankup_member->genders[$rows['gender']].')'?></td>
+	</tr>
+	<tr>
+		<td class="Form_ess">회원등급</td>
+		<td class="Form_right"><?=$config_info['smlevel'][$rows['level']].' (Lv.'.$rows['level'].')'?></td>
+	</tr>
+<?php
+if($mfs_rows['nickname']['use']=='yes') {
+?>
+	<tr>
+		<td class="Form_ess">닉네임</td>
+		<td class="Form_right"><?=$rows['nickname']?></td>
+	</tr>
+<?php
+}
+?>
+	<tr>
+		<td class="Form_ess">이메일주소</td>
+		<td class="Form_right"><?=$rows['email']?></td>
+	</tr>
+<?php
+if($mfs_rows['phone']['use']=='yes') {
+?>
+	<tr>
+		<td class="Form_ess">일반전화</td>
+		<td class="Form_right"><?=$rows['phone']?></td>
+	</tr>
+<?php
+}
+if($mfs_rows['hphone']['use']=='yes') {
+?>
+	<tr>
+		<td class="Form_ess">휴대전화</td>
+		<td class="Form_right"><?=$rows['hphone']?></td>
+	</tr>
+<?php
+}
+if($mfs_rows['address']['use']=='yes') {
+?>
+	<tr>
+		<td class="Form_ess">주소</td>
+		<td class="Form_right"><?=sprintf('[%s] %s %s', $rows['zipcode'], $rows['address1'], $rows['address2'])?></td>
+	</tr>
+<?php
+}
+?>
+	<tr>
+		<td class="Form_ess">가입일자</td>
+		<td class="Form_right"><?=date('Y년 m월 d일', strtotime($rows['join_time']))?></td>
+	</tr>
+	<tr>
+		<td class="Form_ess">비밀번호 변경일자</td>
+		<td class="Form_right"><?=date('Y년 m월 d일', strtotime($rows['passwd_time']))?></td>
+	</tr>
+<?php
+// 최종 로그인
+$login_infos = unserialize($rows['prev_login_infos']);
+if($login_infos['login_time']) {
+?>
+	<tr>
+		<td class="Form_ess">최종 로그인 정보</td>
+		<td class="Form_right">
+			<?=$login_infos['login_time'].' <span class="orange">( IP: '.$login_infos['login_ip'].' )</span>'?>
+			<span id="tip">+ 로그인 정보(접속시간, 접속아이피)는 3개월간 보관됩니다.</span>
+		</td>
+	</tr>
+<?php
+}
+?>
+	<tr>
+		<td class="Form_ess">로그인 횟수</td>
+		<td class="Form_right"><?=number_format($rows['visit'])?>회</td>
+	</tr>
+	<tr>
+		<td class="Form_ess">뉴스레터 수신</td>
+		<td class="Form_right">
+			<?=($rows['mailing']=='yes') ? '수신동의' : '<font style="color:red">수신거부</font>'?>
+			<span id="tip"> + 뉴스레터 수신에 동의하시면 사이트의 다양한 소식을 이메일로 받아 보실 수 있습니다.</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="Form_ess">문자메시지 수신</td>
+		<td class="Form_right">
+			<?=($rows['sms']=='yes') ? '수신동의' : '<font style="color:red">수신거부</font>'?>
+			<span id="tip"> + 문자메시지 수신에 동의하시면 사이트의 다양한 소식을 휴대전화로 받아 보실 수 있습니다.</span>
+		</td>
+	</tr>
+</table>
+<br />
+<br />
+
+<!-- 회원탈퇴 -->
+<table background="../rankup_module/rankup_member/img/delete_bg02.gif" border="0" cellpadding="0" cellspacing="0" width="100%">
+	<tr>
+		<td width="50"><img src="../rankup_module/rankup_member/img/delete_bg01.gif"></td>
+		<td></td>
+		<td width="280"><img src="../rankup_module/rankup_member/img/delete_text.gif" align="absmiddle"></td>
+		<td width="60"><a onClick="var pop = window.open('../rankup_module/rankup_member/secession_regist.html','pop','width=500,height=290'); pop.focus()"><img src="../rankup_module/rankup_member/img/delete_button.gif" align="absmiddle" /></a></td>
+		<td></td>
+		<td align="right" width="50"><img src="../rankup_module/rankup_member/img/delete_bg03.gif"></td>
+	</tr>
+</table>
+<!-- 회원탈퇴 -->
+
+<?php
+include_once '../include/bottom.html';
+?>

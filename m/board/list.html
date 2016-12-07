@@ -1,0 +1,112 @@
+<?php
+/**
+ * 폼(FORM)빌더용 - 리스트 페이지
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+include_once '../../rankup_module/rankup_fbuilder/rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+$fs_rows = $fbuilder->get_settings($_GET['fno']);
+if(!$fs_rows['no']) {
+	scripts('alert("잘못된 요청입니다.");history.back()');
+	exit;
+}
+
+if(!$_GET['page']) $_GET['page'] = 1;
+?>
+
+<div id="container">
+
+	<div class="tit0">
+		<div class="tit_t"><?=$gen->page_title?></div>
+	</div>
+	<div id="article">
+
+<?php
+// 게시글 목록 출력
+list($totals, $contents) = $fbuilder->draw_list($fs_rows['no'], array(
+	'entry' => array(
+		0 => '',
+		1 => '
+			<ul class="bai" onClick="vconfirm.open(this, {:no:})">
+				<li>
+					<a>
+						<img src="'.$pc_domain.'rankup_module/rankup_board/icon/icon_secret.gif" style="margin-bottom:4px" /> {:subject:}
+						<span class="info">{:name:}<em class="br">|</em>{:regist_time:}<em class="br">|</em>{:status_text:}</span>
+					</a>
+				</li>
+				<li class="bn"><span>상세보기</span></li>
+			</ul>'
+	),
+	'time_format' => 'Y.m.d',
+	'status_texts' => array(
+		'request' => '<img src="'.$pc_domain.'board/img/btn_unconfirmed.gif" style="vertical-align:top" alt="답변대기" />',
+		'hold' => '<img src="'.$pc_domain.'board/img/btn_hold.gif" style="vertical-align:top" alt="글확인" />',
+		'answered' => '<img src="'.$pc_domain.'board/img/btn_confirmation.gif" style="vertical-align:top" alt="답변완료" />'
+	)
+), $limits=15);
+
+echo $contents;
+
+/**
+ * 페이징 처리
+ */
+if($totals) {
+	$blocks = array();
+	$block_last = $limits * $_GET['page']; // 15, 30, 45 ...
+	$blocks[] = $block_last - $limits + 1;
+	$blocks[] = $block_last>$totals ? $totals : $block_last;
+	if($blocks[0]==1) $prev_off = ' off';
+	if($blocks[1]==$totals) $next_off = ' off';
+?>
+		<ul class="paging">
+			<li class="near<?=$prev_off?>"><a href="./index.html<?=params('page='.($_GET['page']-1))?>"><span class="pre">이전보기</span></a></li>
+			<li><a><span class="cur"><?=implode(' ~ ', $blocks)?></span> <em class="br">/</em> <span class="tot"><?=$totals?></span></a></li>
+			<li class="near<?=$next_off?>"><a href="./index.html<?=params('page='.($_GET['page']+1))?>"><span class="nex">다음보기</span></a></li>
+		</ul>
+<?php
+}
+?>
+	</div>
+</div>
+
+<!-- 리스트 클릭시 레이어 시작 -->
+<div id="confirm_frame" class="pass_box" style="display:none">
+	<h3>비밀번호입력</h3>
+	<form id="confirm_form" name="confirm_form" action="javascript:void(0)" onSubmit="return $vconfirm.submit(this, 'confirm_form')">
+		<input type="hidden" name="no" />
+		<p>
+			글작성시 입력하신 연락처의 마지막 4자리를 입력하세요.<br />
+			<span>
+				<input type="password" id="confirm_number" name="confirm_number" required hname="비밀번호" option="number" maxlength="4" class="simpleform input" />
+				<input type="submit" src="<?=$pc_domain?>board/img/btn_ok.gif" alt="확인" value="확인" align="absmiddle" class="submit" />
+				<a onClick="vconfirm.close()" class="close" >닫기</a>
+			</span>
+		</p>
+	</form>
+</div>
+<!-- 리스트 클릭시 레이어 끝 -->
+
+<script type="text/javascript" src="../scripts/form.js"></script>
+<script type="text/javascript" src="vconfirm.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+vconfirm.initialize('confirm_frame');
+var $vconfirm = Object.clone($form);
+$vconfirm.hashes = {mode: 'confirm_pwd', pid:<?=$_GET['pid']?>, fno:<?=$_GET['fno']?>}
+$vconfirm.handler = function(trans) { proc.response(trans) }
+//]]>
+</script>
+
+<?php
+include_once '../include/bottom.html';
+?>

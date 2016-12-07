@@ -1,0 +1,142 @@
+<?php
+include_once '../Libs/_php/rankup_basic.class.php';
+
+// 모바일 사용여부 체크
+if($mobile->settings['mobile_use']!='yes') {
+	scripts('location.replace("'.$pc_domain.'")');
+	exit;
+}
+
+// IE 브라우져 접근시 - 9.0 미만 버전은 QR 코드 DP.
+$ie_version = rankup_util::ie_version();
+if(!rankup_basic::is_demo() && $ie_version && intval($ie_version)<9) {
+	include 'qr_index.inc.php';
+	exit;
+}
+
+include_once './builder/rankup_design.class.php';
+$design = new rankup_design;
+$ds_rows = $design->get_settings('main_design');
+
+// 메인페이지를 사용하지 않는 경우
+if($ds_rows['main_use']!='yes') {
+	include_once './builder/rankup_frame.class.php';
+	include_once './class/rankup_moduler.class.php';
+	include_once './design/page_generator.class.php';
+
+	$frame = new rankup_frame;
+	$moduler = new rankup_moduler;
+	$page = new page_generator('', false);
+
+	$pid = $page->get_open_pid();
+	if(!$pid) $page->error(404);
+	else {
+		$rows = $frame->get_frame($pid);
+		$url = $page->get_url($rows);
+		if(!$url) $url = $mobile->m_domain.'pension/index.html?pid='.$rows['no']; // 기본주소
+
+		if($rows['target']=='_self') scripts("location.replace('$url');");
+		else if($rows['target']=='_blank') scripts("window.open('$url');");
+	}
+	exit;
+}
+
+$mobile->print_header();
+?>
+<body>
+<style type="text/css">
+@import url(./design/main/main.css?<?=time()?>);
+@import url(./design/top/frame.css?<?=time()?>);
+</style>
+<script type="text/javascript">
+//<![CDATA[
+var menu_handler = function(pid) {
+	proc.parameters({ pid: pid });
+	proc.process(function(trans) { proc.response(trans) }, false, '<?=$m_domain?>design');
+}
+Event.observe(window, 'load', function() {
+	setTimeout(scrollTo, 0, 0, 0);
+}, false);
+/*
+if('standalone' in navigator && !navigator.standalone && (/iphone|ipod|ipad/gi).test(navigator.platform) && (/Safari/i).test(navigator.appVersion)) {
+	document.write('<link rel="stylesheet" href=".\/scripts\/add2home\/style\/add2home.css">');
+	document.write('<script type="application\/javascript" src=".\/scripts\/add2home\/src\/add2home.js" charset="utf-8"><\/s' + 'cript>');
+}
+*/
+//]]>
+</script>
+
+	<table width="100%" height="100%" cellpadding="0" cellspacing="0" border="0" class="main_r" style="">
+		<thead>
+			<tr>
+				<td>
+					<ul class="nav">
+						<li class="lbtn"></li>
+						<li>
+							<?php
+							// 로고출력
+							include_once $base_dir.'rankup_module/rankup_builder/attachment.class.php';
+							$attach = new attachment('mobile_logo', $mobile->m_dir.'builder/');
+							echo $attach->preview($mobile->settings['logo'], array(
+								'image' => '<a href="'.$m_domain.'"><img src="{:folder:}{:name:}" vspace="5" /></a>'
+							));
+							?>
+						</li>
+						<li class="rbtn"><a href="tel:<?=$mobile->settings['phone']?>"><span>전화걸기</span></a></li>
+					</ul>
+					<nav><ul id="gnb" style="border-bottom:0"></ul></nav>
+				</td>
+			</tr>
+		</thead>
+		<?php
+		if($ds_rows['design_type']=='basic') {
+		?>
+		<tbody>
+			<tr>
+				<td style="height:100%;" valign="<?=$ds_rows['vertical_align']?>">
+					<div id="quick">
+						<?php
+						include_once '../rankup_module/rankup_builder/attachment.class.php';
+						$attach = new attachment('quick_icon', $m_dir.'builder/');
+						$folder = $attach->configs['save']['folder'];
+						echo $design->quick_draw($ds_rows, array(
+							'times' => $ds_rows['icon_qty'],
+							'entry_wrap' => array('<ul class="qn first">', '</ul>', '<ul class="qn">'),
+							'entry' => array(
+								0 => '<li style="visibility:hidden"><a class="qt"></a><span></span></li>',
+								1 => '<li{:first:} style="cursor:pointer"><a onClick="menu_handler({:pid:})" class="qt" style="background:url(/'.$folder.'{:attach:}) center center" /></a><span{:off_text:} style="cursor:pointer">{:base_name:}</span></li>',
+							),
+							'first' => ' class="first"',
+							'off_text' => ' class="off"'
+						));
+						?>
+					</div>
+				</td>
+			</tr>
+		<?php
+		}
+		// 직접제작
+		else { ?>
+			<tr>
+				<td style="height:100%" valign="<?=$ds_rows['vertical_align']?>">
+					<?php
+					echo $design->get_settings('main_content');
+					?>
+				</td>
+			</tr>
+		<?php
+		}
+		?>
+		</tbody>
+		<tfoot>
+		<tr>
+			<td>
+				<div class="footer" style="padding:8px 0 10px">
+					<div style="font-size:10px"><?=$mobile->configs['copyright']?></div>
+				</div>
+			</td>
+		</tr>
+		</tfoot>
+	</table>
+</body>
+</html>

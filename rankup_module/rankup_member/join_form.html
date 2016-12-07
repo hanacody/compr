@@ -1,0 +1,343 @@
+<?php
+/**
+ * 회원가입 - 신청서작성
+ *@note: 4 단계
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+
+if($config_info['membership_use']=='no' || $rankup_member->is_member()) {
+	scripts('location.replace("'.$base_url.'main/index.html")');
+	exit;
+}
+
+// 페이지 제너레이터 - 필수
+include_once '../../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../../include/top.html';
+
+// 디자인설정
+include_once '../rankup_builder/rankup_design.class.php';
+$design = new rankup_design;
+
+// 회원가입폼 설정 로드
+$mfs_rows = $design->get_settings('member_form_options');
+
+// 가입인증
+include_once '../rankup_authentic/rankup_authentic.class.php';
+$auth = new authentic('join');
+if(!$auth->pin_check()) {
+	scripts('alert("실명인증이 되지 않았습니다."); location.replace("join_pin.html");');
+	exit;
+}
+
+// 내국인(14over, 14under)
+$is_local = (strpos($_SESSION['member_type'], '14')!==false);
+
+// 항목아이콘
+$require_icon = '<img src="./img/ic_check.gif" /> ';
+$normal_icon = '<font>　</font>';
+
+// join step
+include_once 'join_step.inc.php';
+?>
+
+<form id="join_form" name="join_form" action="<?=rankup_https_change::https_change('rankup_module/rankup_member/proc.ajax.php', 'https')?>" method="POST" onSubmit="return (validate(this)&&confirm('입력하신 정보로 가입하시겠습니까?'))">
+	<input type="hidden" name="mode" value="verify_join" />
+	<input type="hidden" name="kind" value="personal" />
+	<input type="hidden" name="step" value="4" />
+	<table width="900" cellpadding="0" cellspacing="0" border="0" align="center">
+	<tr>
+		<td><img src="./img/join4.png" alt="회원정보"></td>
+	</tr>
+	<tr>
+		<td class="pd_t_10">
+			<table width="100%" align="center" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr><td class="Form_top" colspan="2">&nbsp;</td></tr>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>이름</td>
+				<td class="Form_right">
+					<?php
+					// 이름 출력
+					if($auth->infos['name']) echo '<b>'.$auth->infos['name'].'</b>';
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>생년월일(성별)</td>
+				<td class="Form_right">
+					<?php
+					// 생년월일(성별) 출력
+					echo date('<\b>Y년 n월 j일</\b>', strtotime($auth->infos['birthday']));
+					if($auth->infos['gender']) echo sprintf(' (%s)', $rankup_member->genders[$auth->infos['gender']]);
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>아이디</td>
+				<td class="Form_right">
+					<ul>
+						<li style="float:left">
+							<input type="text" id="join_id" name="join_id" class="simpleform" required hname="아이디" option="userid" size="12" onChange="this.form.verifyid.value=''" maxlength="15" style="font-family:verdana;font-weight:bolder;padding-top:2px;">
+							<input type="hidden" id="verifyid" name="verifyid" required match="id" hname="인증 아이디" nofocus setfocus="join_id" message="아이디 중복확인을 반드시 하셔야 합니다.">
+						</li>
+						<li style="float:left;margin-left:5px"><a onClick="verify.open($('join_id'))"><img src="./img/btn_id_check.gif" align="absmiddle" alt="아이디 중복확인" vspace="1" /></a></li>
+						<li style="float:left;margin-left:3px" id="verify_spot"></li>
+						<li style="float:left;padding-top:4px;"><span id="tip">+ 영문자로 시작하는 <font face="verdana">4~15</font>자의 영문소문자, 숫자조합</span></li>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>비밀번호</td>
+				<td class="Form_right"><input type="password" name="join_passwd" required hname="비밀번호" size="20" maxlength="20" style="width:160px;font-family:verdana;font-weight:bolder;padding-top:2px;" class="simpleform" /><span id="tip">+ <font face="verdana">4~15</font>자의 영문자, 숫자조합</span></td>
+			</tr>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>비밀번호확인</td>
+				<td class="Form_right"><input type="password" name="re_passwd" required hname="비밀번호" matching="join_passwd" size="20" maxlength="20" style="width:160px;font-family:verdana;font-weight:bolder;padding-top:2px;" class="simpleform" /></td>
+			</tr>
+<?php
+if($mfs_rows['nickname']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['nickname']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+			<tr>
+				<td class="Form_ess"><?=$_item_icon?>닉네임</td>
+				<td class="Form_right"><input type="text" name="nickname"<?=$_req_attr?> hname="닉네임" size="22" maxlength="20" style="width:160px" class="simpleform" /></td>
+			</tr>
+<?php
+}
+?>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>이메일주소</td>
+				<td class="Form_right"><input type="text" name="email" required hname="이메일" option="email" size="50" maxlength="60" class="simpleform"></td>
+			</tr>
+<?php
+if($mfs_rows['phone']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['phone']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+			<tr>
+				<td class="Form_ess"><?=$_item_icon?>일반전화</td>
+				<td class="Form_right">
+					<?php
+					if($is_local) {
+						echo '
+						<input type="text" name="phone[]"'.$_req_attr.' keyNum="phone_3rd_digit" hname="일반전화" option="phone" size="5" maxlength="4" span="3" glue="-" class="simpleform" /> -
+						<input type="text" name="phone[]" size="5" maxlength="4" class="simpleform" /><span id="phone_3rd_digit"> -
+						<input type="text" name="phone[]" size="5" maxlength="4" class="simpleform" /></span>';
+					}
+					else {
+						echo '<input type="text" name="phone[]"'.$_req_attr.' hname="일반전화" size="30" maxlength="25" class="simpleform" />';
+					}
+					?>
+				</td>
+			</tr>
+<?php
+}
+if($mfs_rows['hphone']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['hphone']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+			<tr>
+				<td class="Form_ess"><?=$_item_icon?>휴대전화</td>
+				<td class="Form_right">
+					<?php
+					if($is_local) {
+						// 휴대폰인증 사용시
+						if($mfs_rows['hphone_verify']['use']=='yes') {
+							$sms_verify = '
+							<li style="float:left;margin-left:5px"><a onClick="sms_verify.open(\'vsms_spot\')"><img src="../rankup_sms/img/btn_phone_authentic.gif" alt="휴대폰인증" /></li>
+							<li style="float:left;margin-left:5px" id="vsms_spot"></li>
+							<li style="float:left"><span id="tip">+ 휴대폰인증 버튼을 클릭하신 후 휴대전화번호를 입력하시기 바랍니다.</span></li>';
+						}
+						echo '
+						<ul>
+							<li style="float:left">
+								<input type="text" id="hphone1" name="hphone[]"'.$_req_attr.' hname="휴대전화" option="hphone" size="5" maxlength="3" span="3" glue="-" class="simpleform" /> -
+								<input type="text" id="hphone2" name="hphone[]" size="5" maxlength="4" class="simpleform" /> -
+								<input type="text" id="hphone3" name="hphone[]" size="5" maxlength="4" class="simpleform" />
+							</li>
+							'.$sms_verify.'
+						</ul>';
+					}
+					else {
+						echo '<input type="text" name="hphone[]"'.$_req_attr.' hname="휴대전화" size="30" maxlength="25" class="simpleform" />';
+					}
+					?>
+				</td>
+			</tr>
+<?php
+}
+if($mfs_rows['address']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['address']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+			<tr>
+				<td class="Form_ess"><?=$_item_icon?>주소</td>
+				<td class="Form_right pa5">
+					<?php
+					if($is_local) {
+						echo '
+						<ul>
+							<li style="float:left"><input type="text" id="zipcode" name="zipcode"'.$_req_attr.' hname="우편번호" readOnly size="10" maxlength="8" onClick="rankup_post.open_post(\'zipcode_frame\')" class="simpleform" /></li>
+							<li style="float:left;margin-left:5px"><a onClick="rankup_post.open_post(\'zipcode_frame\')"><img src="./img/btn_post.gif" align="absmiddle" vspace="2" alt="우편번호찾기" class="input_box3" /></a></li>
+							<li style="float:left;margin-left:3px" id="post_spot"></li>
+						</ul>
+						<div style="clear:both;padding-top:2px"><input type="text" id="addrs1" name="addrs1"'.$_req_attr.' hname="주소" readOnly size="100" maxlength="100" onClick="rankup_post.open_post(\'zipcode_frame\')" class="simpleform" /></div>';
+					}
+					else {
+						echo '
+						<div><input type="text" name="zipcode"'.$_req_attr.' hname="우편번호" size="10" maxlength="10" class="simpleform" /><span id="tip">+ ZIP CODE</span></div>
+						<div style="margin-top:4px"><input type="text" name="addrs1"'.$_req_attr.' hname="주소" size="100" maxlength="100" class="simpleform" /></div>';
+					}
+					?>
+					<div style="margin-top:4px"><input type="text" id="addrs2" name="addrs2"<?=$_req_attr?> hname="나머지 주소" size="70" maxlength="100" class="simpleform"><span id="tip">+ 나머지 주소</span></div>
+				</td>
+			</tr>
+<?php
+}
+if($mfs_rows['introduce']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['introduce']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+			<tr>
+				<td class="Form_ess"><?=$_item_icon?>가입인사</td>
+				<td class="Form_right pa5">
+					<textarea name="introduce"<?=$_req_attr?> hname="가입인사" style="width:100%;height:200px" class="simpleform"></textarea>
+				</td>
+			</tr>
+<?php
+}
+?>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>뉴스레터 수신</td>
+				<td class="Form_right">
+					<input type="radio" name="mailing" value="yes" checked id="mailing_yes" class="none"><label for="mailing_yes" class="input_box2">수신동의</label>
+					<input type="radio" name="mailing" value="no" id="mailing_no" class="none"><label for="mailing_no" class="input_box2">수신거부</label>
+					<span id="tip">+ 뉴스레터 수신에 동의하시면 사이트의 다양한 소식을 이메일로 받아 보실 수 있습니다. </span>
+				</td>
+			</tr>
+			<tr>
+				<td class="Form_ess"><?=$require_icon?>문자메시지 수신</td>
+				<td class="Form_right">
+					<input type="radio" name="sms" value="yes" checked id="sms_yes" class="none"><label for="sms_yes" class="input_box2">수신동의</label>
+					<input type="radio" name="sms" value="no" id="sms_no" class="none"><label for="sms_no" class="input_box2">수신거부</label>
+					<span id="tip">+ 문자메시지 수신에 동의하시면 사이트의 다양한 소식을 휴대전화로 받아 보실 수 있습니다.</span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td align="center" class="pd_t_20"><input src="./img/btn_regist_general.gif" type="image" alt="회원가입" /> <a onClick="location.replace('join_intro.html')"><img src="./img/btn_cancel_s.gif" alt="취소" /></a></td>
+	</tr>
+	</table>
+</form>
+
+
+<div id="verify_frame" style="position:absolute;width:400px;z-index:2;display:none" class="Form_box">
+	<form id="verify_form" name="verify_form" action="javascript:void(0)" onSubmit="return verify.check()">
+		<input type="hidden" name="mode" value="member_verify">
+		<table width="100%" border="0" cellpadding="10" cellspacing="0" bgcolor="#ffffff">
+		<tr>
+			<td>
+				<div style="position:relative">
+					<img src="./img/pop_checkid_title.png" alt="아이디 중복검사" />
+					<div style="position:absolute;right:0;top:0">
+						<a onClick="verify.close()"><img src="./img/btn_close.png" border="0" alt="닫기" /></a>
+					</div>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td class="Form_top" colspan="2"></td>
+				</tr>
+				<tr>
+					<td width="85" class="Form_left">아이디 확인</td>
+					<td class="Form_right">
+						<span style="float:left"><input type="text" id="user_id" name="user_id" required hname="아이디" size="14" maxlength="12" option="userid" class="simpleform" style="font-family:verdana;font-weight:bolder;padding-top:4px;width:150px;height:19px" /></span>
+						<span style="float:left;margin-left:10px"><input type="image" src="./img/btn_id_check_pop.gif" alt="중복확인" /></span>
+					</td>
+				</tr>
+				<tr>
+					<td class="pd_t_20" align="center" colspan="2">
+						<table width="100%" cellpadding="5" cellspacing="1" border="0" align="center" bgcolor="#D7D7D7">
+						<tr>
+							<td bgcolor="#EBEBEB" id="verify_result">사용하실 아이디를 입력하여 주십시오.</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</form>
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var verify = {
+	verify_uid: null,
+	open: function(el, spot) {
+		blind.draw();
+		this.verify_uid = null;
+		this.obj = $('verify_frame');
+		this.obj.show();
+
+		if(spot==undefined) spot = $('verify_spot');
+		var offset = spot.positionedOffset();
+		this.obj.setStyle({
+			left: offset.left + 'px',
+			top: offset.top + 'px'
+		});
+
+		this.form = this.obj.getElementsByTagName('form')[0];
+		this.form.user_id.value = el.value;
+		this.form.user_id.focus();
+		this.registFrm = el.form;
+		this.result = $('verify_result');
+		if(el.value) this.check();
+
+		$esc.add('verify.close()');
+	},
+	check: function() {
+		if(validate(this.form)) {
+			new Ajax.Request('./multiProcess.ajax.html', {
+				parameters: Form.serialize(this.form),
+				onSuccess: function(trans) { trans.responseText.evalScripts() }
+			});
+		}
+	},
+	close: function() {
+		this.result.update('사용하실 아이디를 입력하여 주십시오.');
+		this.obj.hide();
+		blind.remove();
+		$esc.remove('verify.close()');
+	},
+	apply: function() {
+		var form = this.registFrm;
+		if(this.verify_uid!=null) form.join_id.value = form.verifyid.value = this.verify_uid;
+		this.close();
+	}
+}
+//]]>
+</script>
+
+<?php
+if($is_local && $mfs_rows['hphone_verify']['use']=='yes') include_once 'sms_verify.inc.php'; // 휴대폰인증 폼 로드
+include_once '../rankup_post/rankup_post.inc.html'; // 우편번호 검색 폼 로드
+include_once '../../include/bottom.html';
+
+// 가입된 정보가 있는지 확인
+if($auth->infos['di_code']) {
+	if($rankup_member->check_di_code($auth->infos['di_code'])) {
+		scripts('blind.draw(); alert("죄송합니다. 회원님은 이미 가입된 상태입니다.\n\n아이디/비밀번호 찾기를 이용해 주시기 바랍니다."); location.replace("find_login_info.html");');
+		exit;
+	}
+}
+?>

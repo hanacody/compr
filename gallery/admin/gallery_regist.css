@@ -1,0 +1,64 @@
+/**
+ * 웹진형 등록폼/리스트 스타일
+ */
+#webzine_frame {
+
+}
+#webzine_frame ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#webzine_frame dl {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#webzine_frame dt {
+	float: left;
+	width: 194px;
+	height: 134px;
+	border: 1px #ccc solid;
+	background-color: #f7f7f7;
+}
+#webzine_frame dt img {
+	margin: 5px;
+	width: 180px;
+	height: 120px;
+	border: 1px #999 solid;
+}
+#webzine_frame dd {
+	float: right;
+	width: 530px;
+	margin: 0;
+	padding: 0;
+}
+#webzine_frame dd textarea {
+	width: 100%;
+	height: 134px;
+}
+
+#webzine_lists .subject {
+	border-right: 0;
+	font-weight: bold;
+	letter-spacing: -1px;
+}
+#webzine_lists .tool {
+	border-left: 0;
+	text-align: right;
+	vertical-align: top;
+}
+#webzine_lists .photo {
+	border-right: 0;
+	text-align: center;
+}
+#webzine_lists .photo img {
+	width: 180px;
+	height: 120px;
+	border: 1px #555 solid;
+}
+#webzine_lists .content {
+	border-left: 2px #e0e0e0 dotted;
+	*border-left: 2px #e0e0e0 dashed;
+	line-height: 1.5em;
+}

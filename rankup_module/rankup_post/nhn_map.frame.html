@@ -1,0 +1,22 @@
+<?php
+/**
+ * 네이버지도API2.0 출력
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->print_user_head('네이버지도API', true, true);
+?>
+<body style="overflow:hidden">
+<script type="text/javascript" src="http://openapi.map.naver.com/openapi/naverMap.naver?ver=2.0&key=<?=$_GET['key']?>"></script>
+<script type="text/javascript" src="nhn_map2.js"></script>
+
+<div id="nhn_map" style="<?=fetch_skin($_GET, 'width:{:width:};height:{:height:}')?>"><img src="http://static.naver.com/maps2/icons/pin_spot2.png" style="visibility:hidden"/></div>
+<input type="hidden" id="mapx" name="mapx" value="<?=$_GET['mapx']?>" />
+<input type="hidden" id="mapy" name="mapy" value="<?=$_GET['mapy']?>" />
+
+<script style="text/javascript">
+//<![CDATA[
+Event.observe(window, 'load', function() { nmap.initialize('nhn_map', '<?=$_GET['key']?>', true) })
+//]]>
+</script>
+</body>
+</html>

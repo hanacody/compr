@@ -1,0 +1,44 @@
+<?php
+/**
+ * 게시글 인쇄
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once 'rankup_board.class.php';
+
+$board = new rankup_board($_GET['id']);
+$board_infos = $board->queryFetchObject("select * from $board->board_table where no=$_GET[no]");
+
+// 상세정보 이미지 크기 자동적용
+$sgallery = unserialize($board->board_configs['sgallery']);
+$view_imgae_width = $sgallery['picture_width'] < $board->slayout['board_width'] ? $sgallery['picture_width'] : $board->slayout['board_width']-40; //가장적당한 크기 게시판 크기에서 -40 정도
+$board_infos->content = $board->prefix_contents($board_infos->content, $view_imgae_width);
+
+$rankup_control->print_user_head($board_infos->subject);
+?>
+<body>
+<style type="text/css">
+/* header */
+ul.print_header {position:relative;width:100%;border-bottom:3px solid #333;height:65px;margin:20px 0}
+ul.print_header li.subject {display:table-cell;width:100%;height:35px;font-size:15px;color:black;line-height:1.0em;border-bottom:1px dotted #ddd}
+ul.print_header li.author {position:absolute;top:44px;font-size:11px;}
+ul.print_header li.pubdate {position:absolute;top:44px;right:0;font-size:11px;}
+/* contents */
+div.print_contents {word-break:break-all;margin-bottom:20px}
+div.print_contents p {margin:0;padding:0}
+</style>
+<div style="width:<?=$board->slayout['board_width']?>px;margin:0 auto;">
+	<ul class="print_header">
+		<li class="subject"><?=$board_infos->subject?></li>
+		<li class="author">· 작성자 : <b><?=$board_infos->unick?></b></li>
+		<li class="pubdate">· 작성일 : <?=date("Y-m-d H:i:s", strtotime($board_infos->wdate))?></li>
+	</ul>
+	<div class="print_contents">
+		<?php
+		// 본문 출력
+		echo $board_infos->content;
+		?>
+	</div>
+</div>
+<script type="text/javascript"> window.print() </script>
+</body>
+</html>

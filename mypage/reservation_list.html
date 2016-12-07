@@ -1,0 +1,132 @@
+<?php
+/**
+ * 예약내역 조회
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+include_once '../pension/class/reserve.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+
+$rankup_reserve = new rankup_reserve;
+$_GET['uid'] = $rankup_member->get_id();
+
+if(!$_GET['uid']) $rankup_control->popup_msg_js('','../pension/reserve_check.html');
+$_GET['page'] = ($_GET['page']) ? $_GET['page'] : 1;
+
+$rankup_reserve->auto_done();
+$rankup_reserve->check_useless_reserve();
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+?>
+
+<?php
+list($totals, $contents, $paging) = $rankup_reserve->print_reserve_contents(array(
+	'entry' => array(
+		0 => '
+			<tr>
+				<td colspan="4" height="30" valign="middle" align="center"><span disabled>검색된 정보가 존재하지 않습니다.</span></td>
+			</tr>',
+		1 => '
+			<tr>
+				<td colspan="4" id="cell_bg03" style="padding-left:10px;">
+				<span class="ic_call">예약번호</span>
+				<b><a style="color:#0c7db1" href="../pension/reserve_content.html?no={:reservation_no:}&page='.$_GET['page'].'">{:reservation_no:} <img src="./img/btn_detail.gif" align="absmiddle"></a></b>
+				 </td>
+			</tr>
+			<tr>
+				{:room_content:}
+				<td rowspan="{:rowspan:}" class="Form_leftv" valign="top" style="padding:0">
+					{:payment_content:}
+				</td>
+				<td rowspan="{:rowspan:}" align="center">
+					<b class="orange">{:status_str:}</b><br>
+					{:btn_cancel:}
+				</td>
+			</tr>
+			{:room_content_sub:}
+			{:facility:}
+
+	'),	'mode'=>'user_page'	,
+		'str_prepayed'=> '부분결제',
+		'str_ready' => '입금대기',
+		'str_payed' => '결제완료',
+		'str_cancel' => '예약취소',
+		'str_precancel' => '취소신청',
+		'str_done' => '숙박종료',
+		'btn_cancel' => '<img src="./img/btn_regist_cancel.gif"></a>'
+), '5','paging' );
+?>
+
+<script type="text/javascript">
+function reserve_cancel(no, status) {
+	var status_alert;
+	switch(status) {
+		case "ready" : status_alert='이 예약을 취소신청하시겠습니까?'; break;
+		case "prepayed" : status_alert='예약을 취소하시면 계약금은 환불되지 않습니다.\n계속 진행하시겠습니까?'; break;
+		case "payed" : status_alert='예약을 취소하시면 환불수수료를 제외한 나머지 금액만 환불됩니다.\n계속 진행하시겠습니까?'; break;
+	}
+	if(confirm(status_alert)) {
+		save_form.no.value= no;
+		save_form.submit();
+	}
+}
+</script>
+
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0"></iframe><br>
+<form name="save_form" action="../pension/multiProcess.ajax.html" method="POST" target="multiProcessFrame">
+<input type="hidden" name="mode" value="update_reserve_status">
+<input type="hidden" name="new_status" value="precancel">
+<input type="hidden" name="no" value="">
+</form>
+
+<table width="690" cellpadding="0" cellspacing="0" border="0" align="center">
+<tr>
+	<td><img src="../pension/img/dot_tit.gif"> 총 <b class="english red_brown"><?=$totals?></b>건의 예약내역이 검색되었습니다.</td>
+</tr>
+<tr>
+	<td class="pd_t_10">
+		<table width="690" cellpadding="0" cellspacing="0" border="1" bordercolor="#e1c8a9" frame="hsides" rules="all" align="center" class="pension">
+		<tr align="center">
+			<th width="230" height="30" >예약정보</td>
+			<th width="190" >결제금액</td>
+			<th width="190">결제정보</td>
+			<th>예약상태</td>
+		</tr>
+		<?=$contents?>
+		<tr>
+			<td class="pd_t_10 pd_b_10" colspan="4">
+				<!--객실상세설명시작-->
+				<table width="670" cellpadding="0" cellspacing="0" border="0" align="center">
+				<tr>
+					<td><img src="../pension/img/dot_explain.gif"> <font class="green">예약후 날짜변경, 객실변경은 예약취소후 다시 예약하셔야 합니다.</font></td>
+				</tr>
+				<tr>
+					<td><img src="../pension/img/dot_explain.gif"> <font class="green">환불문의는 안내전화를 통하여 직접 문의 바랍니다.</font></td>
+				</tr>
+				<tr>
+					<td><img src="../pension/img/dot_explain.gif"> <font class="green">환불적용은 객실 이용요금의 100% 입금 시 에만 적용됩니다.(예약금의 일부만 입금했을 경우에는 환불불가)</font></td>
+				</tr>
+				<tr>
+					<td><img src="../pension/img/dot_explain.gif"> <font class="green">환불은 입금자명으로 되며 입금시 송금수수료는 제외한 후 입금됩니다.</font></td>
+				</tr>
+				<tr>
+					<td><img src="../pension/img/dot_explain.gif"> <font class="green">예약번호 클릭시 예약상세정보를 확인하실 수 있습니다.</font></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		<div id="paging"><?=$paging?></div>
+
+	</td>
+</tr>
+</table>
+
+<?php
+include_once '../include/bottom.html';
+?>

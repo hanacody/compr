@@ -1,0 +1,52 @@
+ul,li.#mm_wrap{border:0px solid #fff;}
+
+/* gnb frame */
+#css_gnb_frame {
+	text-align: left;
+}
+/* main-menu */
+#css_gnb_frame div.mm_wrap {
+	height: 40px;
+	text-align: center;
+}
+#css_gnb_frame ul.mm {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	white-space: nowrap;
+	line-height: 1.0em;
+	margin-top: 1.2em;
+}
+#css_gnb_frame ul.mm li {
+	display: inline;
+	cursor: pointer;
+	padding: 0;
+	margin: 0;
+	font-size: 14px;
+	letter-spacing: -1px;
+	font-weight: bold;
+	line-height: 1.0em;
+}
+#css_gnb_frame ul.mm li.first {
+	margin-left: 0;
+	*margin-left: 1px;
+}
+/* sub-menu */
+#css_gnb_frame ul.sm {
+	clear: both;
+	position: absolute;
+	margin-top: -6px;
+	line-height: 1.0em;
+	padding: 4px 10px;
+	background-color: #683E16;
+}
+#css_gnb_frame ul.sm li {
+	float: left;
+	cursor: pointer;
+	font-size: 11px;
+	padding-top: 0.3em;
+	line-height: 0.8em;
+}
+#css_gnb_frame ul.sm li.first {
+	margin-left: 0;
+}

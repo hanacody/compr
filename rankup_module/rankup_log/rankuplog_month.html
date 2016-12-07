@@ -1,0 +1,75 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+
+$db = new db_class;
+$often = new often_class;
+
+$todayyear = date("Y");
+$today = $todayyear."-".$todaydate;
+
+include_once "./rankup_toplink.html";
+?>
+
+<script type="text/javascript" src="../rankup_chart/js/swfobject.js"></script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name=form method=get action=<?php echo $_SERVER['PHP_SELF']; ?>>
+					<input type=hidden name=mode value=search>
+					<tr>
+						<td class="gray_bg" align="center">검색할 년도를 선택하세요&nbsp;&nbsp;
+							<select name="frontyear">
+								<?php
+								// 연도 출력
+								$years = array();
+								foreach(range(2010, date('Y')) as $year) array_push($years, sprintf('<option value="%d"%s>%d</option>', $year, ($_GET['frontyear']==$year) ? ' selected' : '', $year));
+								echo implode('', array_reverse($years));
+								?>
+							</select>년&nbsp;&nbsp;
+							<input type=image src=../../Libs/_images/btn_search.gif border=0 align=absmiddle alt='검색'>
+						</td>
+					</tr>
+					</form>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="20"></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="4" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+					<tr>
+						<td>
+<?
+$data_file = urlencode("./chart_data/set_chart_month.php?mode=".$_GET['mode']."&frontyear=".$_GET['frontyear']);
+?>
+							<div id="my_chart"></div>
+							<script type="text/javascript">
+							swfobject.embedSWF(
+							"../rankup_chart/open-flash-chart.swf", "my_chart", "740", "500",
+							"9.0.0", "expressInstall.swf",
+							{"data-file":"<?=$data_file?>"} );
+							</script>
+
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

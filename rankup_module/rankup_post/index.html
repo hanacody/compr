@@ -1,0 +1,148 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+$is_demo=rankup_basic::is_demo();
+
+$rankup_control->print_admin_head();
+?>
+<body>
+<div class="bar"><script> titleBar("우편번호 관리", 270) </script></div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="600" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="25">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td><div id="sub_title">우편번호DB 업데이트</div></td>
+						<td align="right"><a onClick="$('help1').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--도움말-->
+			<tr id="help1" style="display:none;">
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">랭크업에서 다운로드 받으신 최신 우편번호 파일을 업로드해 주시기 바랍니다.</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--도움말-->
+			<tr>
+				<td>
+					<!-- 프로세스 처리 프레임 -->
+					<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+					<!-- 프로세스 처리 프레임 -->
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+					<form name="registFrm" method="POST" target="multiProcessFrame" action="./post_dbchange.php" onSubmit="return (validate(this)&&confirm('우편번호 DB를 업데이트 하시겠습니까?'+SPACE))" encType="multipart/form-data">
+					<input type="hidden" name="mode" value="insertdb">
+					<tr>
+						<td class="gray_bg">최신 우편번호 파일</td>
+						<td style="padding:0;">
+							<table width="100%" cellpadding="5" cellspacing="0" border="0">
+							<tr>
+								<td><input type="file" name="postfile" hname="최신 우편번호 파일" filter="txt"></td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr align="center">
+				<td height="40"><input type="image" src="../../Libs/_images/btn_regist.gif" alt="등록"></td>
+			</tr>
+			</form>
+			<tr>
+				<td height="25">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td><div id="sub_title">우편번호DB 적용일자</div></td>
+						<td align="right"><a onClick="$('help2').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--도움말-->
+			<tr id="help2" style="display:none;">
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">업로드 하신 우편번호 업데이트 일자를 알 수 있습니다.</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--도움말-->
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+						<tr align="center">
+							<td class="gray_bg">우편번호DB 적용일자</td>
+							<td class="gray_bg" width="80">삭제</td>
+						</tr>
+						<?php
+						$fileDir = @opendir('./backup');  //저장권한이 있는지 실질적으로 존재하는 디렉토리인지 검사
+
+						while(($filename = readdir($fileDir)) != false) {
+
+						  if ($filename != "." && $filename != ".." && substr($filename,0,11) == 'db_zipcode_') {
+							$upload_year = substr($filename,11,4);
+							$upload_month = substr($filename,15,2);
+							$upload_day = substr($filename,17,2);
+							$upload_hour = substr($filename,19,2);
+							$upload_min = substr($filename,21,2);
+							$upload_sec = substr($filename,23,2);
+						?>
+								<tr>
+						<?php if(!$is_demo) { ?>
+								<td>
+								  <?php echo $upload_year."년 ".$upload_month."월 ".$upload_day."일 ".$upload_hour."시 ".$upload_min."분 ".$upload_sec."초"; ?>
+								</td>
+								<td align=center>
+								  <a href="./del.php?file_Name=<?php echo $filename; ?>" onclick="return confirm('삭제 하시겠습니까?');">삭제</a>
+								</td>
+						<?php } else { ?>
+								<td>
+								  <?php echo $upload_year."년 ".$upload_month."월 ".$upload_day."일 ".$upload_hour."시 ".$upload_min."분 ".$upload_sec."초"; ?>
+								</td>
+								<td align=center>
+								  <a href="javascript:void(0)" onclick="alert('데모버전입니다.');">삭제</a>
+								</td>
+						<?php } ?>
+								</tr>
+						<?php
+						  }
+
+						}
+						closedir($fileDir);
+						?>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

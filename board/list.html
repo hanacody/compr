@@ -1,0 +1,134 @@
+<?php
+/**
+ * 폼(FORM)빌더용 - 게시글 목록페이지
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+
+// 페이지 제너레이터 - 필수
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+
+// 타이틀, 스타일 출력 / 상단 컨텐츠
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+include_once '../rankup_module/rankup_fbuilder/rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+$fs_rows = $fbuilder->get_settings($_GET['fno']);
+if(!$fs_rows['no']) {
+	scripts('alert("잘못된 요청입니다.");history.back()');
+	exit;
+}
+
+// 게시글 목록 출력
+list($totals, $contents) = $fbuilder->draw_list($fs_rows['no'], array(
+	'entry' => array(
+		0 => '
+			<tr>
+				<td height="40" colspan="6" valign="middle"><span disabled>등록된 문의글이 없습니다.</span></td>
+			</tr>',
+		1 => '
+			<tr height="30" >
+				<td>{:row:}</td>
+				<td align="left">
+					<img src="'.$base_url.'rankup_module/rankup_board/icon/icon_secret.gif" align="absmiddle" />
+					<a onClick="vconfirm.open(this, {:no:})">{:subject:}</a>
+				</td>
+				<td>
+					{:name:}
+				</td>
+				<td>
+					{:regist_time:}
+				</td>
+				<td>
+					{:status_text:}
+				</td>
+			</tr>',
+		2 => '<tr><td height="1" colspan="5" bgcolor="#ebebeb"></td></tr>'
+	),
+	'time_format' => 'Y.m.d',
+	'status_texts' => array(
+		'request' => '<img src="./img/btn_unconfirmed.gif" align="absmiddle" alt="답변대기" />',
+		'hold' => '<img src="./img/btn_hold.gif" align="absmiddle" alt="글확인" />',
+		'answered' => '<img src="./img/btn_confirmation.gif" align="absmiddle" alt="답변완료" />'
+	)
+), $limits=15);
+
+?>
+
+<table width="730" cellpadding="0" cellspacing="0" border="0" align="center">
+<tr>
+	<td>
+
+		<div class="subtitle" style="height:22px;">
+			<img src="<?=$base_url.SKIN?>img/bullet_s_tit.png" class="bullet_img" /> 총 <b><?=number_format($totals)?> 건</b>의 문의글이 등록되어 있습니다.
+		</div>
+		<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<col width="50" />
+			<col />
+			<col width="100" />
+			<col width="100" />
+			<col width="90" />
+			<tr>
+				<td class="Form_top" colspan="5">&nbsp;</td>
+			</tr>
+			<tr height="31" align="center" class="t_bgcolor">
+				<td width="50"><img align="absmiddle" src="./img/tit_1.png"></td>
+				<td><img align="absmiddle" src="./img/tit_2.png"></td>
+				<td width="80"><img align="absmiddle" src="./img/tit_3.png"></td>
+				<td width="60"><img align="absmiddle" src="./img/tit_4.png"></td>
+				<td width="80"><img align="absmiddle" src="./img/tit_5.png"></td>
+			</tr>
+			<tbody align="center" class="table_bgcolor">
+			<?=$contents?>
+			</tbody>
+			<tr><td height="1" colspan="5" bgcolor="#323232"></td></tr>
+		</table>
+
+		<div id="paging">
+			<?=rankup_util::print_paging($totals, $limits)?>
+		</div>
+
+		<div style="margin-top:10px;text-align:right">
+			<a href="write.html<?=params('pid=')?>"><img align="absmiddle" src="./img/btn_inquiry.gif"></a>
+		</div>
+
+	</td>
+</tr>
+</table>
+
+<!-- 리스트 클릭시 레이어 시작 -->
+<div id="confirm_frame" class="pass_box" style="display:none">
+	<h3>비밀번호입력</h3>
+	<form id="confirm_form" name="confirm_form" action="javascript:void(0)" onSubmit="return $vconfirm.submit(this, 'confirm_form')">
+		<input type="hidden" name="no" />
+		<p>
+			글작성시 입력하신 연락처의 마지막 4자리를 입력하세요.<br />
+			<span>
+				<input type="password" id="confirm_number" name="confirm_number" required hname="비밀번호" option="number" maxlength="4" class="simpleform input" style=""/>
+				<input type="image" src="./img/btn_ok.gif" alt="확인" align="absmiddle" />
+				<a onClick="vconfirm.close()"><img src="./img/btn_close.gif" alt="닫기" align="absmiddle" /></a>
+			</span>
+		</p>
+	</form>
+</div>
+<!-- 리스트 클릭시 레이어 끝 -->
+
+<script type="text/javascript" src="vconfirm.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+vconfirm.initialize('confirm_frame');
+var $vconfirm = Object.clone($form);
+$vconfirm.hashes = {mode: 'confirm_pwd', pid:<?=$_GET['pid']?>, fno:<?=$_GET['fno']?>}
+$vconfirm.handler = function(trans) { proc.response(trans) }
+//]]>
+</script>
+
+<?php
+include_once '../include/bottom.html';
+?>

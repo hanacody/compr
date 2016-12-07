@@ -1,0 +1,45 @@
+
+#mapkey_items {
+	margin: 0;
+	padding: 0;
+	width: 490px;
+	height: 200px;
+	overflow-y: scroll;
+	padding: 4px 4px;
+	list-style: none;
+	background-color: #f7f7f7;
+}
+#mapkey_items li {
+	float: left;
+	cursor: pointer;
+	border: #ccc 1px solid;
+	width: 469px;
+	*width: 463px;
+	height: 50px;
+	padding: 0;
+	margin: 1px;
+}
+#mapkey_items div {
+	padding: 8px 4px 0 4px;
+	*padding: 8px 4px 0 4px;
+	color: #999;
+	border: 0px red solid;
+	line-height: 1.0em;
+}
+
+.attachNormalItem {
+	background-color: white;
+	border: #acacac 1px solid;
+}
+.attachSelectItem {
+	background-color: #FFEAB9;
+	border: #EBDFBA 1px solid;
+}
+.attachHoverItem {
+	background-color: #F1F9EE;
+	border: #eeeeee 1px solid;
+}
+.attachSHoverItem {
+	background-color: #FCF2DA;
+	border: #eeeeee 1px solid;
+}

@@ -1,0 +1,29 @@
+<?php
+/**
+ * 기타 페이지
+ *@note: READY & HTML 컨텐츠만 해당
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+/**
+ * 페이지 콘텐츠 로드
+ */
+if(!$gen->page) {
+	// 관리자가 일반페이지를 모듈페이지로 바꾼 경우
+	scripts("location.replace('{$base_url}main/index.html')");
+	exit;
+}
+else {
+	include_once $base_dir.SKIN.$gen->page;
+}
+
+include_once '../include/bottom.html';
+?>

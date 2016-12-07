@@ -1,0 +1,172 @@
+<?php
+/**
+ * 인증번호 발송 기록 - 회원가입
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+if(!$_GET['sdate']) $_GET['sdate'] = date('Y-m-d');
+if(!$_GET['edate']) $_GET['edate'] = date('Y-m-d');
+
+list($totals, $contents) = $rankup_member->print_vsms_log(array(
+	'entry_wrap' => array('<tr>', '</tr>'),
+	'entry' => array(
+		0 => '
+		<tr>
+			<td colspan="6" height="40"><span disabled>인증번호 전송 기록이 없습니다.</span></td>
+		</tr>',
+		1 => '
+		<tr>
+			<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+			<td>{:hphone:}</td>
+			<td><b class="tip2">{:vnumber:}</b></td>
+			<td>{:ip_addr:}</td>
+			<td>{:send_time:}</td>
+			<td><a onClick="log.del(\'{:no:}\')"><img src="../../Libs/_images/btn_delete_s.gif" /><a></td>
+		</tr>'
+	)
+), $limits=20);
+
+$rankup_control->print_admin_head('인증번호 발송 기록');
+?>
+<div class="bar"><script> titleBar('인증번호 발송 기록') </script></div>
+
+<center>
+<div class="help_bg" style="width:760px;margin:30px auto 10px auto;text-align:left">
+	<ul class="help_ul">
+		<li>회원가입시 <b style="color:#ff6600"><u>휴대폰 인증번호 전송은 1일 5회로 제한</u></b>되어 있습니다.</li>
+		<li>전송제한으로 인증번호를 받지 못하는 경우에는 해당 휴대전화번호의 전송내역을 삭제 해 주시면 됩니다.</li>
+		<li>문자메시지 전송결과는 [랭크업 홈페이지 > 나의서비스 관리] 에서 확인하실 수 있습니다.</li>
+	</ul>
+</div>
+</center>
+
+<form name="searchFrm" method="GET" action="./member_vsms_log.html">
+	<table width="760" align="center" cellpadding="4" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+	<tr class="gray_bg">
+		<td>
+			<table cellpadding="2" cellspacing="1" border="0" align="center">
+			<tr align="center">
+				<td><input type="checkbox" name="use_date"<? if($_GET['use_date']) echo " checked" ?>></td>
+				<td width="180">
+					<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+				</td>
+				<td width="409" id="period_search_option">
+					<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td bgcolor="white">
+			<table cellpadding="2" cellspacing="1" border="0" align="center">
+			<tr>
+				<td>
+					<select name="smode">
+					<option value="hphone">휴대전화</option>
+					<option value="ip_addr"<? if($_GET['smode']=='ip_addr') echo ' selected' ?>>아이피주소</option>
+					</select>
+				</td>
+				<td>
+					<input type="text" name="skey" value="<?=htmlspecialchars($_GET['skey'])?>" class="simpleform" size="15" maxlength="20" style="background-color:white">
+				</td>
+				<td align="right"><input type="image" src="../../Libs/_images/btn_search.gif" alt="검색"></td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+</form>
+
+<table width="760" cellpadding="0" cellspacing="0" align="center" style="margin-top:20px">
+<tr>
+	<td>
+		<img src="../../Libs/_images/ic_bullet1.gif">총 <b style="color:#FF6600"><?=number_format($totals)?>건</b>의 로그가 검색되었습니다.
+	</td>
+</tr>
+</table>
+
+<table width="760" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="margin-top:5px">
+<tr class="gray_bg" align="center">
+	<td width="30"><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)"></td>
+	<td width="150">휴대전화번호</td>
+	<td width="130">인증번호</td>
+	<td width="150">아이피</td>
+	<td>요청시각</td>
+	<td width="55">삭제</td>
+</tr>
+<tbody id="log_frame" align="center">
+<?=$contents?>
+</tbody>
+</table>
+
+<table width="760" cellpadding="0" cellspacing="0" align="center" style="margin-top:10px">
+<tr>
+	<td>
+		<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+		<a onClick="log.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+		&nbsp;&nbsp;
+		<a onClick="log.del_3month()"><img src="./img/btn_del_log.gif" alt="3개월전 로그삭제" align="absmiddle" /></a>
+		<a onClick="log.reset()"><img src="./img/btn_reset_log.gif" alt="로그초기화" align="absmiddle" /></a>
+	</td>
+</tr>
+<tr>
+	<td>
+		<div id="paging">
+			<?=$rankup_control->print_paging($totals, $limits)?>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td height="20"></td>
+</tr>
+</table>
+
+<script type="text/javascript">
+//<![CDATA[
+checker.initialize('log_frame', 'input[name="no[]"]');
+
+var log = {
+	del: function(no) {
+		var nos = no || checker.get();
+		if(!nos.length) {
+			alert('삭제하실 로그 데이터를 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('선택하신 로그 데이터를 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_vsms', nos: nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			alert('삭제 되었습니다.');
+			location.replace('./member_vsms_log.html');
+		}, false);
+	},
+	del_3month: function() {
+		if(!confirm('3개월전 로그 데이터를 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_vsms_log'});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제 되었습니다.');
+				location.replace('./member_vsms_log.html');
+			}
+		}, false);
+	},
+	reset: function() {
+		if(!confirm('로그 데이터를 초기화하시겠습니까?')) return false;
+		proc.parameters({mode: 'reset_vsms_log'});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('초기화 되었습니다.');
+				location.replace('./member_vsms_log.html');
+			}
+		}, false);
+	}
+}
+//>
+</script>
+
+</body>
+</html>

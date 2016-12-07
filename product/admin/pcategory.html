@@ -1,0 +1,121 @@
+<?php
+/**
+ * 제품카테고리설정
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'top_menu.inc.php';
+?>
+
+<link type="text/css" rel="stylesheet" href="../../rankup_module/rankup_category/category.css" />
+<script type="text/javascript" src="../../rankup_module/rankup_category/category.class.js"></script>
+<script type="text/javascript" src="./pcategory.extend.js"></script>
+<style type="text/css">
+#category_frame ul { width: 300px; } /* 콘테이너 가로크기 - dt 보다 40px 커야함 */
+#category_frame li.body { height: 400px; } /* 콘테이너 세로크기 */
+#category_frame li.head dt, #category_frame li.body dt { width: 210px; } /* 카테고리명 가로크기 - ul 보다 90px 작아야함 */
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;text-align:left">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+
+			<div id="category_frame">
+				<?php
+				// 스탭정의
+				$steps = array(
+					array('step' => 1, 'title' => '제품대분류', 'item_name' => '제품대분류'),
+					array('step' => 2, 'title' => '제품중분류', 'item_name' => '제품중분류')
+				);
+				echo fetch_contents($steps, $entry = array(
+					'times' => count($steps),
+					'entry_wrap' => array('<table><tr align="center">', '</tr></table>'),
+					'entry' => array(
+						1 => '
+							<td id="step{:step:}">
+								<h2>{:title:}</h2>
+								<ul>
+									<li class="head">
+										<dl>
+											<dd class="cbox"><input type="checkbox" id="checker_top" onClick="checker{:step:}.all(this.checked)" /></dd>
+											<dt>{:item_name:}</dt>
+											<dd class="used">출력</dd>
+											<dd class="child">하위</dd>
+										</dl>
+									</li>
+									<li id="step{:step:}_frame" class="body">
+										<!--<![CDATA[ nodes ]]>-->
+									</li>
+								</ul>
+							</td>',
+						3 => '<td class="next">▶</td>'
+					)
+				));
+				// 툴박스
+				echo fetch_contents($steps, $entry = array(
+					'times' => count($steps),
+					'entry_wrap' => array('<table style="margin-top:-6px"><tr align="center">', '</tr></table>'),
+					'entry' => array(
+						1 => '
+							<td id="step{:step:}_tools" style="padding-top:5px;">
+								<div spot="step{:step:}_frame" step="{:step:}">
+									<a onClick="pcategory.direction.first(this)"><img src="../../rankup_module/rankup_category/img/btn_first.gif" align="absmiddle" /> <a onClick="pcategory.direction.up(this)"><img src="../../rankup_module/rankup_category/img/btn_up.gif" align="absmiddle" /></a> <a onClick="pcategory.direction.down(this)"><img src="../../rankup_module/rankup_category/img/btn_down.gif" align="absmiddle" /></a> <a onClick="pcategory.direction.last(this)"><img src="../../rankup_module/rankup_category/img/btn_end.gif" style="margin-right:70px;" align="absmiddle" /></a> <a onClick="pcategory.add(this)"><img src="../../rankup_module/rankup_category/img/btn_add.gif" class="gap" align="absmiddle" /></a> <a onClick="pcategory.modify(this)"><img src="../../rankup_module/rankup_category/img/btn_modify.gif" align="absmiddle" /></a> <a onClick="pcategory.del(this)"><img src="../../rankup_module/rankup_category/img/btn_board_del.gif" align="absmiddle" /></a>
+								</div>
+							</td>',
+						3 => '<td class="next"></td>'
+					)
+				));
+				?>
+			</div>
+
+		</form>
+
+	</div>
+
+	<div id="regist_frame" style="position:absolute;width:400px;background-color:white;border:1px black solid;padding:10px;display:none;z-index:2">
+		<div style="float:right;width:10px;margin-top:-5px"><a onClick="pcategory.close()">×</a></div>
+		<form id="save_form" name="save_form" onSubmit="return false">
+			<input type="hidden" id="no" name="no" />
+			<input type="hidden" id="depth" name="depth" />
+			<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1" style="table-layout:fixed">
+				<col width="134" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 항목이름</td>
+					<td><input type="text" id="item" name="item" required hname="항목이름" size="25" maxlength="25" class="simpleform" onKeyUp="pcategory.enter(event)" /></td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 출력여부</td>
+					<td>
+						<input type="radio" name="used" checked value="yes" id="used_yes" /><label for="used_yes">출력함</label>
+						<input type="radio" name="used" value="no" id="used_no" /><label for="used_no">출력안함</label>
+					</td>
+				</tr>
+			</table>
+		</form>
+		<div style="text-align:center;margin-top:10px">
+			<a onClick="pcategory.save()"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+			<a onClick="pcategory.close()"><img src="../../Libs/_images/btn_close1.gif" align="absmiddle" alt="창닫기" /></a>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+	//@note: 스탭수 만큼 checker 생성할 것
+	var checker1 = Object.clone(checker);
+	var checker2 = Object.clone(checker);
+	checker1.initialize('step1_frame', 'input[name="nos[]"]');
+	checker2.initialize('step2_frame', 'input[name="nos[]"]');
+
+	// 객실시설설정 초기화
+	pcategory.initialize('category_frame', true, 'product', domain +'rankup_module/rankup_category');
+	</script>
+
+</div>
+</center>
+
+</body>
+</html>

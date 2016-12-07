@@ -1,0 +1,199 @@
+<?php
+/**
+ * 모바일웹설정 - 기본설정
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './top_menu.inc.php';
+
+$ms_rows = $mobile->settings;
+if(!$ms_rows['domain']) $ms_rows['domain'] = 'http://';
+
+?>
+
+<script type="text/javascript" src="../../rankup_module/rankup_builder/attachment.class.js"></script>
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	if(!el) return;
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'basic': mode = ['show', 'hide']; break;
+		case 'own': mode = ['hide', 'show']; break;
+	}
+	if(el.name=='domain_kind') {
+		$w('basic_domain_frame own_domain_frame').each(function(frame, index) {
+			$(frame)[mode[index]]();
+			$A($(frame).select('input')).each(function(field) {
+				if(mode[index]=='hide') field.disabled = true;
+				else field.disabled = field.getAttribute('face') ? true : false;
+			});
+		});
+	}
+}
+</script>
+<style type="text/css">
+@import url('mobile.css');
+div.preview {
+	width: 578px;
+	*width: 599px;
+	height: 80px;
+	overflow: auto;
+	padding: 10px;
+	border: 1px #ccc solid;
+	background-color: #ededed;
+	text-align: center;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+</style>
+
+<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+<center>
+<div style="width:750px;text-align: left">
+
+	<form id="save_form" name="save_form" onSubmit="return false">
+	<div id="sub_title">기본설정</div>
+	<table width="100%" align="center" cellpadding="7" cellspacing="1" border="0" bgcolor="#d7d7d7" class="list_top" style="table-layout: fixed">
+	<colgroup style="background:white">
+		<col width="134" />
+		<col />
+	</colgroup>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;모바일웹 사용</td>
+		<td>
+			<input type="radio" name="mobile_use" checked value="yes" id="mobile_use_yes"><label for="mobile_use_yes">사용함</label>
+			<input type="radio" name="mobile_use"<? if($ms_rows['mobile_use']=='no') echo ' checked' ?> value="no" id="mobile_use_no"><label for="mobile_use_no">사용안함</label>
+			<div id="tip" style="margin:8px 0 0 0;">+모바일용 홈페이지(모바일웹)는 <b style="color:#3366cc">모바일기기로 사이트에 접속할 경우 자동으로 전환</b>됩니다.</div>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;회원제 사용</td>
+		<td >
+			<input type="radio" name="membership_use" checked value="yes" id="membership_use_yes"><label for="membership_use_yes">사용함</label>
+			<input type="radio" name="membership_use"<? if($ms_rows['membership_use']=='no') echo ' checked' ?> value="no" id="membership_use_no"><label for="membership_use_no">사용안함</label>
+			<div id="tip" style="margin:8px 0 0 0">+ 회원제 사용을 <b style="color:#3366cc">사용안함</b>으로 설정하시면 <u>메뉴별로 설정된 접근권한과 상관 없이 <b style="color:#3366cc">모든서비스가 비회원에게도 공개</b></u> 됩니다.</p></div>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;도메인 설정</td>
+		<td >
+			<input type="radio" name="domain_kind" checked value="basic" id="domain_kind_basic" onClick="change_frame(this)"><label for="domain_kind_basic">기본주소 사용</label>
+			<input type="radio" name="domain_kind"<? if($ms_rows['domain_kind']=='own') echo ' checked' ?> value="own" id="domain_kind_own" onClick="change_frame(this)"><label for="domain_kind_own">보유도메인 사용</label>
+
+			<div id="basic_domain_frame" class="note">
+				<ul>
+					<li>다음 주소에서 모바일 홈페이지(모바일웹)를 확인하실 수 있습니다.</li>
+					<li style="margin-top:3px;">
+						<a href="<?=$config_info['domain'].$mobile->m_folder?>/index.html" target="_blank" style="font-family:verdana;font-size:13px;text-decoration:none;font-weight:bold"><?=$config_info['domain'].$mobile->m_folder?>/index.html</a>
+					</li>
+				</ul>
+			</div>
+			<div id="own_domain_frame" class="note" style="display: none">
+				<ul>
+					<li>
+						보유중인 도메인을 입력해 주십시오.
+						<span id="tip">( 도메인이 없을 경우 <b style="color:#3366cc">기본주소 사용</b>으로 설정을 변경해 주십시오 )
+					</li>
+					<li><input type="text" name="domain" required hname="도메인 주소" value="<?=$ms_rows['domain']?>" maxlength="100" default="http://" style="font-family:verdana;background-color:white;width:500px;height:30px;border:2px #555 solid;padding:0.2em;" /></li>
+				</ul>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;사이트명</td>
+		<td>
+			<input type="text" name="sitename" value="<?=str_replace('"', '&quot;', $mobile->configs['sitename'])?>" maxlength="50" class="simpleform" style="width:90%">
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;전화번호</td>
+		<td>
+			<input type="text" name="phone" size="20" maxlength="15" value="<?=$ms_rows['phone']?>" class="simpleform" />
+			<span id="tip">+ 전화걸기 아이콘 클릭 시 연결될 전화번호를 입력하십시오. ( ex: 1544-6862,  82-70-8240-6820 )</span>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;로고등록</td>
+		<td >
+			<input type="hidden" id="on_logo" name="on_logo" />
+			<input type="hidden" face="attach2" name="mode" value="post_attach" disabled />
+			<input type="hidden" face="attach2" name="kind" value="mobile_logo" disabled />
+			<input type="hidden" face="attach2" name="handler" value="logo.draw" disabled />
+
+			<span><input type="file" name="_attach_" onChange="logo.post(this, 'attach2')"></span>
+			<span id="tip">( 가로 320 x 세로 60 이내. &nbsp; jpg, gif, png 파일만 등록 가능 )</span>
+			<div id="logo_preview" class="preview" style="margin-top:4px;">
+				<?php
+				include_once '../../rankup_module/rankup_builder/attachment.class.php';
+				$attach = new attachment('mobile_logo', $mobile->m_dir.'builder/');
+				echo $attach->preview($ms_rows['logo'], array(
+					'image' => '<img src="{:folder:}{:name:}" />'
+				));
+				?>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;카피라이트</td>
+		<td>
+			<textarea type="editor" name="copyright" required hname="카피라이트" style="width:100%;height:85px;overflow-y:visible" class="simpleform" nofocus nonimage><?=$mobile->configs['copyright']?></textarea>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;준비중 페이지</td>
+		<td>
+			<textarea type="editor" name="ready_content" style="width:100%;height:300px;" nofocus><?=$mobile->configs['ready_content']?></textarea>
+		</td>
+	</tr>
+	</table>
+	</form>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정하신 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script type="text/javascript"> change_frame($('domain_kind_<?=$ms_rows['domain_kind']?>')) </script>
+	<script type="text/javascript">
+	Wysiwyg.createELM();
+
+	// 모바일 로고 등록처리
+	var logo = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_logo').value = name;
+				$('logo_preview').update('<img src="'+ domain + folder + name +'" align="absmiddle" />');
+			}
+		}
+	}
+
+	/* $form setting */
+	$form.debug = false;
+	$form.hashes = {mode: 'save_settings', kind: 'basic'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			$('on_logo').value = '';
+			alert('저장되었습니다.');
+		}
+	}
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

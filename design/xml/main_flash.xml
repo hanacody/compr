@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+			<root>
+				<containerWidth>1000</containerWidth>
+				<containerHeight>475</containerHeight>
+				<images type="2">
+					<src>../design/main/mfbg.13311179397788.jpg</src><src>../design/main/mfbg.13311179487863.jpg</src><src>../design/main/mfbg.13311179513015.jpg</src><src>../design/main/mfbg.13311179535532.jpg</src><src>../design/main/mfbg.13311179564618.jpg</src>
+				</images>
+				
+			<imageList type="2">
+				<posi>
+					<top>350</top>
+					<left>700</left>
+				</posi>
+				<transparent>100</transparent>
+			</imageList>
+				<contents type="1">
+					<top>
+						<text><![CDATA[시장점유율 1위 브랜드 랭크업!]]></text>
+						<size>42</size>
+						<color>0x296CCC</color>
+					</top>
+					<middle>
+						<text><![CDATA[랭크업은 각종 사이트를 운영할 수 있는 솔루션을 제공합니다.]]></text>
+						<size>13</size>
+						<color>0x666666</color>
+					</middle>
+					<bottom>
+						<text><![CDATA[]]></text>
+						<size>13</size>
+						<color>0x9A9A9A</color>
+					</bottom>
+					<posi>
+						<top>40</top>
+						<left>330</left>
+					</posi>
+					<bgImage>../design/main/</bgImage>
+					<transparent>100</transparent>
+				</contents>
+			</root>

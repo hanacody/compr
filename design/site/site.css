@@ -1,0 +1,41 @@
+
+/*background 대표테마색*/
+.img_bgc{background-color:#296CCC}
+
+/*탭 bgcolor 대표테마색*/
+.prd_tabs li{background-color:#296CCC}
+.tab_choice{background-color:#296CCC!important}
+
+/*좌측메뉴 타이틀+라인 대표테마색*/
+.l_tit,.l_tit2{color:#296CCC}
+.text_menu{border-bottom:2px solid #296CCC}
+
+/*서브우측컨텐츠 타이틀+블릿+라인 대표테마색*/
+#con_top_box{border-bottom:1px solid #296CCC}
+.tit_bullet{background-color:#296CCC;border: 1px solid #296CCC;_background:#296CCC}
+
+/*서브 컨텐츠 타이틀+블릿색상 대표테마색*/
+.info_title{color:#296CCC}
+.bullet_img{background-color:#296CCC}
+
+/*메인 배경색 및 타이틀*/
+.col_basic{background-color:#296CCC}
+.tab_wrap li{color:#296CCC}
+.con_tit{color:#296CCC}
+
+/* 갤러리 ABCD형 사진 대표테마색*: background 변경 시 이미지사이즈 변경가능 */
+.pic_bgc{background-color:#296CCC}
+
+/*게시판 상단 배경색+타이틀명 대표테마색*/
+.t_bgcolor td{background-color:#296CCC}
+.subtitle{color:#296CCC}
+.Form_box {border:#296CCC 2px solid}
+.Form_top {border-top:#296CCC 2px solid}
+.Form_top2 {border-top:#296CCC 2px solid}
+
+/* 메인비쥬얼 하단 컨테이너 색상 */
+#main_container {
+	filter: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#296CCC, EndColorStr=#5194f4);
+	background: -moz-linear-gradient(top, #296CCC, #5194f4);
+	background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#296CCC), to(#5194f4));
+}

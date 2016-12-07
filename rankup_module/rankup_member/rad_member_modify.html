@@ -1,0 +1,268 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+// 디자인설정
+include_once $base_dir.'rankup_module/rankup_builder/rankup_design.class.php';
+$design = new rankup_design;
+
+// 회원가입폼 설정 로드
+$mfs_rows = $design->get_settings('member_form_options');
+
+// 회원정보 로드
+$rows = $rankup_member->get_member_info($_GET['uid']);
+
+// 내국인(14over, 14under)
+$is_local = (strpos($rows['type'], '14')!==false);
+
+// - 분리
+foreach(explode(' ', 'phone hphone') as $field) $$field = explode('-', $rows[$field]);
+
+// 항목아이콘
+$require_icon = '<img src="./img/ic_check.gif">';
+$normal_icon = '<img src="./img/ic_dot1.gif">';
+
+$rankup_control->print_admin_head('회원정보수정');
+?>
+<body>
+<div class="bar"><script> titleBar('회원정보수정') </script></div>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<style type="text/css">
+ul, li { margin: 0; padding: 0;}
+</style>
+
+<form name="registFrm" action="<?=rankup_https_change::https_change('rankup_module/rankup_member/proc.ajax.php', 'https')?>" method="POST" onSubmit="return (Wysiwyg.submit_start()&&validate(this)&&confirm('변경사항을 저장하시겠습니까?'))">
+	<input type="hidden" name="mode" value="modify_info" />
+	<input type="hidden" name="pkind" value="<?=$_GET['pkind']?>" />
+	<input type="hidden" name="kind" value="<?=$rows['kind']?>" />
+	<input type="hidden" name="type" value="<?=$rows['type']?>" />
+	<input type="hidden" name="uid" value="<?=$rows['uid']?>" />
+	<table width="750" border="0" cellpadding="0" cellspacing="0" align="center" style="margin-top:30px">
+		<tr><td height="25"><div id="sub_title">회원기본정보</div></td></tr>
+		<tr>
+			<td>
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+					<col width="110" />
+					<tr>
+						<td class="gray_bg"><img src="./img/ic_dot1.gif"> 아이디</td>
+						<td height="38"><b><?=$rows['uid']?></b></td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><?=$require_icon?> 이름</td>
+						<td>
+							<input type="text" name="name" required hname="이름" value="<?=$rows['name']?>" size="20" maxlength="50" class="simpleform" style="width:160px;">
+							<span id="tip">+ 최대 50자까지 입력 가능</span>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><?=$require_icon?> 생년월일</td>
+						<td>
+							<?php
+							// 생일분리
+							preg_match('/(\d{4})(\d{2})(\d{2})/', $rows['birthday'], $ns);
+							?>
+							<select id="year" name="birthday[]" required hname="년도" title="년도 선택" onChange="draw_day('year', 'month', 'day')">
+								<option value="">년도</option>
+								<?php
+								// 년도
+								$years = array();
+								$age_limits = date('Y');
+								if($config_info['membership_age']=='14over') $age_limits -= 14;
+								else if($config_info['membership_age']=='19over') $age_limits -= 19;
+								foreach(range(1900, $age_limits) as $year) {
+									$selected = ($ns[1]==$year) ? ' selected' : '';
+									array_push($years, sprintf('<option value="%d"%s>%d년</option>', $year, $selected, $year));
+								}
+								echo implode('', array_reverse($years));
+								?>
+							</select>
+							<select id="month" name="birthday[]" required hname="월" title="월 선택" onChange="draw_day('year', 'month', 'day')">
+								<option value="">월</option>
+								<?php
+								// 월
+								foreach(range(1, 12) as $month) {
+									$selected = ($ns[2]==$month) ? ' selected' : '';
+									echo sprintf('<option value="%02d"%s>%d월</option>', $month, $selected, $month);
+								}
+								?>
+							</select>
+							<select id="day" name="birthday[]" required hname="일" title="일 선택">
+								<option value="">일</option>
+								<?php
+								// 일
+								foreach(range(1, date('t', strtotime($rows['birthday']))) as $day) {
+									$selected = ($ns[3]==$day) ? ' selected' : '';
+									echo sprintf('<option value="%02d"%s>%d일</option>', $day, $selected, $day);
+								}
+								?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><?=$require_icon?> 성별</td>
+						<td>
+							<input type="radio" name="gender" checked value="1" id="gender_male" class="input_box" /><label for="gender_male">남<label>
+							<input type="radio" name="gender"<? if($rows['gender']==2) echo ' checked' ?> value="2" id="gender_female" class="input_box" /><label for="gender_female">여<label>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><?=$normal_icon?> 비밀번호</td>
+						<td><input type="text" name="new_passwd" hname="비밀번호" option="userpw" size="20" maxlength="20" style="width:160px;font-family:verdana;font-weight:bolder;padding-top:2px;background-color:white" class="simpleform"><span id="tip">+ <font face="verdana">4~15</font>자의 영문자, 숫자조합 <font style="color:red">( 비밀번호 변경시에만 입력하십시오 )</font></span></td>
+					</tr>
+<?php
+if($mfs_rows['nickname']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['nickname']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+					<tr>
+						<td class="gray_bg"><?=$_item_icon?> 닉네임</td>
+						<td><input type="text" name="nickname"<?=$_req_attr?> hname="닉네임" value="<?=$rows['nickname']?>" size="22" maxlength="20" style="width:160px;" class="simpleform" /></td>
+					</tr>
+<?php
+}
+?>
+					<tr>
+						<td class="gray_bg"><?=$require_icon?> 회원등급</td>
+						<td>
+							<select name="level">
+							<?php
+							foreach(range(1, $rankup_member->join_level) as $level) {
+								$_selected = ($level==$rows['level']) ? ' selected' : '';
+								echo '<option value="'.$level.'"'.$_selected.'>'.$config_info['smlevel'][$level].'</option>';
+							}
+							?>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><?=$require_icon?> 이메일주소</td>
+						<td><input type="text" name="email" required hname="이메일 주소" option="email" value="<?=$rows['email']?>" size="40" maxlength="50" class="simpleform"></td>
+					</tr>
+<?php
+if($mfs_rows['phone']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['phone']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+					<tr>
+						<td class="gray_bg"><?=$_item_icon?> 일반전화</td>
+						<td>
+							<?php
+							if($is_local) {
+								echo '
+								<input type="text" name="phone[]"'.$_req_attr.' keyNum="phone_3rd_digit" hname="일반전화" option="phone" value="'.$phone[0].'" size="5" maxlength="4" span="3" glue="-" class="simpleform"> -
+								<input type="text" name="phone[]" value="'.$phone[1].'" size="5" maxlength="4" class="simpleform"><span id="phone_3rd_digit"> -
+								<input type="text" name="phone[]" value="'.$phone[2].'" size="5" maxlength="4" class="simpleform"></span>';
+							}
+							else {
+								echo '
+								<input type="text" name="phone[]"'.$_req_attr.' hname="일반전화" value="'.$rows['phone'].'" size="30" maxlength="25" class="simpleform">';
+							}
+							?>
+						</td>
+					</tr>
+<?php
+}
+if($mfs_rows['hphone']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['hphone']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+					<tr>
+						<td class="gray_bg"><?=$_item_icon?> 휴대전화</td>
+						<td>
+							<?php
+							if($is_local) {
+								echo '
+								<input type="text" id="hphone1" name="hphone[]"'.$_req_attr.' hname="휴대전화" option="hphone" value="'.$hphone[0].'" size="5" maxlength="3" span="3" glue="-" class="simpleform"> -
+								<input type="text" id="hphone2" name="hphone[]" value="'.$hphone[1].'" size="5" maxlength="4" class="simpleform"> -
+								<input type="text" id="hphone3" name="hphone[]" value="'.$hphone[2].'" size="5" maxlength="4" class="simpleform">';
+							}
+							else {
+								echo '
+								<input type="text" name="hphone[]"'.$_req_attr.' hname="휴대전화" value="'.$rows['hphone'].'" size="30" maxlength="25" class="simpleform">';
+							}
+							?>
+						</td>
+					</tr>
+<?php
+}
+if($mfs_rows['address']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['address']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+					<tr>
+						<td class="gray_bg"><?=$_item_icon?> 주소</td>
+						<td>
+							<?php
+							if($is_local) {
+								echo '
+								<ul style="list-style:none">
+									<li style="float:left"><input type="text" id="zipcode" name="zipcode"'.$_req_attr.' hname="우편번호" value="'.$rows['zipcode'].'" readonly size="10" maxlength="8" onClick="rankup_post.open_post(\'zipcode_frame\')" class="simpleform"></li>
+									<li style="float:left;margin-left:5px"><a onClick="rankup_post.open_post(\'zipcode_frame\')"><img src="./img/btn_post.gif" align="absmiddle" vspace="2" alt="우편번호찾기" /></a></li>
+									<li style="float:left;margin-left:3px" id="post_spot"></li>
+								</ul>
+								<div style="clear:both;padding-top:2px"><input type="text" id="addrs1" name="addrs1"'.$_req_attr.' hname="주소" value="'.$rows['address1'].'" readonly size="80" maxlength="100" onClick="rankup_post.open_post(\'zipcode_frame\')" class="simpleform"></div>';
+							}
+							else {
+								echo '
+								<div><input type="text" name="zipcode"'.$_req_attr.' hname="우편번호" value="'.$rows['zipcode'].'" size="10" maxlength="10" class="simpleform"><span id="tip">+ ZIP CODE</span></div>
+								<div style="margin-top:4px"><input type="text" name="addrs1"'.$_req_attr.' hname="주소" value="'.$rows['address1'].'" size="80" maxlength="100" class="simpleform"></div>';
+							}
+							?>
+							<div style="margin-top:4px"><input type="text" id="addrs2" name="addrs2"<?=$_req_attr?> hname="나머지 주소" value="<?=$rows['address2']?>" size="60" maxlength="100" class="simpleform"><span id="tip">+ 나머지 주소</span></div>
+						</td>
+					</tr>
+<?php
+}
+if($mfs_rows['introduce']['use']=='yes') {
+	list($_item_icon, $_req_attr) = ($mfs_rows['introduce']['req']=='yes') ? array($require_icon, ' required') : array($normal_icon, '');
+?>
+					<tr>
+						<td class="gray_bg"><?=$_item_icon?> 가입인사</td>
+						<td>
+							<textarea name="introduce"<?=$_req_attr?> hname="가입인사" style="width:100%;height:200px" class="simpleform"><?=$rows['introduce']?></textarea>
+						</td>
+					</tr>
+<?php
+}
+?>
+				</table>
+			</td>
+		</tr>
+		<tr><td height="20"></td></tr>
+		<tr><td height="25"><div id="sub_title">정보수신설정</div></td></tr>
+		<tr>
+			<td>
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+					<tr>
+						<td width="110" class="gray_bg"><img src="./img/ic_dot1.gif"> 뉴스레터 수신</td>
+						<td>
+							<input type="radio" name="mailing" value="yes" checked id="mailing_yes"><label for="mailing_yes">수신동의</label>
+							<input type="radio" name="mailing" value="no"<? if($rows['mailing']=="no") echo ' checked' ?> id="mailing_no"><label for="mailing_no">수신거부</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="gray_bg"><img src="./img/ic_dot1.gif"> 문자메시지 수신</td>
+						<td>
+							<input type="radio" name="sms" value="yes" checked id="sms_yes"><label for="sms_yes">수신동의</label>
+							<input type="radio" name="sms" value="no"<? if($rows['sms']=="no") echo ' checked' ?> id="sms_no"><label for="sms_no">수신거부</label>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr><td height="20"></td></tr>
+		<tr><td height="25"><div id="sub_title">관리자메모</div></td></tr>
+		<tr>
+			<td>
+				<textarea type="editor" name="memo" hname="관리자메모" class="simpleform" style="width:100%;height:150px" nofocus nonimage><?=$rows['memo']?></textarea>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding:20px 0 30px 0" align="center"><input type="image" src="../../Libs/_images/btn_save1.gif" alt="저장하기" align="absmiddle"> <a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" border="0" alt="뒤로가기" align="absmiddle"></a></td>
+		</tr>
+	</table>
+</form>
+
+<?php
+// 우편번호 검색 폼 로드
+include_once $base_dir.'rankup_module/rankup_post/rankup_post.inc.html';
+?>
+
+</body>
+</html>

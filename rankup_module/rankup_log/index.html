@@ -1,0 +1,48 @@
+<script>
+function chk(){
+	if(!document.loginForm.uid.value){
+		alert('아이디를입력하세요');
+		document.loginForm.uid.focus();
+		return false;
+	}
+	if(!document.loginForm.upasswd.value){
+		alert('패스워드를입력하세요');
+		document.loginForm.upasswd.focus();
+		return false;
+	}
+}
+</script>
+<body leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" background='images/bg.gif'>
+<link rel="stylesheet" type="text/css" href="style/style.css">
+<table width="500" border="0" cellpadding="0" cellspacing="0" align='center'>
+<tr><td><img src='images/log_bg01.gif'></td></tr>
+<tr><td background='images/log_bg02.jpg'><br><br><br><br>
+<table width="350" align=center bgcolor="#f7f7f7" cellpadding="5" cellspacing="1" border="0"><tr><td>
+<table width="350" align=center bgcolor="#dddddd" cellpadding="30" cellspacing="1" border="0"><tr><td bgcolor="#ffffff" >
+<img src='images/admin_bar.gif'>
+<table border=0 cellpadding=5 cellspacing=1 bgcolor='dddddd' width='350' align='center'>
+<form name=loginForm method=post action=rankuplog_login.php onsubmit="return chk();">
+	<tr>
+		<td bgcolor='f7f7f7'><img src='images/icon05.gif'><font color='000000'>아이디</font></td>
+		<td bgcolor='ffffff'><input type=text name=uid class=simpleform></td>
+	</tr>
+	<tr>
+		<td bgcolor='f7f7f7'><img src='images/icon05.gif'><font color='000000'>패스워드</font></td>
+		<td bgcolor='ffffff'><input type=password name=upasswd class=simpleform></td>
+	</tr>
+	<tr>
+		<td bgcolor='ffffff' colspan=2 align=center>
+		<input type=image src='images/button_login.gif'>
+		</td>
+	</tr>
+</form>
+</table>
+<br><font color='156BA1'> + 로그분석 설치시 설정하셨던 아이디 패스워드를 입력하세요.</font>
+</td></tr></table>
+</td></tr></table>
+<br><br><br><br><br><br><br><br><br></td></tr>
+<tr><td>
+<img src="images/log_bg03.jpg" width="825" height="49" border="0" usemap="#Map"></td></tr>
+<map name="Map">
+  <area shape="rect" coords="317,2,558,23" href="http://www.rankup.co.kr" target="_blank">
+</map></table>

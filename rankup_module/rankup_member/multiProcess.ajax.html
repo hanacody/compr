@@ -1,0 +1,77 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+
+switch($_POST['mode']) {
+
+	// 아이디 중복체크
+	case 'member_verify':
+		$uid = $rankup_member->get_member_basic('uid', $_POST['user_id']);
+		if(empty($uid)) $message = "<b style='color:#FF6600'>$_POST[user_id]</b> 아이디는 사용하실 수 있습니다.<br>이 아이디를 사용하시려면 [사용하기] 버튼을 누르시기 바랍니다.<br /><div style='text-align:center;margin:4px;'><input type='image' src='{$base_url}rankup_module/rankup_member/img/btn_id_use.gif' onClick='verify.apply()'></div>";
+		else $message = "<b style='color:#FF6600'>$_POST[user_id]</b> 는 이미 사용중인 아이디 입니다.<br>새로운 아이디를 입력하시기 바랍니다.";
+		echo "
+		<script type='text/javascript'>
+		verify.verify_uid = '$_POST[user_id]';
+		verify.result.update(\"$message\");
+		</script>";
+		break;
+
+	// 회원 삭제
+	case 'delete_member':
+		$uids = str_replace('__', "','", $_POST['uids']);
+		switch($_POST['pkind']) {
+			// 탈퇴신청 회원으로 처리
+			case 'all': // 전체회원
+			case 'general': // 개인회원
+				$rankup_member->delete_member_services($uids); // 등록서비스 삭제
+				$rankup_member->delete_member_contents($uids); // 등록한 컨텐츠 삭제
+				$result = $rankup_control->query("update $rankup_member->member_table2 set secession='yes', secession_reason='관리자삭제처리', secession_wdate=now() where uid in('$uids')");
+				break;
+
+			// 최종삭제
+			case 'secession':
+				include_once $base_dir.'Libs/_php/rankup_payment.class.php';
+				$rankup_payment = new rankup_payment;
+				// 결제내역 아이디값 갱신
+				foreach(explode('__', $_POST['uids']) as $uid) {
+					$rankup_control->query("update $rankup_payment->payment_table set uid='_$uid' where uid='$uid'");
+					$rankup_control->query("update $rankup_payment->reserve_table set uid='_$uid' where uid='$uid'");
+				}
+				// 회원정보삭제
+				$rankup_control->query("delete from $rankup_member->member_table where uid in('$uids')");
+				$result = $rankup_control->query("delete from $rankup_member->member_table2 where uid in('$uids')");
+				break;
+		}
+		break;
+
+	// 메모 로드
+	case 'load_memo':
+		$rows = $rankup_member->queryFetch("select memo from $rankup_member->member_table2 where uid='$_POST[uid]'");
+		$nodes = fetch_skin($rows, '<memo><![CDATA[{:memo:}]]></memo>');
+		$rankup_member->print_xml_header('<xml>'.$nodes.'</xml>');
+		break;
+
+	// 메모 등록
+	case 'save_memo':
+		include_once $wysiwyg_dir.'wysiwyg_Class.php';
+		$rankup_control->change_encoding($_POST, 'IN');
+		$_val['memo'] = $Wysiwyg->wysiwyg_result_func(stripslashes($_POST['memo']));
+		$values = $rankup_control->change_query_string($_val);
+		$rankup_control->query("update $rankup_member->member_table2 set $values where uid='$_POST[uid]'");
+		break;
+
+	// 탈퇴 이유 로드
+	case 'load_secession':
+		$rows = $rankup_member->queryFetch("select secession_reason from $rankup_member->member_table2 where uid='$_POST[uid]'");
+		$nodes = fetch_skin($rows, '<secession><![CDATA[{:secession_reason:}]]></secession>');
+		$rankup_member->print_xml_header('<xml>'.$nodes.'</xml>');
+		break;
+
+}
+
+// 회원목록 엑셀파일로 저장
+if($_GET['mode']=='ExcelDown') {
+	include_once $base_dir.'Libs/_php/rankup_Sql2Excel.class.php';
+	$rankup_member->download_member_datas($_GET);
+	exit;
+}
+?>

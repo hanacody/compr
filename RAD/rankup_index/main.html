@@ -1,0 +1,14 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+$rankup_control->print_admin_head();
+?>
+<frameset cols="237,*" border="0">
+	<frame src="./left.html" name="left" scrolling="auto" border="0" noresize>
+	<frame src="../../rankup_module/rankup_statistics/today_statistic.html" name="right" scrolling="auto" border="0" noresize>
+	<noframes>
+		<body>
+			<h4>인터넷 익스플로러를 설치 또는 업그레이드 하시기 바랍니다.</p>
+		</body>
+	</noframes>
+</frameset>

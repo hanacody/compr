@@ -1,0 +1,33 @@
+<?php
+include_once './Libs/_php/rankup_basic.class.php';
+if(empty($_COOKIE['rankup_log_start'])) {
+	setCookie('rankup_log_start', 'true', time()+1800, '/');
+	include_once $base_dir.'rankup_module/rankup_log/rankuplog.php';
+}
+
+$frame_src = ($config_info['intro_use']!='yes') ? './main/index.html' : './intro.html';
+if($config_info['frame_use']=='yes') {
+?>
+<!--
+<!CDATA[
+ 본 프로그램은 (주)랭크업에서 상업적 목적으로 개발한 제품입니다.
+ 랭크업에서 정식으로 구매하지 않고 사용할 경우 라이센스에 저촉되며 형사·민사상의 책임을 물을 수 있습니다.
+ 저작권법 (제97조의 5항) 재산권 권리의 복제, 공연, 방송, 전시, 전송(인터넷), 2차적 저작물 작성의 방법으로 침해한 자에 대해
+ 5년이하의 징역 또는 5천만원 이하의 벌금형에 처해 집니다.
+ ■공식배포처:http://rankup.co.kr 문의 1544-6862
+]]>
+-->
+<frameset rows="*" frameborder="0" border="0" framespacing="0">
+	<frame name="main" src="<?=$frame_src?>" border="0" scrolling="auto" noresize>
+	<noframes>
+	<body>
+		<h4>인터넷 익스플로러를 설치 또는 업그레이드 하시기 바랍니다.</h4>
+	</body>
+	</noframes>
+</frameset>
+<?php
+}
+else {
+	header('location: '.$frame_src);
+}
+?>

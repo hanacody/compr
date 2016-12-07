@@ -1,0 +1,636 @@
+<?php
+#####################################################################
+# 프로그램 : Rankup Multi-Board Part. II
+# 개발버전 : V2.1.090909
+# 개발자명 : Kurokisi
+# 라이센스 : 랭크업
+# 업데이트 : 2009-09-09
+#####################################################################
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "./rankup_board.class.php";
+include_once "./rankup_board_admin.class.php";
+$rankup_control->check_admin();
+$rankup_board = new rankup_board_admin;;
+$rankup_control->print_admin_head("멀티게시판관리 - 게시판 환경설정");
+?>
+<body style="overflow-y:scroll">
+<?php
+if($rankup_board->include_js_class) rankup_basic::include_js_class(); // 2009.10.08 fixed
+?>
+<div class="bar"><script> titleBar('멀티게시판관리 - 게시판 환경설정', 300) </script></div>
+<script type="text/javascript"> direct_board = true </script>
+<script type="text/javascript" src="<?=$rankup_board->wysiwyg_url?>wysiwyg.js"></script>
+<link rel="stylesheet" type="text/css" href="./rankup_board.css">
+
+<script type="text/javascript">
+var ETC_SETTING = function() {}
+// 게시판 목록 형태 변경
+ETC_SETTING.prototype.change_board_style = function(el) {
+	var form = document.boardRegistFrm;
+
+	// 기본형+웹진형
+	var normal_skin_check_true = ["use_condense","use_comment", "use_reply", "use_new_icon", "use_attach_icon", "use_reply_icon","use_near_article", "use_detail_list"];
+	var normal_skin_check_false = ["use_secret"];
+	var normal_skin_disable_false =["use_attach_icon", "use_reply", "use_reply_icon", "use_comment", "use_hit_best","hit_best_num", "use_vote","use_report","use_near_article","use_detail_list","use_only_good","use_snssend"];
+
+	// 갤러리형
+	var gallery_skin_check_true = ["use_comment", "use_new_icon","use_near_article", "use_detail_list","use_attach"];
+	var gallery_skin_check_false = ["use_secret", "use_condense","use_attach_icon", "use_reply","use_reply_icon"];
+	var gallery_skin_disabled_true = ["use_attach_icon","use_reply", "use_reply_icon"];
+	var gallery_skin_disabled_false = ["use_comment", "use_hit_best", "hit_best_num", "use_vote", "use_report","use_near_article", "use_detail_list","use_only_good","use_snssend"];
+
+	// 1:1 형
+	var mantoman_skin_check_true = ["use_secret","use_condense","use_reply", "use_new_icon", "use_attach_icon", "use_reply_icon"];
+	var mantoman_skin_check_false = ["use_comment","use_near_article", "use_detail_list", "use_hit_best", "use_vote", "use_only_good","use_report","use_snssend"];
+	var mantoman_skin_disabled_false = ["use_attach_icon","use_reply", "use_reply_icon"];
+	var mantoman_skin_disabled_true = ["use_comment", "use_hit_best", "use_vote", "use_report","use_near_article", "use_detail_list","use_only_good","use_snssend"];
+
+	switch(el.value) {
+		case "normal":
+		case "webzin":
+			if(el.value == "webzin")	{
+				form.subject_length.value = 30;
+				$('gallerySettingForm').style.display = "block";
+				$('thumb_nums_frame').style.display = "none";
+			} else {
+				form.subject_length.value = 40;
+				$('gallerySettingForm').style.display = "none";
+			}
+			normal_skin_disable_false.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).disabled = false; });
+			normal_skin_check_true.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).checked = true; });
+			normal_skin_check_false.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).checked = false; });
+			break;
+		case "gallery":
+			form.subject_length.value = 13;
+			gallery_skin_disabled_true.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).disabled = true; });
+			gallery_skin_disabled_false.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).disabled = false; });
+			gallery_skin_check_true.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).checked = true; });
+			gallery_skin_check_false.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).checked = false; });
+			$('gallerySettingForm').style.display = "block";
+			$('thumb_nums_frame').style.display = "block";
+			break;
+		case "mantoman":
+			form.subject_length.value = 40;
+			mantoman_skin_disabled_true.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).disabled = true; });
+			mantoman_skin_disabled_false.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).disabled = false; });
+			mantoman_skin_check_true.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).checked = true; });
+			mantoman_skin_check_false.each(function(val) { var check_element = "form."+val; if(eval(check_element)) eval(check_element).checked = false; });
+			$('gallerySettingForm').style.display = "none";
+			break;
+	}
+}
+// 등록 및 수정시 리스트 블럭킹
+ETC_SETTING.prototype.screen_blind = function(mode) {
+	var blind = $('screenBlindDiv');
+	if(mode===true) {
+		var _height = parseInt(document.body.clientHeight,10);
+		if(parseInt(document.body.scrollHeight,10)>_height) _height = parseInt(document.body.scrollHeight,10);
+		blind.style.height = _height + "px";
+		blind.style.marginTop = "-" + parseInt(document.body.scrollTop,10) + "px";
+		this.change_display("screenBlindDiv", true);
+
+		// SELECT 객체 숨기기
+		this.sb_selects = document.getElementsByTagName("select");
+		for(var i=0; i<this.sb_selects.length; i++) this.sb_selects[i].style.visibility = "hidden";
+	}
+	else {
+		this.change_display("screenBlindDiv", false);
+		if(this.sb_selects!=null) for(var i=0; i<this.sb_selects.length; i++) this.sb_selects[i].style.visibility = "visible";
+	}
+}
+// 레이어 토글
+ETC_SETTING.prototype.change_display = function(el, val) {
+	if(val===true||val===false) {
+		var obj = $(el);
+		obj.style.display = val ? "block" : "none";
+		if(val===false) {
+			if(el!=="screenBlindDiv") this.screen_blind(false);
+			return false;
+		}
+		// 페이지 중앙에 띄우기
+		obj.style.top = (obj.offsetHeight>document.body.clientHeight) ? document.body.scrollTop : document.body.scrollTop+(document.body.clientHeight-obj.offsetHeight)/2 + "px";
+		obj.style.left = (obj.offsetWidth>document.body.clientWidth) ? document.body.scrollLeft : document.body.scrollLeft+(document.body.clientWidth-obj.offsetWidth)/2 + "px";
+		if(el!=="screenBlindDiv") this.screen_blind(true);
+	}
+	else {
+		var _val = $(el).style.display;
+		$(el).style.display = (_val=="none") ? "block" : "none";
+		this.screen_blind(false);
+	}
+}
+// 사이트디자인 클래스 변수 생성
+var etc_setting = new ETC_SETTING;
+</script>
+<style type="text/css">
+th {font-size:9pt;text-align:left;font-weight:normal;background-color:#fafafa;}
+#screenBlindDiv {display:none;position:absolute;left:0px;top:0px;width:100%;z-index:0;text-align:center;background-color:black;FILTER:gray alpha(opacity=30 Style=4 FinishOpacity=90);}
+</style>
+
+<div id="screenBlindDiv"></div>
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+
+<!-- 게시판 등록/수정폼 -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td>
+			<table width="100%" border="0" cellpadding='0' cellspacing='0' align=center>
+			<tr>
+				<td bgcolor='eeeeee' height='50' align='center'>
+					 <img src='./img/ic_arrow1.gif' align='absmiddle'> <a href='common.html?cmode=board' class='sub_menu'<?=$_on['board']?>>게시판환경설정</a>&nbsp;
+					 <img src='./img/ic_arrow1.gif' align='absmiddle'> <a href='common.html?cmode=water' class='sub_menu'<?=$_on['water']?>>워터마크설정</a>&nbsp;
+					 <img src='./img/ic_arrow1.gif' align='absmiddle'> <a href='common.html?cmode=sns' class='sub_menu'<?=$_on['sns']?>>SNS설정</a>&nbsp;
+				</td>
+			</tr>
+			<tr><td height='1' bgcolor='e5e5e5'></td></tr>
+			<tr><td>&nbsp;</td></tr>
+			</table>
+	</td>
+</tr>
+<tr align="center">
+	<td>
+<?php
+// 게시판환경설정
+if($_GET['cmode'] == "board") {
+?>
+		<table width="750" border="0" cellpadding="2" cellspacing="0">
+		<form id="boardRegistFrm" name="boardRegistFrm" action="./multiProcess.ajax.html" target="multiProcessFrame" method="POST" onSubmit="return (Wysiwyg.submit_start()&&validate(this)&&confirm('선택하신 설정사항을 게시판에 반영하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="board_config_setting">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="border:1px #ccc solid" bgcolor="#efefef">
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#cdcdcd" border="0" align="center">
+				<tr bgcolor="white">
+					<td bgcolor="f7f7f7" width="120" height="40" align="center"><b>게시판 형태 선택</b></td>
+					<td>
+						<input type="radio" name="board_style" checked value="normal" id="board_style_normal" onClick="etc_setting.change_board_style(this)"><label for="board_style_normal">리스트 형태</label>
+						<input type="radio" name="board_style" value="gallery" id="board_style_gallery" onClick="etc_setting.change_board_style(this)"><label for="board_style_gallery">갤러리 형태</label>
+						<input type="radio" name="board_style" value="webzin" id="board_style_webzin" onClick="etc_setting.change_board_style(this)"><label for="board_style_webzin">웹진 형태</label>
+						<input type="radio" name="board_style" value="mantoman" id="board_style_mantoman" onClick="etc_setting.change_board_style(this)"><label for="board_style_mantoman">1:1 형태</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:25px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">기본환경 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<thead bgcolor="white">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">게시판 가로크기</td>
+					<td><input type="text" name="board_width" hname="게시판 가로사이즈" value="700" size="4" option="number" maxlength="4" minval="500" maxval="1024" class="enable"> 픽셀</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">목록 제목글자 제한</td>
+					<td><input type="text" name="subject_length" hname="목록 제목글자 제한" option="number" value="40" size="4" maxlength="3" maxval="100" class="enable"> Byte, <input type="checkbox" name="use_condense" checked id="use_condense"><label for="use_condense">글 줄임기호(...) 사용</label><span id="tip">+ 한글 2Byte, 영문 1Byte 처리</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">페이지당 게시물 수</td>
+					<td><input type="text" name="article_rows" hname="페이지당 게시물수" option="number" value="15" size="4" maxlength="2" class="enable"> 개/페이지<span id="tip">+ 한 페이지당 출력될 게시물 갯수</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시판 사용</td>
+					<td>
+						<input type="checkbox" name="board_use" checked id="board_use"><label for="board_use">사용</label><span id="tip" style="color:#ff6633">+ 체크해제시 사이트에 해당 게시판/게시글들이 더이상 출력되지 않음</span>
+					</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">기능사용 및 출력 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">분류기능 사용</td>
+					<td><input type="checkbox" name="use_category" id="use_category"><label for="use_category">사용</label><span id="tip">+ 기능 사용시 '분류설정'에서 게시판 분류를 설정</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">중복조회 사용</td>
+					<td><input type="checkbox" name="use_duplicate_hit" id="use_duplicate_hit"><label for="use_duplicate_hit">사용</label><span id="tip">+ 게시물을 읽을때 마다 조회수가 증가,　* 미사용시 게시물당 1회만 증가 ( 관리자/글작성자 제외 )</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">댓글기능 사용</td>
+					<td><input type="checkbox" name="use_comment" checked id="use_comment"><label for="use_comment">사용</label></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">답글기능 사용</td>
+					<td><input type="checkbox" name="use_reply" checked id="use_reply"><label for="use_reply">사용</label></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">추천/반대기능 사용</td>
+					<td><input type="checkbox" name="use_vote" id="use_vote"><label for="use_vote">사용</label>, <input type="checkbox" name="use_only_good" id="use_only_good"><label for="use_only_good">추천만 사용</label></td>
+				</tr>
+<? if($rankup_board->board_extension) { ?>
+				<tr>
+					<td bgcolor="f7f7f7">신고기능 사용</td>
+					<td><input type="checkbox" name="use_report" id="use_report"><label for="use_report">사용</label><span id="tip">+ 회원이 불건전한 게시물을 신고할 수 있는 기능</span></td>
+				</tr>
+<? } ?>
+				<tr>
+					<td bgcolor="f7f7f7">비밀글 기능 사용</td>
+					<td><input type="checkbox" name="use_secret" id="use_secret" onClick="rankup_board.check_mantoman_style(this)"><label for="use_secret">사용</label><span id="tip">+ 권한 있는 사람과 작성자만 열람가능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">인쇄기능 사용</td>
+					<td><input type="checkbox" name="use_print" id="use_print"><label for="use_print">사용</label><span id="tip">+ 회원이 해당 게시물을 인쇄 할수 있는 기능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">작성자이름 출력</td>
+					<td>
+						<input type="radio" name="use_writer" id="use_writer_nickname" value="nickname" checked><label for="use_writer_nickname">닉네임</label>
+						<input type="radio" name="use_writer" id="use_writer_uid" value="uid"><label for="use_writer_uid">아이디</label>
+						<span id="tip">+ 게시물 작성자에 닉네임 또는 아이디를 출력</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">SNS 글보내기 사용</td>
+					<td><input type="checkbox" name="use_snssend" id="use_snssend"><label for="use_snssend">사용</label><span id="tip">+ 게시물 상세페이지에 SNS 글보내기 버튼 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시물 삭제기능</td>
+					<td>
+						<input type="radio" name="use_articledel" id="use_articledel_now" value="now"><label for="use_articledel_now">바로삭제</label>
+						<input type="radio" name="use_articledel" id="use_articledel_wait" value="wait" checked><label for="use_articledel_wait">삭제된 게시물로 표시</label>
+						<span id="tip">+ 삭제된 게시물을 삭제하면 최종 삭제 처리</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">워터마크 사용</td>
+					<td><input type="checkbox" name="use_watermark" id="use_watermark_now"><label for="use_watermark_now">사용</label><span id="tip">+ 워터마크 사용여부 설정</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">조회수 BEST 출력</td>
+					<td>
+						<input type="checkbox" name="use_hit_best" id="use_hit_best"><label for="use_hit_best">사용</label>
+						<select name="hit_best_num">
+						<option value="5">5개</option>
+						<option value="10">10개</option>
+						<option value="15">15개</option>
+						<option value="20">20개</option>
+						</select>
+						<span id="tip">+ 게시물 목록/상세페이지에 조회수 BEST 출력</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">NEW 아이콘 출력</td>
+					<td>
+						<input type="checkbox" name="use_new_icon" checked id="use_new_icon"><label for="use_new_icon">사용</label> &nbsp;<input type="text" name="recent_time" value="24" hname="NEW 아이콘의 출력 시간" option="number" size="2" maxval="72" maxlength="2" class="enable"> 시간 이내<span id="tip">+ 목록에서 최근 게시물에 new 아이콘 출력, 최대 <b style="color:#FF6633">72시간</b> 까지 설정</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 아이콘 출력</td>
+					<td><input type="checkbox" name="use_attach_icon" checked id="use_attach_icon"><label for="use_attach_icon">사용</label><span id="tip">+ 목록에 첨부파일 아이콘 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">답글 아이콘 출력</td>
+					<td><input type="checkbox" name="use_reply_icon" checked id="use_reply_icon"><label for="use_reply_icon">사용</label><span id="tip">+ 목록에 답글 아이콘 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">이전글/다음글 출력</td>
+					<td><input type="checkbox" name="use_near_article" checked id="use_near_article"><label for="use_near_article">사용</label><span id="tip">+ 게시물 상세페이지 하단에 이전글, 다음글 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">상세페이지 목록 출력</td>
+					<td><input type="checkbox" name="use_detail_list" checked id="use_detail_list"><label for="use_detail_list">사용</label><span id="tip">+ 게시물 상세페이지 하단에 목록 출력</span></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">첨부파일 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">첨부파일 사용</td>
+					<td><input type="checkbox" name="use_attach" checked id="use_attach" onClick="rankup_board.check_gallery_style(this)"><label for="use_attach">사용</label><span id="tip">+ 자료실/갤러리 기능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 출력</td>
+					<td><input type="checkbox" name="use_detail_attach" checked id="use_detail_attach"><label for="use_detail_attach">사용</label><span id="tip">+ 게시물 상세페이지에 첨부파일 목록 / 다운로드 현황 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 갯수</td>
+					<td><input type="text" name="attach_nums" value="4" hname="첨부파일 갯수" option="number" size="4" maxlength="1" maxval="9" class="enable"> 개<span id="tip">+ <b style="color:#FF6633">최대 9개</b>까지 설정 가능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 최대크기</td>
+					<td><input type="text" name="attach_size" value="2048" hname="첨부파일 최대크기" size="4" maxlength="5" option="number" maxval="<?=intval(ini_get("post_max_size"))*1024;?>" class="enable"> KB/파일<span id="tip">+ PHP 설정상 <b style="color:#FF6633">최대 <?=intval(ini_get("post_max_size"))*1024;?>KB</b>까지 설정가능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">이미지 최대 가로크기</td>
+					<td><input type="text" name="picture_width" value="675" hname="이미지 최대 가로크기" option="number" size="4" maxlength="4" minval="300" maxval="900" class="enable"> 픽셀<span id="tip">+ 상세페이지에 출력될 이미지의 최대 가로크기, 게시판 가로크기와 <b style="color:#FF6633">25픽셀</b> 유지</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 확장자</td>
+					<td><input type="text" name="attach_extension" value="gif,png,jpg,bmp,swf,hwp,doc,pdf,ppt,xls,gul,zip,alz" hname="첨부파일 확장자" size="39" maxlength="250" class="enable" antifilter="php,php3,html,htm"><span id="tip">+ 쉼표<span style="font-family:verdana">(,)</span>로 구분 (단, php, php3, html, html 제외)</span></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		</thead>
+		<tbody bgcolor="white" id="gallerySettingForm" style="display:none">
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">갤러리 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">목록 최대 가로크기</td>
+					<td><input type="text" name="thumb_width" value="120" hname="목록 최대 가로크기" option="number" size="4" maxlength="3" minval="30" maxval="300" class="enable"> 픽셀<span id="tip">+ 가로크기가 지정된 크기를 초과할 경우 지정된 사이즈로 축소되며, 세로크기도 같은 비율로 축소 됨</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">목록 최대 세로크기</td>
+					<td><input type="text" name="thumb_height" value="120" hname="목록 최대 세로크기" option="number" size="4" maxlength="3" minval="30" maxval="300" class="enable"> 픽셀<span id="tip">+ 세로크기가 지정된 크기를 초과할 경우 지정된 사이즈로 축소되며, 가로크기도 같은 비율로 축소 됨</td>
+				</tr>
+				<tr id="thumb_nums_frame">
+					<td bgcolor="f7f7f7">줄당 이미지 수</td>
+					<td><input type="text" name="thumb_nums" value="5" hname="한줄에 표실할 이미지 갯수" option="number" size="4" maxlength="1" class="enable"> 개/줄<span id="tip">+ 한줄에 표시할 이미지 갯수</span></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+		<tfoot bgcolor="white">
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">게시판 상단/하단 파일 설정</strong><span id="tip">+ 게시판 상단/하단에 출력할 파일을 설정</span></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">상단에 로드할 파일명</td>
+					<td>
+						<input type="text" name="board_header_file" value="" size="50" class="simpleform">
+						<span id="tip">+ 파일 업로드 위치 : <b style="font-family:verdana">board/include/</b></span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7" width="120">하단에 로드할 파일명</td>
+					<td>
+						<input type="text" name="board_footer_file" value="" size="50" class="simpleform">
+						<span id="tip">+ 파일 업로드 위치 : <b style="font-family:verdana">board/include/</b></span>
+					</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">본문 설정</strong><span id="tip">+ 게시글 내용에 출력할 기본 텍스트를 설정</span></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">기본 텍스트</td>
+					<td><textarea type="editor" name="board_content" class="enable" style="width:100%;height:150px;"></textarea></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">사용제한</strong><span id="tip">+ 입력시 쉼표<span style="font-family:verdana">(,)</span>로 구분</span></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">금지 단어 설정</td>
+					<td><textarea name="board_filter" class="enable" style="width:100%;height:100px;"></textarea></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">아이피 차단 설정</td>
+					<td><textarea name="ip_block" class="enable" style="width:100%;height:100px;"></textarea></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><input type="image" src="./img/btn_input.gif" align="absmiddle"> </td>
+		</tr>
+		</tfoot>
+		</form>
+		</table>
+		<script type="text/javascript">Wysiwyg.createELM()</script>
+		<!-- 등록/수정폼 -->
+<?php
+}
+// 워터마크 설정
+else if($_GET['cmode'] == "water") {
+	$wm_settings = $rankup_board->wm_settings;
+	$watermark_image = rankup_util::get_watermark_image($base_dir."rankup_module/rankup_board/watermark/");
+	if($watermark_image) {
+		list($width, $height) = rankup_util::get_optimize_size($base_dir."rankup_module/rankup_board/watermark/$watermark_image", array(170, 170));
+		$watermark_image = "<img src='{$base_url}rankup_module/rankup_board/watermark/$watermark_image' align='absmiddle' width='$width' height='$height'>";
+	}
+	else $watermark_image = "<img src='{$base_url}images/no_100_100.gif' align='absmiddle'>";
+	list($wmark_width, $wmark_height) = getimagesize($base_dir.'rankup_module/rankup_board/watermark/sample_result.jpg');
+?>
+		<table width="750" cellpadding="7" cellspacing="0" border="0" bordercolor="dddddd" bgcolor="#ffffff" style="border-collapse:collapse;">
+		<form name="registFrm" method="POST" target="multiProcessFrame" action="./multiProcess.ajax.html" onSubmit="return (validate(this)&&confirm('변경하신 사항을 저장하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="set_wm_settings">
+		<tr>
+			<td>
+				<script type="text/javascript" src="./rankup_watermark.js"></script>
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td><img src="./img/ic_bullet1.gif"><strong class="sub_title">워터마크 설정</strong></td>
+				</tr>
+				<tr>
+					<td style="padding-top:5px">
+						<table id="watermark_frame" width="100%" cellpadding="5" cellspacing="1" bgcolor="#dedede">
+						<tbody bgcolor="white">
+						<tr>
+							<td width="90" bgcolor="#f7f7f7">사용여부</td>
+							<td>
+								<input type="radio" name="use_watermark" value="yes" checked id="use_watermark_yes"><label for="use_watermark_yes">사용함</label>
+								<input type="radio" name="use_watermark" value="no"<? if($wm_settings['use_watermark']=="no") echo " checked" ?> id="use_watermark_no"><label for="use_watermark_no">사용안함</label>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7">워터마크 불투명도</td>
+							<td>
+								<input type="text" size="8" maxlength="3" name="watermark_opacity" value="<?=$wm_settings['watermark_opacity']?>" required hname="불투명도" minval="1" maxval="100" class="simpleform" onBlur="rankup_watermark.apply_wmark()">
+								<span id="tip">+ 불투명도 수치가 높을 수록 진하게 출력됩니다. ( 입력 범위: 1 ~ 100 )</span><br>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7">워터마크 여백</td>
+							<td>
+								<input type="text" name="watermark_margin" value="<?=$wm_settings['watermark_margin']?>" size="8" maxlength="3" hname="워터마크 여백" option="number" class="simpleform" onBlur="rankup_watermark.apply_wmark()">
+								<span id="tip">+ 워터마크 여백을 설정 (단위 : pixel )</span>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7">워터마크 위치</td>
+							<td>
+								<input type="text" id="watermark_location_text" value="정중앙" size="8" class="simpleform" readOnly style="padding-top:5px;text-align:center;cursor:pointer" onClick="rankup_watermark.open_location('watermark_location_frame')">
+								<table id="watermark_location_frame" style="position:absolute;border:2px #999 solid;display:none;" cellpadding="5" cellspacing="1" bgcolor="#dedede">
+								<col width="30">
+								<col width="30">
+								<col width="30">
+								<tbody id="position_frame" bgcolor="#fafafa" align="center" style="cursor:pointer">
+								<tr height="40">
+									<td title="좌측상단"><input type="radio" name="watermark_location" value="lt" onClick="rankup_watermark.apply_wmark(this)"></td>
+									<td title="중앙상단"><input type="radio" name="watermark_location" value="ct" onClick="rankup_watermark.apply_wmark(this)"></td>
+									<td title="우측상단"><input type="radio" name="watermark_location" value="rt" onClick="rankup_watermark.apply_wmark(this)"></td>
+								</tr>
+								<tr height="40">
+									<td title="좌측중앙"><input type="radio" name="watermark_location" value="lm" onClick="rankup_watermark.apply_wmark(this)"></td>
+									<td title="정중앙"><input type="radio" name="watermark_location" checked value="cm" onClick="rankup_watermark.apply_wmark(this)"></td>
+									<td title="우측중앙"><input type="radio" name="watermark_location" value="rm" onClick="rankup_watermark.apply_wmark(this)"></td>
+								</tr>
+								<tr height="40">
+									<td title="좌측하단"><input type="radio" name="watermark_location" value="lb" onClick="rankup_watermark.apply_wmark(this)"></td>
+									<td title="중앙하단"><input type="radio" name="watermark_location" value="cb" onClick="rankup_watermark.apply_wmark(this)"></td>
+									<td title="우측하단"><input type="radio" name="watermark_location" value="rb" onClick="rankup_watermark.apply_wmark(this)"></td>
+								</tr>
+								</tbody>
+								</table>
+								<span id="tip">+ 워터마크가 삽입될 위치를 9개의 영역중에서 선택</span>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7">워터마크 투시색상</td>
+							<td>
+								<input type="radio" name="watermark_transcolor" checked value="none" id="transcolor_none" onClick="rankup_watermark.apply_wmark()"><label for="transcolor_none">지정안함</label>
+								<input type="radio" name="watermark_transcolor" value="white" id="transcolor_white" onClick="rankup_watermark.apply_wmark()"><label for="transcolor_white">하얀색(#FFFFFF)</label>
+								<input type="radio" name="watermark_transcolor" value="black" id="transcolor_black" onClick="rankup_watermark.apply_wmark()"><label for="transcolor_black">검은색(#000000)</label>
+								<input type="radio" name="watermark_transcolor" value="magenta" id="transcolor_magenta" onClick="rankup_watermark.apply_wmark()"><label for="transcolor_magenta">보라색(#FF00FF)</label>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7">워터마크 등록</td>
+							<td>
+								<input type="hidden" id="on_watermark" name="on_watermark">
+								<span><input type="file" name="watermark" hname="워터마크 이미지" class="simpleform" onChange="rankup_watermark.post_wmark(this)" filter="png,gif,jpg"></span><span id="tip">+ 워터마크로 사용할 이미지 ( png, gif, jpg )</span>
+							</td>
+						</tr>
+						</tbody>
+						</table>
+						<script type="text/javascript"> rankup_watermark.initialize("<?=$wm_settings['watermark_location']?>", "<?=$wm_settings['watermark_transcolor']?>") </script>
+
+						<table width="100%" cellspacing="1" cellpadding="0" border="0" style="margin-top:8px" bgcolor="#dedede">
+						<col width="180" span="3">
+						<tbody align="center" bgcolor="white">
+						<tr height="26" bgcolor="#f7f7f7">
+							<td>적용전</td>
+							<td bgcolor="#efefef">워터마크</td>
+							<td>적용후</td>
+						</tr>
+						<tr height="185">
+							<td><img src="watermark/sample.jpg" align="absmiddle" width="250" height="170" style="border:1px #dedede solid"></td>
+							<td id="watermark_image"><?=$watermark_image?></td>
+							<td id="result_image"><a onClick="rankup_watermark.preview_wmark.show('result_image')" title="미리보기 - 클릭"><img src="watermark/sample_result.jpg" align="absmiddle" width="250" height="170" style="border:1px #dedede solid"></a></td>
+						</tr>
+						</tbody>
+						</table>
+						<div id="wmark_preview_frame" style="position:absolute;display:none;width:auto;border:1px #808080 solid;padding:6px;background-color:white;cursor:pointer;z-index:100" onClick="rankup_watermark.preview_wmark.hide()" title="미리보기 닫기 - 클릭">워터마크 적용이미지 미리보기 프레임</div>
+						<div id="tip" style="margin:0;margin-top:6px">
+							+ 적용후 이미지를 클릭하시면 워터마크가 적용된 샘플이미지를 보실 수 있습니다.<br>
+							+ 워터마크 설정을 적용하시려면 하단의 '저장' 버튼을 클릭하셔야 바랍니다.
+						</div>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		<table width="700" cellpadding="0" cellspacing="0" style="margin-top:20px">
+		<tr align="center">
+			<td><input type="image" src="./img/btn_save1.gif" align="absmiddle"></td>
+		</tr>
+		</form>
+		</table>
+<?php
+}
+// SNS 설정
+else {
+	include_once "../../Libs/_php/rankup_sns.class.php";
+	$rankup_sns = new rankup_sns;
+	$sns_settings = $rankup_sns->sns_settings;
+?>
+		<table width="750" cellpadding="7" cellspacing="0" border="0" bordercolor="dddddd" bgcolor="#ffffff" style="border-collapse:collapse;">
+		<form name="registFrm" method="POST" target="multiProcessFrame" action="./multiProcess.ajax.html" onSubmit="return (validate(this)&&confirm('변경하신 사항을 저장하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="set_sns_settings">
+		<tr>
+			<td>
+				<script type="text/javascript" src="./rankup_watermark.js"></script>
+				<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td><img src="./img/ic_bullet1.gif"><strong class="sub_title">SNS 설정하기</strong></td>
+				</tr>
+				<tr>
+					<td style="padding-top:5px">
+						<table id="watermark_frame" width="100%" cellpadding="5" cellspacing="1" bgcolor="#dedede">
+						<tbody bgcolor="white">
+						<tr>
+							<td width="120" bgcolor="#f7f7f7">사용여부</td>
+							<td height="35">
+								<input type="radio" name="use_sns" value="yes" checked id="use_sns_yes"><label for="use_sns_yes">사용함</label>
+								<input type="radio" name="use_sns" value="no"<? if($sns_settings['use_sns']=="no") echo " checked" ?> id="use_sns_no"><label for="use_sns_no">사용안함</label>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7" class="fvls0">구글 bit.ly 사용자</td>
+							<td>
+								<input type="text" size="15" name="bitly_name" value="<?=$sns_settings['bitly_name']?>" hname="사용자 이름" option="userid" class="simpleform">
+								<span id="tip">+ 구글 <span class="fvls0">bit.ly</span> 회원가입시 입력한 <span class="fvls0">username</span> 값입니다.</span><br>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7" class="fvls0">구글 bit.ly API key</td>
+							<td height="35">
+								<input type="text" name="bitly_apikey" value="<?=$sns_settings['bitly_apikey']?>" size="60" hname="apikey" class="simpleform">
+								<div id="tip" style="margin:5px 0 0 0;">+ 구글 <span class="fvls0">bit.ly</span> 회원가입후 <span class="fvls0">settings</span> 정보에서 확인이 가능합니다.</div>
+							</td>
+						</tr>
+						<tr>
+							<td bgcolor="#f7f7f7" class="fvls0">SNS 버튼 출력</td>
+							<td height="35">
+								<?=$rankup_sns->sns_use_setting($sns_settings['use_sns_type']);?><br/>
+								<div id="tip" style="margin:5px 0 0 0">+ 사용하실 SNS 서비스를 선택하시기 바랍니다.</div>
+							</td>
+						</tr>
+						</tbody>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		<table width="750" cellpadding="0" cellspacing="0" style="margin-top:20px">
+		<tr align="center">
+			<td><input type="image" src="./img/btn_save1.gif" align="absmiddle"></td>
+		</tr>
+		</form>
+		</table>
+<?php
+}
+?>
+	</td>
+</tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<?php
+/**
+ * 견적문의
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+include_once '../../product/class/product.class.php';
+$product = new product;
+
+if($gen->infos['page_type']=='module' && $gen->infos['module']=='product') {
+	$ps_rows = $product->get_settings();
+	$_GET['fno'] = $ps_rows['use_component'];
+
+	$rows = $product->get_product($_GET['no']);
+	$before_contents = fetch_skin($rows, '
+	<tr>
+		<td class="Form_ess"><font>　</font>견적 제품명</td>
+		<td class="Form_right">
+			<font color="#666666" style="font-size:8t"><b>{:title:}</b></font>
+			<input type="hidden" name="item_no" value="{:no:}" />
+		</td>
+	</tr>');
+
+	// 페이지 타이틀 수정
+	$gen->page_title .= '(제품견적문의)'; // 현재위치 + 윈도우 타이틀 출력부분
+	$gen->infos['base_name'] .= '(제품견적문의)'; // 컨텐트 타이틀 출력부분
+}
+
+// 등록폼 로드
+include_once '../board/write.html';
+?>

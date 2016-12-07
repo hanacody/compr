@@ -1,0 +1,93 @@
+<?php
+/**
+ * 답변메일발송
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../rankup_mailing/rankup_mailing.class.php';
+
+if(!$_GET['kind']) $_GET['kind'] = 'answer_'.$_GET['fno']; // 2012.06.20 fixed
+$mailing = new rankup_mailing($_GET['kind']);
+
+include_once 'rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+$rows = $fbuilder->get_article($_GET['fno'], $_GET['no']);
+
+$rankup_control->print_admin_head('답변메일 발송');
+?>
+<body>
+<script type="text/javascript"> var direct_board = true; </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+
+<div class="bar"><script> titleBar('답변메일 발송') </script></div>
+
+<form name="send_form" id="send_form" onSubmit="return false" style="margin-top:30px">
+	<input type="hidden" name="kind" id="kind" value="<?=$_GET['kind']?>" />
+	<input type="hidden" name="fno" id="fno" value="<?=$_GET['fno']?>" />
+	<input type="hidden" name="no" id="no" value="<?=$_GET['no']?>" />
+	<input type="hidden" name="fromname" id="fromname" value="<?=$rows['name']?>" /><!이름>
+	<table width="700" border="0" cellpadding="0" cellspacing="0" align="center">
+	<tr>
+		<td><div id="sub_title">답변메일 발송</div></td>
+	</tr>
+	<tr>
+		<td>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;이메일 주소</td>
+				<td><input type="text" name="fromemail" id="fromemail" class="simpleform" style="width:50%"<?=$readonly?> required hname="이메일 주소" value="<?=$rows['email']?>" maxlength="100" /></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;이메일 제목</td>
+				<td><input type="text" name="subject" id="subject" class="simpleform" style="width:93%"<?=$readonly?> required hname="이메일 제목" value="<?=$mailing->settings['subject']?>" maxlength="100" /></td>
+			</tr>
+			</table>
+			<div style="margin-top: 10px">
+				<textarea type="editor" name="body" id="body"<?=$readonly?> required hname="메일 내용" style="width:100%;height:450px" nofocus><?=$mailing->settings['body']?></textarea>
+			</div>
+		</td>
+	</tr>
+<?php
+if($_GET['show']!='yes') {
+?>
+	<tr>
+		<td align="center" style="padding:15px">
+			<?php
+			// 보내기 버튼
+			if(rankup_basic::is_demo()) {
+				echo "<a onClick=\"alert('데모 버전에서는 이메일을 발송할 수 없습니다.')\"><img src='../rankup_mailing/img/btn_mail_send.gif' border='0' align='absmiddle' alt='메일보내기'></a>";
+			}
+			else {
+				echo '<a onClick="$form.submit(this, \'send_form\', \'지금 메일을 발송하시겠습니까?\')"><img src="../rankup_mailing/img/btn_mail_send.gif" align="absmiddle" alt="메일보내기"></a>&nbsp;';
+			}
+			?>
+			<a onclick="self.close()"><img src="../../Libs/_images/btn_close1.gif" align="absmiddle" alt="닫기"></a>
+		</td>
+	</tr>
+<?php
+}
+?>
+	</table>
+</form>
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+Wysiwyg.createELM();
+
+$form.blind = true;
+$form.hashes = {mode: 'send_reply_mail'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('발송되었습니다.');
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

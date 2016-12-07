@@ -1,0 +1,123 @@
+<?php
+/**
+ * 인트로 페이지 설정
+ *@author: kurokisi
+ *@authDate: 2011.09.01
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './top_menu.inc.php';
+include_once './rankup_design.class.php';
+
+$design = new rankup_design;
+$ds_rows = $design->get_settings('intro_design');
+if(!$ds_rows['out_url']) $ds_rows['out_url'] = 'http://';
+
+?>
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'ready': mode = ['hide', 'hide', 'hide']; break;
+		case 'html': mode = ['show', 'hide', 'hide']; break;
+		case 'pin': mode = ['hide', 'hide', 'show']; break;
+		case 'link': mode = ['hide', 'show', 'hide']; break;
+	}
+	$w('intro_html_frame intro_link_frame intro_pin_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+}
+</script>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;margin:30px 0;text-align:left">
+
+		<div class="help_bg" style="margin-bottom:25px">
+			<ul class="help_ul">
+				<li>인트로 유형을 '링크'로 설정할 경우 설정한 URL이 열립니다.</li>
+				<li>인트로 유형을 '인증페이지'로 설정할 경우 '로그인' 또는 '실명인증'을 하지 않으면 사이트 이용이 제한됩니다.</li>
+			</ul>
+		</div>
+
+		<form id="form_frame" name="form_frame" onSubmit="return false">
+			<div id="sub_title">인트로 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+				<col width="120" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 인트로 사용</td>
+					<td>
+						<input type="radio" name="intro_use" checked value="yes" id="intro_use_yes"><label for="intro_use_yes">사용함</label>
+						<input type="radio" name="intro_use"<? if($config_info['intro_use']=='no') echo ' checked' ?> value="no" id="intro_use_no"><label for="intro_use_no">사용안함</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 인트로 유형</td>
+					<td>
+						<input type="radio" name="intro_type" checked value="ready" id="intro_type_ready" onClick="change_frame(this)"><label for="intro_type_ready">준비중</label>
+						<input type="radio" name="intro_type" value="html" id="intro_type_html" onClick="change_frame(this)"><label for="intro_type_html">일반HTML</label>
+						<input type="radio" name="intro_type" value="pin" id="intro_type_pin" onClick="change_frame(this)"><label for="intro_type_pin">인증페이지</label>
+						<input type="radio" name="intro_type" value="link" id="intro_type_link" onClick="change_frame(this)"><label for="intro_type_link">링크<span class="tip">(리다이렉트)</span></label>
+					</td>
+				</tr>
+				<tr id="intro_link_frame" style="display:none">
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 링크입력</td>
+					<td><input type="text" name="intro_url" value="<?=$ds_rows['intro_url']?>" default="http://" size="90" maxlength="200" class="simpleform" /></td>
+				</tr>
+			</table>
+
+			<div id="intro_html_frame" style="display:none;margin-top:-1px">
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<tr>
+						<td><textarea type="editor" id="intro_content" name="intro_content" class="simpleform" style="width:100%;height:400px" nofocus><?=$design->get_settings('intro_content')?></textarea></td>
+					</tr>
+				</table>
+			</div>
+
+			<div id="intro_pin_frame" style="display:none;margin-top:-1px">
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<col width="120" />
+					<col />
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 만19세 미만 나가기</td>
+						<td>
+							<input type="text" name="out_url" value="<?=$ds_rows['out_url']?>" default="http://" size="90" maxlength="200" class="simpleform" />
+							<div id="tip" style="margin:8px 0 0 0">+ 가입자 연령제한이 '<b class="tip2">만19세이상</b>' 인 경우 인트로페이지에 노출되는 '<b class="tip2">19세미만나가기</b>' 버튼의 이동주소를 설정합니다.</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</form>
+
+		<div style="margin-top:10px;text-align:center">
+			<a onClick="$form.submit(this, 'form_frame', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+		</div>
+
+	</div>
+
+	<script type="text/javascript">
+	Wysiwyg.createELM();
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_intro'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			alert('저장되었습니다.');
+		}
+	}
+	change_frame($('intro_type_<?=$ds_rows['intro_type']?>'));
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

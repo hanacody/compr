@@ -1,0 +1,121 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'top_menu.inc.php';
+include_once 'rankup_analytics.class.php';
+
+$analytics = new rankup_analytics;
+
+$as_rows = $analytics->configs;
+if(rankup_basic::is_demo()) $as_rows['google_pass'] = '00000000';
+?>
+
+<table width="750" border="0" cellpadding="0" cellspacing="0" align="center">
+<tr>
+	<td height="25">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td><div id="sub_title">사이트 분석 스크립트 등록</div>&nbsp;</td>
+				<td align="right"><a onclick="$('help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr id="help" style="display:none;">
+	<td>
+		<div class="help_bg" style="margin-bottom: 7px">
+		<ul class="help_ul">
+			<li>
+				<b class="orange_b">구글 웹로그 분석(google analytics) 스크립트 등록 방법</b>
+				<div style="margin:15px 0 10px 0">
+					- 구글 Analytics는 웹로그 분석 서비스로 이 서비스를 이용하기 위해서는 우선 구글계정에 가입하셔야 합니다.<br />
+					- 구글 Analytics를 이용하면 광고 타겟팅의 정확도를 높이고 마케팅 전략을 강화하며 웹사이트의 전환 실적을 개선할 수 있습니다.
+				</div>
+				<div style="margin:30px 0 10px 0;line-height:150%;"><b>1.</b> 구글 Analytics<a href="http://www.google.co.kr/analytics" target="_blank" style="font-weight:bold;">(http://www.google.co.kr/analytics)</a>에 접속합니다.</br>
+				<span style="padding-left:15px;">Analytics를 처음 사용하시는 분은 "지금 가입하기"를 클릭해서 Analytics에 가입합니다.</span>
+				</div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info01.gif" align="absmiddle" /></br><span class="sky_b">구글 Analytics </span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px;line-height:150%;"><b>2.</b> 구글 계정정보를 입력하고 로그인합니다.</br>
+				<span style="padding-left:15px;">구글계정이 없으신 분은 우측 상단의 "새 구글계정 가입"을 클릭해서 구글계정을  만들어 주십시오.</span>
+				</div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info02.gif" align="absmiddle" /></br><span class="sky_b">구글 Analytics 로그인</span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px"><b>3.</b>"Google Analytics 가입"을 클릭해서 Analytics 계정을 만들어 주십시오.</div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info03.gif" align="absmiddle" /></br><span class="sky_b">Analytics 가입</span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px"><b>4.</b> 추적할 사이트의 URL, 계정이름을 입력한 후 약관에 동의하고 "새 계정 만들기"를 클릭합니다.</div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info04.gif" align="absmiddle" /></br><span class="sky_b">Analytics 계정만들기</span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px"><b>5.</b> 아래 그림에 표시한 추적코드(②)를 복사해 주십시오.</div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info05.gif" align="absmiddle" /></br><span class="sky_b">추적코드 복사</span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px"><b>6.</b> "기타로그분석관리> 기본환경설정"에 추적코드와 함께 Google Analytics 의 ID, 비밀번호, 프로필번호를 등록합니다. </div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info06.gif" align="absmiddle" /></br><span class="sky_b">기타로그분석관리>기본환경설정</span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px;font-weight:bold;" class="sub_title">※ 프로필번호는 Analytics 메인페이지에서 사이트프로필 수정을 클릭하면 확인하실 수 있습니다.</div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info07.gif" align="absmiddle" /></br><span class="sky_b">프로필 확인 </span></center>
+				</div>
+				<div style="padding:50px 0px 10px 0px"><b>7.</b> 정상적으로 구글접속통계가 출력되는지 확인합니다. </div>
+				<div style="background-color:white;padding:8px;" width="80%">
+					<center><img src="./img/analytics_info08.gif" align="absmiddle" /></br><span class="sky_b">구글접속 통계</span></center>
+				</div>
+			</li>
+		</ul>
+	</td>
+</tr>
+<tr>
+	<td>
+		<form id="save_form" name="save_form" onSubmit="return false">
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<tr>
+				<td width="170" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Google Analytics ID</td>
+				<td><input type="text" name="google_id" style="width:200px" class="simpleform" value="<?=$as_rows['google_id']?>"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Google Analytics 비밀번호</td>
+				<td><input type="password" name="google_pass" style="width:200px;" class="simpleform" value="<?=$as_rows['google_pass']?>"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Google Analytics 프로필</td>
+				<td><input type="text" name="google_profile_id" style="width:200px;" class="simpleform" value="<?=$as_rows['google_profile_id']?>"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;스크립트 입력</td>
+				<td><textarea name="google_scripts" style="width:100%;height:300px;" required hname="사이트 분석 스크립트" class="simpleform"><?=$as_rows['google_scripts']?></textarea></td>
+			</tr>
+		</table>
+		<div style="margin-top: 10px;text-align:center;">
+			<?php
+			if(rankup_basic::is_demo()) echo '<a onClick="alert(\'데모버전에서는 변경하실 수 없습니다.\')"><img src="../../Libs/_images/btn_save1.gif" alt="저장하기" align="absmiddle" /></a>';
+			else echo '<a onClick="$form.submit(this, \'save_form\', \'입력하신 사항을 저장하시겠습니까?\')"><img src="../../Libs/_images/btn_save1.gif" alt="저장하기" align="absmiddle" /></a>';
+			?>
+		</div>
+		</form>
+	</td>
+</tr>
+</table>
+<br />
+<br />
+<script type="text/javascript">
+// $form submit setting
+$form.debug = false;
+$form.hashes = {mode: 'set_configs'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+</script>
+
+</body>
+</html>

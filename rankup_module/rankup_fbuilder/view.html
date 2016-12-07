@@ -1,0 +1,183 @@
+<?php
+/**
+ * 등록폼관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+$fs_rows = $fbuilder->get_settings($_GET['fno']);
+$rows = $fbuilder->get_article($_GET['fno'], $_GET['no']);
+
+$rankup_control->print_admin_head('등록폼관리 - '.$fs_rows['form_name']);
+
+include_once '../rankup_builder/attachment.class.php';
+$attach = new attachment('fbuilder');
+
+
+//@note: 관련상품이 있는경우 - 즉, 견적문의 폼인 경우
+if($rows['item_no']) {
+	include_once '../../product/class/product.class.php';
+	$product = new product;
+	$ps_rows = $product->get_product($rows['item_no']);
+	if($ps_rows['no']) {
+		$before_contents = fetch_skin($ps_rows, '
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 견적 제품명</td>
+			<td><b>{:title:}</b> &nbsp; <a href="../../product/view.html?no={:no:}" target="_blank"><b class="tip">[제품보기]</b></a></td>
+		</tr>');
+	}
+	else {
+		$before_contents = fetch_skin($ps_rows, '
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 견적 제품명</td>
+			<td><span disabled>제품이 삭제되었거나 존재하지 않는 제품입니다.</span></td>
+		</tr>');
+	}
+}
+
+if($rows['uid']) {
+	$before_contents .= '
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 아이디</td>
+		<td><a href="../rankup_member/member_detail.html?uid='.$rows['uid'].'" target="_blank"><b>'.$rows['uid'].'</b></a></td>
+	</tr>';
+}
+
+$status_texts = array(
+	'request' => '미확인',
+	'hold' => '글확인',
+	'answered' => '답변완료'
+);
+
+// 필수항목 텍
+$require_icon = ' <font color="red">*</font>';
+?>
+<body>
+<div class="bar"><script> titleBar("등록폼관리 - <?=$fs_rows['form_name']?>", 400) </script></div>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+<?php
+// 등록폼 출력
+echo $fbuilder->draw_view($fs_rows, array(
+	'forms' => $fs_rows,
+	'values' => $rows,
+	'entry' => array(
+		1 => '
+			{:on_group_name:}
+			<table width="100%" cellpadding="10" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+			<col width="120" />
+			<col />
+			{:before_contents:}
+			{:fields:}
+			{:after_contents:}
+			</table>',
+		2 => '<hr style="visibility:hidden" />'
+	),
+	'on_group_name' => '<div id="sub_title">{:group_name:}</div>',
+	'before_contents' => $before_contents, // the first time
+	'after_contents' => $after_contents, // the last time
+
+	'field_entry' => array(
+		'entry' => array(
+			1 => '
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> {:field_name:}{:require_icon:}</td>
+				<td>{:field_value:} {:on_hint:}</td>
+			</tr>'
+		),
+		'field_items' => array(
+			'email' => '<a href="mailto:{:email:}">{:email:}</a>',
+			'jumin' => '{:jumin1:} - {:jumin2:}',
+			'addrs' => '{:zipcode:}, {:addrs1:} {:addrs2:}',
+			'attach' => '<a href="'.$base_url.$attach->configs['save']['folder'].'{:name:}">{:name:}</a>',
+			'calendar' => array(
+				1 => '{:sdate:}',
+				2 => '{:sdate:} ~ {:edate:}'
+			),
+			'dimension' => '{:square:}㎡ (약 {:pyeong:}평)'
+		),
+		'on_hint' => ' <span class="tip">{:hint:}</span>',
+		'require_icon' => $require_icon
+	)
+));
+?>
+
+	<hr style="visibility:hidden" />
+	<div id="sub_title">기타사항</div>
+	<table width="100%" cellpadding="10" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+	<col width="120" />
+	<col />
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 등록일시</td>
+		<td><?=$rows['regist_time']?></td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 등록아이피</td>
+		<td><?=$rows['regist_ip']?></td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 답변상태</td>
+		<td><?=$status_texts[$rows['status']]?></td>
+	</tr>
+	</table>
+
+<?php
+// 답변이 완료된 경우
+if($rows['status']=='answered') {
+?>
+	<hr style="visibility:hidden" />
+	<div id="sub_title">답변내용</div>
+	<table width="100%" cellpadding="10" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+	<col width="120" />
+	<col />
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 답변제목</td>
+		<td>
+			<?=$rows['answered_title']?>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 답변내용</td>
+		<td>
+			<?=$rows['answered_body']?>
+		</td>
+	</tr>
+	<tr>
+		<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 답변일시</td>
+		<td><?=$rows['answered_time']?></td>
+	</tr>
+	</table>
+<?php
+}
+?>
+
+	<div style="margin-top:10px;text-align:center">
+		<?php
+		// 미답변시 답변메일 발송 버튼 노출
+		if($rows['status']!=='answered') echo '<a onClick="fbuilder.mail('.$rows['no'].')"><img src="../rankup_mailing/img/btn_mail_send.gif" align="absmiddle" alt="메일보내기" /></a>';
+		?>
+		<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" align="absmiddle" alt="뒤로가기" /></a>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+var fbuilder = {
+	fno: null,
+	mail: function(no) {
+		var pop = window.open('send_mail.html?fno='+this.fno+'&no='+no, 'pop', 'width=740,height=600,top=0,left=0,scrollbars=1');
+		pop.focus();
+	}
+}
+fbuilder.fno = "<?=$_GET['fno']?>";
+</script>
+
+</body>
+</html>

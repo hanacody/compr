@@ -1,0 +1,39 @@
+/* gnb frame */
+#css_gnb_frame {
+	width: 980px;
+	height: 65px;
+
+}
+/* main-menu */
+#css_gnb_frame div.mm_wrap {
+	/* solid */
+	border: 1px #000 solid;
+	background-color: #296CCC;
+}
+#css_gnb_frame ul.mm li {
+	margin-left: 95px;
+	color: #FFFFFF;
+}
+#css_gnb_frame ul.mm li:hover, #css_gnb_frame ul.mm li.hover {
+	color: #FFF100;
+}
+/* sub-menu */
+#css_gnb_frame ul.sm {
+	/* solid */
+	border: 1px #000 solid;
+	background-color: #FFFFFF;
+}
+#css_gnb_frame ul.sm li {
+	margin-left: 12px;
+	color: #B0AAAA;
+}
+#css_gnb_frame ul.sm li:hover, #css_gnb_frame ul.sm li.hover {
+	color: #212120;
+}
+/* sub-menu margin */
+#css_gnb_frame ul.sm.s1 { margin-left: 5px; }
+#css_gnb_frame ul.sm.s2 { margin-left: 150px; }
+#css_gnb_frame ul.sm.s3 { margin-left: 290px; }
+#css_gnb_frame ul.sm.s6 { margin-left: 450px; }
+#css_gnb_frame ul.sm.s5 { margin-left: 570px; }
+#css_gnb_frame ul.sm.s7 { margin-left: 680px; }

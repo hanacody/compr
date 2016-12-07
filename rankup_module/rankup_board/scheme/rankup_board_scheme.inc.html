@@ -1,0 +1,225 @@
+<?php
+###################################################################
+## 게시판 관련 테이블
+###################################################################
+$_BOARD_TABLES = array(
+// 게시물 테이블(개별)
+"rankup_board_scheme" => "
+CREATE table `rankup_board_{:board_id:}` (
+`no` int(20) unsigned NOT NULL auto_increment,
+`dno` int(10) NOT NULL default '1',
+`cno` int(10) default NULL,
+`sno` int(20) NOT NULL default '0',
+`gno` int(10) NOT NULL default '0',
+`pno` int(10) unsigned NOT NULL default '0',
+`nano` int(20) NOT NULL default '0',
+`pano` int(20) NOT NULL default '0',
+`uip` varchar(20) default NULL,
+`uid` varchar(35) default NULL,
+`unick` varchar(40) NOT NULL default '',
+`upass` varchar(20) default NULL,
+`subject` varchar(250) NOT NULL default '',
+`content` text,
+`attach` text,
+`voter` text,
+`wdate` datetime NOT NULL default '0000-00-00 00:00:00',
+`mdate` datetime NOT NULL default '0000-00-00 00:00:00',
+`sval` enum('yes','no') NOT NULL default 'no',
+`nval` enum('yes','no') NOT NULL default 'no',
+`dval` enum('yes','no') NOT NULL default 'no',
+`cnum` int(11) unsigned NOT NULL default '0',
+`dnum` int(11) unsigned NOT NULL default '0',
+`gnum` int(11) unsigned NOT NULL default '0',
+`bnum` int(11) unsigned NOT NULL default '0',
+`hnum` int(11) unsigned NOT NULL default '0',
+PRIMARY KEY (`no`),
+KEY `dno` (`dno`,`sno`,`gno`),
+KEY `pno` (`pno`),
+KEY `cno` (`cno`),
+KEY `nano` (`nano`),
+KEY `pano` (`pano`),
+KEY `unick` (`unick`),
+KEY `wdate` (`wdate`),
+KEY `cnum` (`cnum`),
+KEY `hnum` (`hnum`),
+KEY `gnum` (`gnum`),
+KEY `bnum` (`bnum`),
+KEY `dnum` (`dnum`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+",
+
+// 댓글 테이블(개별)
+"rankup_board_comment_scheme" => "
+CREATE table `rankup_board_comment_{:board_id:}` (
+`no` int(20) unsigned NOT NULL auto_increment,
+`ano` int(20) NOT NULL default '0',
+`pno` int(10) NOT NULL default '0',
+`cnum` int(10) NOT NULL default '0',
+`remove`  enum('yes','no') NOT NULL default 'no',
+`uip` varchar(20) default NULL,
+`uid` varchar(35) default NULL,
+`unick` varchar(40) default NULL,
+`upasswd` varchar(20) default NULL,
+`icon` tinyint(3) unsigned NULL default NULL,
+`content` text,
+`wdate` datetime NOT NULL default '0000-00-00 00:00:00',
+PRIMARY KEY (`no`),
+KEY `ano` (`ano`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+");
+
+
+###################################################################
+## 기본 설정 테이블
+###################################################################
+$_BOARD_CONFIG_TABLES = array(
+// 게시판 환경설정 테이블(통합)
+"rankup_board_config" => "
+CREATE table `rankup_board_config` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`id` varchar(20) NOT NULL default '',
+`name` varchar(100) NOT NULL default '',
+`cno` int(11) NOT NULL default '0',
+`pcno` int(11) NOT NULL default '0',
+`skin` varchar(255) default NULL,
+`style` enum('normal', 'gallery', 'webzin', 'mantoman') NOT NULL default 'normal',
+`rank` int(11) NOT NULL default '1',
+`anum` int(20) NOT NULL default '0',
+`uval` enum('yes','no') NOT NULL default 'yes',
+`mval` enum('yes','no') NOT NULL default 'no',
+`pcmval` enum('yes','no') NOT NULL default 'no',
+`smlayout` text,
+`spcmlayout` text,
+`slayout` text,
+`sfunction` text,
+`soption` text,
+`scategory` text,
+`spermission` text,
+`spoint` text,
+`sattach` text,
+`sgallery` text,
+`scontent` text,
+`sfilter` text,
+`sblock` text,
+PRIMARY KEY (`no`),
+UNIQUE KEY `id` (`id`),
+KEY `cno` (`cno`),
+KEY `pcno` (`pcno`),
+KEY `rank` (`rank`),
+KEY `anum` (`anum`),
+KEY `uval` (`uval`),
+FULLTEXT KEY `board_id` (`id`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+",
+
+// 카테고리 테이블
+"rankup_board_category" => "
+CREATE table `rankup_board_category` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`pno` int(11) NOT NULL default '0',
+`mbno` int(11) default NULL,
+`content` varchar(40) NOT NULL default '',
+`rank` int(11) NOT NULL default '1',
+`mskin` varchar(50) default NULL,
+`lskin` varchar(50) default NULL,
+`mbnum` enum('1', '2') NOT NULL default '1',
+`sprint` text,
+`mval` enum('yes', 'no') NOT NULL default 'no',
+`bval` enum('yes', 'no') NOT NULL default 'no',
+`cval` enum('yes', 'no') NOT NULL default 'no',
+`uval` enum('yes', 'no') NOT NULL default 'yes',
+`pval` enum('yes', 'no') NOT NULL default 'yes',
+`dval` enum('yes', 'no') NOT NULL default 'no',
+PRIMARY KEY (`no`),
+KEY `pno` (`pno`),
+KEY `rank` (`rank`),
+KEY `mval` (`mval`),
+KEY `pval` (`pval`),
+KEY `dval` (`dval`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+",
+
+// 게시물 분할 테이블(통합)
+"rankup_board_division" => "
+CREATE table `rankup_board_division` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`bid` varchar(20) NOT NULL default '',
+`division` int(11) not NULL default '1',
+`banum` int(11) not NULL default '0',
+PRIMARY KEY (`no`),
+KEY `bid` (`bid`),
+KEY `division` (`division`),
+KEY `banum` (`banum`)
+) TYPE=MyISAM AUTO_INCREMENT=1;
+",
+
+// 조회수 베스트 테이블(통합)
+"rankup_board_hit_best" => "
+CREATE table `rankup_board_hit_best` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`pcno` int(11) NOT NULL default '0',
+`bid` varchar(20) NOT NULL default '',
+`adno` int(10) NOT NULL default '1',
+`ano` int(20) unsigned NOT NULL default '1',
+`ahnum` int(11) unsigned NOT NULL default '0',
+PRIMARY KEY (`no`),
+KEY `pcno` (`pcno`),
+KEY `bid` (`bid`),
+KEY `ano` (`ano`),
+KEY `ahnum` (`ahnum`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+",
+
+// 댓글수 베스트 테이블(통합)
+"rankup_board_comment_best" => "
+CREATE table `rankup_board_comment_best` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`pcno` int(11) NOT NULL default '0',
+`bid` varchar(20) NOT NULL default '',
+`adno` int(10) NOT NULL default '1',
+`ano` int(20) unsigned NOT NULL default '1',
+`acnum` int(11) unsigned NOT NULL default '0',
+PRIMARY KEY (`no`),
+KEY `pcno` (`pcno`),
+KEY `bid` (`bid`),
+KEY `ano` (`ano`),
+KEY `acnum` (`acnum`)
+) TYPE=MyISAM AUTO_INCREMENT=1;
+",
+
+// 주간 베스트 테이블(메뉴 전용)
+"rankup_board_weekly_best" => "
+CREATE table `rankup_board_weekly_best` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`pcno` int(11) NOT NULL default '0',
+`bid` varchar(20) NOT NULL default '',
+`adno` int(10) NOT NULL default '1',
+`ano` int(20) unsigned NOT NULL default '1',
+`hnum` int(11) unsigned NOT NULL default '0',
+`wdate` date NOT NULL default '0000-00-00',
+PRIMARY KEY (`no`),
+KEY `pcno` (`pcno`),
+KEY `bid` (`bid`),
+KEY `hnum` (`hnum`),
+KEY `wdate` (`wdate`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+",
+
+// 신규 게시물 테이블(통합)
+"rankup_board_new_article" => "
+CREATE table `rankup_board_new_article` (
+`no` int(10) unsigned NOT NULL auto_increment,
+`pcno` int(11) NOT NULL default '0',
+`bid` varchar(20) NOT NULL default '',
+`adno` int(10) NOT NULL default '1',
+`ano` int(20) unsigned NOT NULL default '1',
+`awdate` datetime NOT NULL default '0000-00-00 00:00:00',
+PRIMARY KEY (`no`),
+KEY `pcno` (`pcno`),
+KEY `bid` (`bid`),
+KEY `ano` (`ano`),
+KEY `awdate` (`awdate`)
+) TYPE=MyISAM AUTO_INCREMENT=1
+");
+
+?>

@@ -1,0 +1,302 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './top_menu.inc.php';
+include_once 'rankup_design.class.php';
+include_once 'attachment.class.php';
+include_once 'rankup_frame.class.php';
+
+$frame = new rankup_frame;
+$design = new rankup_design;
+$ds_rows = $design->get_settings('left_menu_design');
+if(!$ds_rows['lnb_type']) $ds_rows['lnb_type'] = 'basic';
+if(!$ds_rows['lnb_title_type']) $ds_rows['lnb_title_type'] = 'text';
+
+?>
+
+<?php
+/**
+ * 컬러픽커 로드
+ *@usage: echo color_picker('name', 'value');
+ *@usage: <script> color_picker.initialize('color_frame'); </script> // 컬러픽커 초기화
+ */
+include_once $base_dir.'Libs/_picker/color_picker.inc.php';
+?>
+
+<script type="text/javascript" src="attachment.class.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'basic': case 'html': mode = ['hide', 'show']; break;
+		case 'upload': mode = ['show', 'hide']; break;
+		case 'text': mode = ['hide']; break;
+		case 'image': mode = ['show']; break;
+	}
+	var viewer = $('viewer');
+	if(viewer!=null) viewer.remove();
+	if(el.name=='lnb_type') $w('upload_frame detail_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+	else $w('lnb_title_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+}
+</script>
+<style type="text/css">
+#viewer {
+	position: absolute;
+	padding: 8px;
+	background-color: white;
+	border: 1px #dedede solid;
+	margin: 0 5px;
+}
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;text-align:left">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+
+			<div id="sub_title">좌측메뉴설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="1" border="0" bgcolor="#d7d7d7" class="list_top" style="table-layout:fixed">
+			<col width="134" />
+			<col style="background-color:white" />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;메뉴설정</td>
+				<td>
+					<input type="radio" name="lnb_type" checked value="basic" onClick="change_frame(this)" id="lnb_type_basic"><label for="lnb_type_basic">랭크업 일반메뉴</label>
+					<input type="radio" name="lnb_type" value="upload" onClick="change_frame(this)" id="lnb_type_upload"><label for="lnb_type_upload">사용자제작 플래시메뉴</label>
+				</td>
+			</tr>
+			<tr id="upload_frame" style="display:none">
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;좌측메뉴 업로드</td>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+					<col width="230" />
+					<col width="80" />
+					<col />
+					<tr bgcolor="#eeeeee" align="center">
+						<td>1차 메뉴명</td>
+						<td>파일업로드</td>
+						<td>메뉴 사이즈</td>
+					<tr>
+					<?php
+					// 프레임 로드
+					$attach = new attachment('lnb_flash');
+					$folder = $attach->configs['save']['folder'];
+					echo $frame->print_frames(array(
+						'use_lnb' => true,
+						'attach_kind' => 'lnb_flash',
+						'attaches' => $ds_rows['lnb_flashes'],
+						'entry' => array(
+							0 => '
+							<tr>
+								<td colspan="3" align="center" onMouseOver="this.bgColor=\'red\';this.style.color=\'white\'" onMouseOut="this.bgColor=\'white\';this.style.color=\'red\'" style="color:red">먼저 상위메뉴를 생성하시기 바랍니다. <b>[ <a href="./index.html" style="letter-spacing:-1px">메뉴 및 페이지설정 바로가기</a> ]</b></td>
+							</tr>',
+							1 => '
+							<tr>
+								<td width="110" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;{:base_name:}</td>
+								<td align="center">
+									<a onClick="uploader.open(\'lnb_flash\', \'{:base_name:}\', \'on_lnbs[{:no:}]\', {:no:})"><img src="./img/btn_upload.gif" align="absmiddle"></a>
+								</td>
+								<td>
+									가로 <input type="text" name="widths[{:no:}]" value="{:width:}" style="width:35px" maxlength="4" class="simpleform"> px ,
+									세로 <input type="text" name="heights[{:no:}]" value="{:height:}" style="width:35px" maxlength="4" class="simpleform"> px
+									<input type="hidden" class="on_item" name="on_lnbs[{:no:}]" />
+									{:on_attach:}
+								</td>
+							</tr>'
+						),
+						'on_attach' => ' &nbsp; <a onMouseOver="uploader.preview(this)" onMouseOut="uploader.preview_close()" folder="'.$folder.'" name="{:name:}"><img src="./img/btn_img_view.gif" align="absmiddle" /></a>'
+					), '', 1, 'yes');
+					?>
+					</table>
+				</td>
+			</tr>
+			<tbody id="detail_frame">
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;상단 타이틀 형태</td>
+					<td>
+						<input type="radio" name="lnb_title_type" checked value="text" id="lnb_title_type_text" onClick="change_frame(this)"><label for="lnb_title_type_text"> 텍스트</label>
+						<input type="radio" name="lnb_title_type" value="image" id="lnb_title_type_image" onClick="change_frame(this)"><label for="lnb_title_type_image">이미지</label>
+					</td>
+				</tr>
+				<tr id="lnb_title_frame" style="display:none">
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;상단 타이틀 이미지</td>
+					<td>
+						<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+						<col width="230" />
+						<col width="80" />
+						<col />
+						<tr bgcolor="#eeeeee" align="center">
+							<td>1차 메뉴명</td>
+							<td>파일업로드</td>
+							<td>업로드 이미지</td>
+						<tr>
+						<?php
+						// 프레임 로드
+						$attach = new attachment('lnb_title');
+						$folder = $attach->configs['save']['folder'];
+						echo $frame->print_frames(array(
+							'use_lnb' => true,
+							'attach_kind' => 'lnb_title',
+							'attaches' => $ds_rows['lnb_titles'],
+							'entry' => array(
+								0 => '
+								<tr>
+									<td colspan="3" align="center" onMouseOver="this.bgColor=\'red\';this.style.color=\'white\'" onMouseOut="this.bgColor=\'white\';this.style.color=\'red\'" style="color:red">먼저 상위메뉴를 생성하시기 바랍니다. <b>[ <a href="./index.html" style="letter-spacing:-1px">메뉴 및 페이지설정 바로가기</a> ]</b></td>
+								</tr>',
+								1 => '
+								<tr>
+									<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;{:base_name:}</td>
+									<td align="center"><a onClick="uploader.open(\'lnb_title\', \'{:base_name:}\', \'on_titles[{:no:}]\', {:no:})"><img src="./img/btn_upload.gif" align="absmiddle"></a></td>
+									<td><input type="hidden" class="on_item" name="on_titles[{:no:}]" />{:on_attach:}</td>
+								</tr>'
+							),
+							'on_attach' => '<a onMouseOver="uploader.preview(this)" onMouseOut="uploader.preview_close()" folder="'.$folder.'" name="{:name:}"><img src="./img/btn_img_view.gif" align="absmiddle" /></a>'
+						), '', 1, 'yes');
+						?>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 하위메뉴 색상</td>
+					<td id="color_frame">
+						<div id="tip" style="margin: 5px 0"> 색상을 지정하지 않으려면 입력란의 값을 비우시고 저장하시면 됩니다.</div>
+						<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout: fixed">
+						<col width="134" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 글자색</td>
+							<td>
+								비활성 : <?=color_picker('sm_off_color', $ds_rows['sm_off_color'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('sm_on_color', $ds_rows['sm_on_color'])?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 배경색</td>
+							<td>
+								비활성 : <?=color_picker('sm_off_bgcolor', $ds_rows['sm_off_bgcolor'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('sm_on_bgcolor', $ds_rows['sm_on_bgcolor'])?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;2차메뉴 테두리색</td>
+							<td>
+								비활성 : <?=color_picker('sm_off_bordercolor', $ds_rows['sm_off_bordercolor'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('sm_on_bordercolor', $ds_rows['sm_on_bordercolor'])?>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" height="2" bgcolor="white" style="font-size:0;padding:0"></td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;3차메뉴 글자색</td>
+							<td>
+								비활성 : <?=color_picker('tm_off_color', $ds_rows['tm_off_color'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('tm_on_color', $ds_rows['tm_on_color'])?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;3차메뉴 배경색</td>
+							<td>
+								비활성 : <?=color_picker('tm_off_bgcolor', $ds_rows['tm_off_bgcolor'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('tm_on_bgcolor', $ds_rows['tm_on_bgcolor'])?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;3차메뉴 테두리색</td>
+							<td>
+								비활성 : <?=color_picker('tm_off_bordercolor', $ds_rows['tm_off_bordercolor'])?> &nbsp; &nbsp;
+								활성화 : <?=color_picker('tm_on_bordercolor', $ds_rows['tm_on_bordercolor'])?>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+			</table>
+
+		</form>
+	</div>
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script style="text/javascript">
+	color_picker.initialize('color_frame');
+
+	change_frame($('lnb_type_<?=$ds_rows['lnb_type']?>'));
+	change_frame($('lnb_title_type_<?=$ds_rows['lnb_title_type']?>'));
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+<script type="text/javascript" src="uploader.class.js"></script>
+<style type="text/css"> @import url('./uploader.css'); </style>
+<!-- FILE UPLOADER -->
+<div id="uploader_frame" style="display: none">
+	<form name="post_frame" method="POST" onSubmit="return false">
+		<dl class="titlebar">
+			<dt>+ 파일업로더 +</dt>
+			<dd><a onClick="uploader.close()">×</a></dd>
+		</dl>
+		<div class="item_wrap">
+			<dl class="item">
+				<dt>메뉴</dt>
+				<dd id="base_name"></dd>
+			</dl>
+			<dl class="item">
+				<dt>파일</dt>
+				<dd style="padding:0">
+					<span><input type="file" name="_attach_" onChange="uploader.post(this, 'attach')" /></span>
+					<input type="hidden" face="attach" name="mode" value="post_attach" disabled />
+					<input type="hidden" face="attach" name="kind" value="" disabled />
+					<input type="hidden" face="attach" name="handler" value="uploader.draw" disabled />
+				</dd>
+			</dl>
+		</div>
+	</form>
+	<div class="clear" style="margin-top:10px;"></div>
+	<div id="uploader_preview" class="preview"></div>
+	<div class="clear" style="margin-top:10px;text-align: center">
+		<a onClick="uploader.apply()"><img src="../../Libs/_images/btn_apply.gif" alt="적용" align="absmiddle" /></a>
+		<a onClick="uploader.close()"><img src="../../Libs/_images/btn_close.gif" alt="닫기" align="absmiddle" /></a>
+	</div>
+</div>
+<!-- FILE UPLOADER -->
+
+<script type="text/javascript">
+uploader.initialize('uploader_frame', 'save_form');
+
+// $form submit setting
+$form.debug = false;
+$form.hashes = {mode: 'save_design', kind: 'left'};
+$form.handler = function(trans) {
+	$w('title flash').each(function(node) {
+		var items = trans.responseXML.getElementsByTagName(node);
+		$A(items).each(function(item) {
+			var infos = {}
+			$w('no folder name').each(function(field) {
+				infos[field] = item.getElementsByTagName(field)[0].firstChild.nodeValue;
+			});
+			with(infos) {
+				var el = $('save_form').select('input[name="'+ ((node=='title')?'on_titles':'on_lnbs') +'['+ no +']"]')[0];
+				el.value = ''; // reset
+			}
+			if(infos.name) uploader.preview_button(el, infos);
+		});
+	});
+	alert('저장되었습니다.');
+
+}
+</script>
+
+</body>
+</html>

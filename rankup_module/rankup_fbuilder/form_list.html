@@ -1,0 +1,115 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include_once 'rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+$rankup_control->print_admin_head('폼(FORM)관리');
+?>
+<body>
+<div class="bar"><script> titleBar('폼(FORM)관리') </script></div>
+<style type="text/css">
+.fv {font-family:verdana}
+.info {font-family:dotum !important;color:#777;padding-left:4px !important}
+.div {color:#ddd}
+</style>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+	<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+	<col width="35" />
+	<col />
+	<col width="65" />
+	<col width="100" />
+	<col width="75" />
+	<col width="70" />
+	<col width="50" />
+	<col width="50" />
+	<tr class="gray_bg" align="center">
+		<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+		<td>폼이름 (테이블명)</td>
+		<td>게시글수</td>
+		<td>쓰기권한</td>
+		<td>폼생성일</td>
+		<td>미리보기</td>
+		<td>수정</td>
+		<td>삭제</td>
+	</tr>
+	<tbody id="list_frame" align="center" valign="top">
+	<?php
+	echo $fbuilder->print_forms(array(
+		'mode' => 'list',
+		'entry' => array(
+			0 => '
+			<tr>
+				<td height="40" colspan="8" valign="middle"><span disabled>등록된 폼이 존재하지 않습니다.</span></td>
+			</tr>',
+			1 => '
+			<tr>
+				<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+				<td align="left">
+					<a href="form_builder.html?no={:no:}"><b>{:form_name:}</b></a> <span class="tip fv">({:table_name:})</span>
+					<div class="hline gray_bg info">
+						 개인정보수집동의 {:privacy_text:} <span class="div">&nbsp;|&nbsp;</span>
+						스팸방지코드 {:antispam_text:}
+					</div>
+				</td>
+				<td><a href="forms.html?no={:no:}" target="_blank">{:articles_num:}</a></td>
+				<td>{:write_level_text:} 부터</td>
+				<td>{:regist_date:}</td>
+				<td><a href="../../board/write.html?fno={:no:}" target="_blank"><img src="../../Libs/_images/btn_preview_s.gif" /></a></td>
+				<td><a href="./form_builder.html?no={:no:}"><img src="../../Libs/_images/btn_modify_s.gif" /></a></td>
+				<td><a onClick="fbuilder.del()"><img src="../../Libs/_images/btn_delete_s.gif" /></a></td>
+			</tr>'
+		),
+		'level_texts' => $config_info['smlevel'],
+		'use_texts' => array(
+			'yes' => '<span style="color:#009966">사용</span>',
+			'no' => '<span style="color:#cc0000">사용안함</span>'
+		)
+	));
+	?>
+	</tbody>
+	</table>
+
+	<div style="position:relative;margin-top:8px">
+		<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+		<a onClick="fbuilder.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+		<div style="position:absolute;right:0"><a href="form_builder.html">[폼(FORM)등록+]</a></div>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+checker.initialize('list_frame', 'input[name="no[]"]');
+
+var fbuilder = {
+	del: function(no) {
+		var nos = (no==undefined) ? checker.get() : no;
+		if(!nos.length) {
+			alert('삭제하실 등록폼을 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('[주의] 삭제된 등록폼은 복구되지 않습니다.\n\n선택하신 등록폼을 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_forms', nos:nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				try { top.frames['left'].location.reload(); } catch(e) { }
+				location.reload();
+			}
+		}, false);
+	}
+}
+//]]>
+</script>
+
+<body>
+</html>

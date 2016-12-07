@@ -1,0 +1,28 @@
+<?
+if($this->soption['use_hit_best']!=="on") return;
+?>
+<tr>
+	<td> 
+		<!-- 조회수 베스트 -->						
+		<table border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td style="padding-left:3px" height="25"><b>조회수 <span class="best">BEST</span></td>
+		</tr>
+		</table>
+		<table border="0" cellpadding="2" cellspacing="0" width="100%" class="best_bg">
+		<tr>
+			<td>
+				<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="white">
+				<tr>
+					<td style="padding:5 10 5 10px"> 
+						<table width="100%" cellpadding="3" cellspacing="0" border="0">
+						<?=$this->get_best_articles("hit_best")?>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>

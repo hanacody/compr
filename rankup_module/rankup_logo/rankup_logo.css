@@ -1,0 +1,46 @@
+a {cursor:pointer;}
+button {cursor:pointer;}
+input {font-size:8pt;font-family:verdana;font-weight:bolder;letter-spacing:-1px;}
+#bannerHeader {background-color:white;}
+#bannerBody {background-color:white;}
+#bannerHeader th {padding:5px;font-size:9pt;}
+#bannerBody td {padding:5px;text-align:center;font-size:9pt;border:#777777 1px solid;background-color:#EDEDED;color:#999999;font-weight:normal;}
+#bannerItem th {padding:4px;font-weight:normal;font-size:9pt;}
+#bannerItem td {border:0px;background-color:white;cursor:pointer;padding:0px;border-bottom:#EFEFEF 1px solid;font-size:9pt;}
+#item {border:white 2px solid;}
+#itemInfo th {text-align:left;}
+#bindToolBox div {padding:0px;cursor:pointer;font-weight:normal;color:#555555;margin-bottom:5px} /* 2010.12.20 modified */
+.selClass {background-color:#D6E3F1;} /*border:#777777 1px dotted;*/
+
+/* 배너세팅 정보*/
+#settingsInfo {background:url('') no-repeat;font-size:8pt;font-weight:normal;font-family:verdana;letter-spacing:-1px;display:inline;margin-left:10px;vertical-align:top;padding-top:3px;height:20px;}
+#settingsInfo font {font-size:7pt;color:#777777;margin:0px 2px 0px 1px;}
+#settingsInfo span {font-family:verdana;letter-spacing:-1px;color:#336699} /* 2010.12.20 modified */
+#text {font-family:verdana;}
+
+/*등록/수정폼*/
+#registFrmDiv {position:absolute;width:760px;border:black 2px solid;left:0px;top:-2000px;padding:6px;background-color:white;z-index:100;}
+#registFrmDiv input {height:20px;margin:0px;}
+#previewItemBox {background-color:white;width:10px;margin-bottom:5px;padding:0px;}
+#previewItemBox img {margin:0px;}
+
+/* banner outline - 2010.12.20 added */
+.banner_outline {border:1px #555 solid}
+
+#mediaOutline {cursor:pointer;}
+#mediaOutline input {margin-left:4px;margin-bottom:2px;width:11px;height:11px;}
+#mediaOutline label {padding-left:2px;font-size:8pt;font-family:dotum;letter-spacing:-1px;height:11px;}
+
+#banner_kind_td label {font-weight:bolder;font-size:9pt;font-family:dotum;}
+#period_field {margin-left:10px;}
+#mediaInfo {font-size:8pt;font-family:dotum;border:#777777 1px solid;background-color:white;padding:2px 6px 0px 7px;color:#777777}
+#tip {margin-left:6px;color:#3399FF;font-size:8pt;font-family:dotum;letter-spacing:-1px}
+
+.disable {background-color:#efefef;border:#acacac 1px solid;}
+.enable {background-color:white;border:#A9BECF 1px solid;}
+
+/*맞춤사이즈안내*/
+#bannerSizeGuideDiv {position:absolute;display:none;width:300px;border:#3399CC 3px solid;padding:4px;background-color:white;margin:26px 0px 0px -192px;z-index:300}
+#bannerSizeGuideDiv b {font-family:verdana;}
+#bannerSizeGuideDiv td {color:#333333;font-size:8pt;font-family:verdana;letter-spacing:-1px;font-weight:normal;}
+#bannerSizeGuideDiv th {padding-top:6px;font-size:8pt;color:white;font-family:verdana;}

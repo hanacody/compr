@@ -1,0 +1,294 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+$rankup_banner = new rankup_banner;
+
+// 위치값이 없을때 활성화된 배너위치로 설정
+if(empty($_GET['position'])) {
+	$_positions = array_keys($rankup_banner->positions);
+	while($_GET['position']<3) $_GET['position'] = array_shift($_positions);
+}
+
+$banner_lists = $rankup_banner->get_banner_list($_GET['position']);
+
+// 헤더
+$rankup_control->print_admin_head("배너관리");
+?>
+<body style="margin:0px;">
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="./rankup_banner.js"></script>
+<script type="text/javascript">
+<!--
+// 배너 클래스 변수 정의
+var banner = classObj = new BANNER;
+
+// window load 시 tr 에 onClick 이벤트 부여
+Event.observe(window, "load", function() {
+	classObj.registFrm = document.registFrm;
+	classObj.settingFrm = document.settingFrm;
+	classObj.bannerBody = $('bannerBody');
+	classObj.maxWidth = 900; // 가로사이즈 제한 설정
+	classObj.bannerItems = document.getElementsByName("bannerItem");
+	classObj.rebuild_event(); // 배너 리스트에 이벤트 할당
+});
+//-->
+</script>
+<link rel="stylesheet" type="text/css" href="./rankup_banner.css">
+<!-- 블라인드 -->
+<div id="screenBlindDiv" style="display:none;position:absolute;left:0px;top:0px;width:100%;z-index:90;text-align:center;background-color:black;FILTER:gray alpha(opacity=20 Style=4 FinishOpacity=90)"></div>
+<!-- 블라인드 -->
+
+<div class="bar"><script> titleBar('배너관리') </script></div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" align="center">
+<tr>
+	<td bgcolor='#eeeeee' height='50' align="center" style="padding:8px">
+		<table width="760" cellpadding="5" cellspacing="0" border="0">
+		<col width="14%" span="6" />
+		<col />
+		<?=$rankup_banner->print_positions()?>
+		</table>
+	</td>
+</tr>
+<tr><td height='1' bgcolor='#dddddd'></td></tr>
+<tr><td>&nbsp;</td></tr>
+</table>
+
+<center>
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0"></iframe>
+
+<!-- 등록/수정폼 -->
+<div id="registFrmDiv">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+<form name="registFrm" method="POST" action="./multiProcess.html" target="multiProcessFrame" onSubmit="return (Wysiwyg.submit_start() && validate(this))">
+<input type="hidden" name="position" value="<?=$_GET['position']?>">
+<input type="hidden" name="mode">
+<input type="hidden" name="bind">
+<input type="hidden" name="no">
+<tbody align="center">
+<tr>
+	<td><b>배너등록 / 수정 폼</b></td>
+</tr>
+<tr>
+	<td>
+		<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#D0D0D0" style="table-layout:fixed">
+		<colgroup bgcolor="white"><col align="center" width="60" bgcolor="#F1F4E8"><col></colgroup>
+		<tr height="30">
+			<td>배너종류</td>
+			<td id="banner_type_td">
+				<input type="radio" name="banner_type" value="media" onClick="banner.change_form(this)" checked id="banner_type_id1"><label for="banner_type_id1">이미지/플래시</label>
+				<input type="radio" name="banner_type" value="text" onClick="banner.change_form(this)" id="banner_type_id2"><label for="banner_type_id2">직접입력</label><span id="tip">+ 소스코드 등록시 직접입력 모드 사용</span>
+			</td>
+		</tr>
+		<tr height="30">
+			<td>배너크기</td>
+			<td>
+				<input type="text" name="width" size="3" hname="가로크기" option="number" onKeyUp="banner.set_resize(this)" maxlength="3" class="enable" style="display:none;margin-right:4px;"><select name="width_type" onChange="banner.change_size_type(this)"><option value="pixel">픽셀</option><option value="percent">퍼센트</option><option value="exact" selected>실제크기</option><!option value="auto">맞춤비율</option></select> × <input type="text" name="height" size="3" hname="세로크기" option="number" onKeyUp="banner.set_resize(this)" maxlength="3" class="enable" style="display:none;margin-right:4px;"><select name="height_type" onChange="banner.change_size_type(this)"><option value="pixel">픽셀</option><option value="percent">퍼센트</option><option value="exact" selected>실제크기</option><!option value="auto">맞춤비율</option></select><span id="tip">+ 최적사이즈 <span style="font-family:verdana;color:#FF6633">가로<?=$rankup_banner->positions[$_GET['position']]['width']?>픽셀</span>이하</span>　<a onClick="banner.open_size_guide()"><u>맞춤크기설정</u></a>　<a onClick="banner.set_real_size()"><u>실제크기설정</u></a>　<a onClick="banner.set_full_size()"><u>100%크기설정</u></a>
+				<!-- 배너 위치별 맞춤사이즈 안내-->
+				<div id="bannerSizeGuideDiv" onFocusOut="banner.open_size_guide()">
+				<table width="100%" cellpadding="4" cellspacing="1">
+				<tbody align="center" bgcolor="white">
+				<tr bgcolor="#238BC9"><th width="40%">배너위치</th><th width="40%">맞춤사이즈</th><th width="20%">적용</th></tr>
+				<?=$rankup_banner->print_sizes($_GET['position'])?>
+				</table>
+				</div>
+				<!-- 배너 위치별 맞춤사이즈 안내-->
+			</td>
+		</tr>
+		<tr height="30">
+			<td>사용기간</td>
+			<td style="padding:0px 0px 0px 1px;">
+				<table width="100%" height="100%" cellpadding="3" cellspacing="0" border="0">
+				<tr>
+					<td width="138">
+						<input type="radio" name="period" value="no" checked onClick="banner.change_period_set(this)" id="period_id1"><label for="period_id1">설정안함</label>
+						<input type="radio" name="period" value="yes" onClick="banner.change_period_set(this)" id="period_id2"><label for="period_id2">설정함</label>
+					</td>
+					<td id="period_field" style="display:none;background-color:#f9f9f9;padding:0px 0px 0px 4px;border-left:#dedede 1px dotted;"><?
+						// 기간제한용 날짜/시간 입력 폼 생성
+						function get_time_options($arr, $unit='') {
+							foreach($arr as $arv) {
+								if(is_int($arv)) $arv = sprintf("%02d", $arv);
+								$options .= "<option value='$arv'>$arv$unit</option>";
+							}
+							return $options;
+						}
+						// 시·분 템플릿
+						$timmer_template = " <select name='{:name:}'>{:options:}</select>";
+						$stime  = str_replace(array("{:name:}", "{:options:}"), array("period_shour", get_time_options(range(0,23), "시")), $timmer_template);		// 시작 - 시
+						$stime .= str_replace(array("{:name:}", "{:options:}"), array("period_sminute", get_time_options(array("정각","반"))), $timmer_template);	// 시작 - 분
+						$etime  = str_replace(array("{:name:}", "{:options:}"), array("period_ehour", get_time_options(range(0,23), "시")), $timmer_template);		// 종료 - 시
+						$etime .= str_replace(array("{:name:}", "{:options:}"), array("period_eminute", get_time_options(array("정각","반"))), $timmer_template);	// 종료 - 분
+						?>
+						<table cellpadding="2" cellspacing="0" border="0">
+						<tr>
+							<td><input type="text" name="period_sdate" readOnly onClick="rankup_calendar.draw_calendar(this)" class="calendar"></td>
+							<td><?=$stime?> 부터</td>
+							<td><input type="text" name="period_edate" readOnly onClick="rankup_calendar.draw_calendar(this)" class="calendar"></td>
+							<td><?=$etime?> 까지 사용</td>
+						</tr>
+						</table>
+					</td>
+					<td id="period_tip_field" style="padding-top:8px"><span id="tip">+ 사용기간을 설정할 경우 지정한 기간 동안만 배너가 노출</span></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr height="30">
+			<td>이동주소</td>
+			<td><input type="text" name="address" hname="이동주소" style="width:430px;" maxlength="255" value="http://" default="http://"><input type="checkbox" name="popup_banner" id="popup_banner_id1" onFocus="this.blur()"><label for="popup_banner_id1" onFocus="this.blur()">새창모드</label><span id="tip">+ 배너클릭시 이동할 페이지 주소</span></td>
+		</tr>
+		<tr>
+			<td>배너파일</td>
+			<td><input type="hidden" name="on_attached" required hname="배너파일" nofocus setfocus="attached"><input type="file" name="attached" style="width:430px;" hname="배너파일" maxlength="255" filter="gif,jpg,bmp,png,swf" onChange="banner.post_attached(this)"><span id="tip">+ 배너용 미디어 파일(JPG, GIF, PNG, SWF) 첨부</span></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr id="editorBox" style="display:none">
+	<td style="padding:8px 0px 6px 0px;"><textarea type="editor" name="content" style="word-break:break-all;width:100%;height:200px;" hname="배너내용" nofocus></textarea></td>
+</tr>
+<tr id="previewBox">
+	<td style="padding:8px 0px 6px 0px;">
+		<table width="100%" height="231" cellpadding="3" cellspacing="1" bgcolor="#D0D0D0" border="0" style="table-layout:fixed;">
+		<tbody bgcolor="white" align="center">
+		<tr height="28" bgcolor="#EFECE3">
+			<td disabled>미리보기</td>
+		</tr>
+		<tr>
+			<td bgcolor="#FDFDFD"><div id="previewItemBox"><i disabled style="padding:0px 4px 0px 4px;"><nobr>NULL</nobr></i></div><span id="mediaInfo" disabled>-- × --, --</span><span id="mediaOutline"><input type="checkbox" name="mediaOutlineChecker" id="outline_id1" onClick="banner.set_media_outline()" onFocus="this.blur()"><label for="outline_id1" onFocus="this.blur()">테두리표시</label></span></td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td><a onClick="banner.preview_banner(true)"><img src="./img/bt_preview.gif"></a><input type="image" src="./img/bt_input.gif" style="margin-left:2px"><a onClick="banner.change_display('registFrmDiv', false)"><img src="./img/bt_close_s.gif" style="margin-left:2px"></a></td>
+</tr>
+</tbody>
+</form>
+</table>
+</div>
+<!-- 등록/수정폼 -->
+</center>
+
+<table width="770" cellpadding="2" cellspacing="5" bgcolor="white" border="0" align="center" bgcolor="#dedede">
+	<form name="settingFrm" method="POST" action="./multiProcess.html" target="multiProcessFrame">
+	<input type="hidden" name="mode">
+	<thead id="bannerHeader">
+	<tr>
+		<td style="padding:0px 0px 0px 5px">
+			<table width="100%" cellpadding="0" cellspacing="0">
+			<tr>
+				<td><div id="sub_title">배너관리</div>  &nbsp;<img src='./img/btn_banner_regist.gif' border='0' align='absmiddle' style="cursor:pointer;" onClick="banner.regist_item()" alt="배너등록"><span id="tip">+ 리스트에 보이는 배너의 스타일과 실제 사이트에 출력되는 배너의 스타일이 다를 수도 있습니다.</span>
+				</td>
+				<td width="50" align="right">
+					<a onClick="$('banner_help').toggle()" title="도움말"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle"></a>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr id="banner_help" style="display:none">
+		<td>
+			<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+			<tr>
+				<td class="help_bg">
+					<table cellpadding="0" cellspacing="5" border="0" width="100%">
+					<tr>
+						<td><img src="../../Libs/_images/ic_arrow2.gif"><font color=ff6600><b>랜덤기능</b></font></td>
+					</tr>
+					<tr>
+						<td><img src="./img/help_banner1.jpg" class="help_img"></td>
+					</tr>
+					<tr><td height="10"></td></tr>
+					<tr>
+						<td><img src="../../Libs/_images/ic_arrow2.gif"><font color=ff6600><b>테두리 표시기능</b></font></td>
+					</tr>
+					<tr>
+						<td><img src="./img/help_banner2.jpg" class="help_img"></td>
+					</tr>
+					<tr><td height="10"></td></tr>
+					<tr>
+						<td><img src="../../Libs/_images/ic_arrow2.gif"><font color=ff6600><b>위치지정/사용여부/사용기간설정</b></font></td>
+					</tr>
+					<tr>
+						<td><img src="./img/help_banner3.jpg" class="help_img"></td>
+					</tr>
+					<tr>
+						<td>
+							<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#e2d4c1" class="table1">
+								<tr>
+									<td bgcolor="faf6ec" width="110">미디어 파일형식</td>
+									<td>JPG, GIF, PNG, SWF 파일로 제한</td>
+								</tr>
+								<tr>
+									<td bgcolor="faf6ec" width="110">가로사이즈 제한</td>
+									<td>배너용 미디어첨부파일의 가로사이즈는 최대 900px 까지 설정할수 있습니다.</td>
+								</tr>
+								<tr>
+									<td bgcolor="faf6ec" width="110">도메인 머지기능</td>
+									<td>이동주소에 <b style="color:#0099FF">{:domain:}</b>member/join.html 와 같이 입력하게 되면, 현재 홈페이지의 도메인이 <br><b style="color:#0099FF">http://<?=$_SERVER['HTTP_HOST']?>/</b>member/join.html 처럼 자동으로 변환되어 적용됩니다.</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<th style="padding:5px 0px 0px 0px">
+			<table width="100%" cellpadding="4" cellspacing="1" border="0">
+				<colgroup align="center" bgcolor="#F7F7F7"><col width="40"><col width="30"><col></colgroup>
+				<tr height="2" bgcolor="#6699CC">
+					<td colspan="3" style="padding:0"></td>
+				</tr>
+				<tr height="26">
+					<td><input type="checkbox" style="cursor:pointer;width:12px;height:12px;margin:0px 2px 2px 0" id="checkAll_id1" onClick="banner.checkAll(this.checked)" onFocus="this.blur()"><label for="checkAll_id1" onFocus="this.blur()" style="cursor:pointer">선택</label></td>
+					<td>순위</td>
+					<td>
+						<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr>
+							<td align="center">배너정보</td>
+							<td align="right" width="120"><!--2010.12.20 remarked <a onClick="banner.set_banner_outline()"><img src="./img/bt_outline.gif"></a>--></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</th>
+	</tr>
+	</thead>
+	<!-- 배너리스트 -->
+	<tbody id="bannerBody">
+	<?=$banner_lists?>
+	</tbody>
+	<!-- 배너리스트 -->
+	<tfoot>
+	<tr>
+		<th style="padding:0px 0px 0px 0px">
+			<table width="100%" cellpadding="4" cellspacing="1" border="0" bgcolor="white">
+				<colgroup bgcolor="#F7F7F7"><col><col><col></colgroup>
+				<tr height="2" bgcolor="#6699CC"><td style="padding:0"></td></tr>
+				<tr>
+					<td>
+						<table width="100%" height="28" cellpadding="0" cellspacing="0">
+						<tr>
+							<td width="100" style="padding-left:4px">☞ 선택한 배너를</td><td><a onClick="banner.bind_item()" value="bind"><img src="./img/bt_bind.gif"></a><a onClick="banner.ajax_process('view', true, 'yes')"><img src="./img/bt_use2.gif" style="margin-left:2px"></a><a onClick="banner.ajax_process('view', true, 'no')"><img src="./img/bt_unused2.gif" style="margin-left:2px"></a><a onClick="banner.ajax_process('delete', true)"><img src="./img/bt_del_s2.gif" style="margin-left:2px"></a></td>
+							<!--2010.12.20 remarked <td align="right"><a onClick="banner.set_banner_outline()"><img src="./img/bt_outline.gif"></a></td>-->
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</th>
+	</tr>
+	</tfoot>
+	</form>
+</table><br />
+
+</body>
+</html>

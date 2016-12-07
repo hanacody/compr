@@ -1,0 +1,56 @@
+<?php
+/**
+ * ��Ʈ�� ������
+ */
+include_once './Libs/_php/rankup_basic.class.php';
+
+if($config_info['intro_use']=='no') {
+	$rankup_control->popup_msg_js('', './index.html');
+	exit;
+}
+
+include_once $base_dir.'rankup_module/rankup_builder/rankup_design.class.php';
+$design = new rankup_design;
+
+$intro = $design->get_settings('intro_design');
+if($intro['intro_type']=='link') {
+	$rankup_control->popup_msg_js('', $intro['intro_url']);
+	exit;
+}
+
+switch($intro['intro_type']) {
+	case 'html': // HTML ������
+		$content = $design->get_settings('intro_content');
+		break;
+
+	case 'ready': // �غ� ������
+		$content = $design->get_settings('ready_content');
+		break;
+
+	case 'pin': // ���� ������
+		if($config_info['membership_use']=='yes') { // ȸ���� ������ ���������� Ȱ��ȭ
+			include_once './rankup_module/rankup_authentic/rankup_authentic.class.php';
+			$auth = new authentic('intro');
+			if($auth->pin_check()) {
+				scripts('location.replace("main/index.html")');
+				exit;
+			}
+			ob_start();
+			include_once $base_dir.SKIN.'intro.inc.php';
+			$content = ob_get_contents();
+			ob_get_clean();
+		}
+		else {
+			// ȸ������ �������� ���� ���� �غ��� ������ Ȱ��ȭ
+			$content = $design->get_settings('ready_content');
+		}
+		break;
+}
+
+$rankup_control->print_user_head();
+?>
+<body style="background:#ffffff!important">
+<style type="text/css"> html, body { height: 100%; } </style>
+<?=$content?>
+</body>
+</html>

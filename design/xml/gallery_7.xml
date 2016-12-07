@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="euc-kr" ?>
+			<root>
+				<containerWidth>730</containerWidth>
+				<containerHeight>500</containerHeight>
+				<images type="1">
+					<src>../PEG/gallery/gallery.13311072761702.jpg</src><src>../PEG/gallery/gallery.13311073579702.jpg</src><src>../PEG/gallery/gallery.13311073579703.jpg</src><src>../PEG/gallery/gallery.13311073579704.jpg</src><src>../PEG/gallery/gallery.13311073579705.jpg</src>
+				</images>
+				
+			<imageList type="2">
+				<posi>
+					<top>350</top>
+					<left>160</left>
+				</posi>
+				<transparent>99</transparent>
+			</imageList>
+				<contents type="3">
+					<top>
+						<text><![CDATA[시장 점유율 1위 브랜드 랭크업!]]></text>
+						<size>36</size>
+						<color>0xFFFFFF</color>
+					</top>
+					<middle>
+						<text><![CDATA[랭크업은 각종 사이트를 운영할 수 있는 솔루션을 제공합니다.]]></text>
+						<size>14</size>
+						<color>0x9A9A9A</color>
+					</middle>
+					<bottom>
+						<text><![CDATA[2001년 회사 설립일로 부터 10년간 웹솔루션 개발 서비스를 해 온 랭크업의 노하우가 집약되어 있습니다.]]></text>
+						<size>12</size>
+						<color>0xD2D2D2</color>
+					</bottom>
+					<posi>
+						<top>10</top>
+						<left>0</left>
+					</posi>
+					<bgImage>../PEG/gallery/gtbg.13315330720453.png</bgImage>
+					<transparent>50</transparent>
+				</contents>
+			</root>

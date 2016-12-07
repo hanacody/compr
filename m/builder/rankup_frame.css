@@ -1,0 +1,44 @@
+/**
+ * 랭크업 프레임 스타일시트
+ *@author: kurokisi
+ *@authDate: 2011.08.09
+ */
+
+/* depth level : 1 */
+#d1 {
+	background-color: #e6f1fb;
+}
+#d1 td {
+	border-top: 1px #dedede solid;
+	border-bottom: 1px #dedede solid;
+}
+#d1 span {
+	letter-spacing: -1px;
+	font-weight: bold;
+	color: #ff6600;
+}
+#d1 p {
+	color: black;
+	font-weight: bold;
+	letter-spacing: 0px;
+}
+
+/* depth level : 2 */
+#d2 {
+	background-color: #fff;
+}
+#d2 td {
+	border-bottom: 1px #dedede solid;
+}
+#d2 span {
+	letter-spacing: -1px;
+	font-weight: normal;
+	color: #339900;
+}
+#d2 p {
+	color: #555;
+	padding-left: 25px;
+	font-weight: normal;
+	letter-spacing: 0px;
+	background: url('../../rankup_module/rankup_board/icon/icon_re.gif') no-repeat 10px 2px;
+}

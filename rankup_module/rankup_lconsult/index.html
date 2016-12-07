@@ -1,0 +1,197 @@
+<?php
+/**
+ * 고객문자상담관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'rankup_lconsult.class.php';
+$lconsult = new rankup_lconsult;
+
+if(!$_GET['page']) $_GET['page'] = 1;
+if(!$_GET['sdate']) $_GET['sdate'] = date('Y-m-d');
+if(!$_GET['edate']) $_GET['edate'] = date('Y-m-d');
+
+include_once 'top_menu.inc.php';
+?>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+	<form name="search_form" action="./index.html" method="GET">
+		<table width="100%" cellpadding="0" cellspacing="1" bgcolor="#dedede">
+		<tr bgcolor="#f7f7f7">
+			<td>
+				<table cellpadding="2" cellspacing="1" border="0" align="center">
+				<tr align="center">
+					<td><input type="checkbox" name="use_date"<? if($_GET['use_date']) echo " checked" ?>></td>
+					<td width="180">
+						<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+					</td>
+					<td width="409" id="period_search_option">
+						<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="white">
+				<table cellpadding="2" cellspacing="1" border="0" align="center">
+				<tr>
+					<td>
+						<select id="status" name="status">
+						<option value="">-답변상태-</option>
+						<option value="no">미답변</option>
+						<option value="yes">답변완료</option>
+						</select>
+					</td>
+					<td>
+						<select id="smode" name="smode">
+						<option value="name">이름</option>
+						<option value="consult">문의내용</option>
+						<option value="phone">연락처</option>
+						<option value="uid">아이디</option>
+						</select>
+					</td>
+					<td><input type="text" name="skey" size="20" value="<?=$_GET['skey']?>" maxlength="20" class="simpleform"></td>
+					<td><input type="image" src="../../Libs/_images/btn_search.gif" border="0" align="absmiddle"></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</form>
+	<script type="text/javascript">
+	//<![CDATA[
+	$('status').value = '<? echo $_GET['status'] ?>';
+	$('smode').value = '<? echo $_GET['smode'] ? $_GET['smode'] : 'name' ?>';
+	//]]>
+	</script>
+	<br />
+	<br />
+
+<?php
+// 문의글 출력
+list($totals, $contents) = $lconsult->print_contents(array(
+	'entry' => array(
+		0 => '
+		<tr>
+			<td colspan="6" height="40" valign="middle"><span disabled>문의글이 존재하지 않습니다.</span></td>
+		</tr>',
+		1 => '
+		<tr>
+			<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+			<td align="left">
+				<b>{:name:}</b>{:on_uid:}
+				<div class="hline">{:phone:}</div>
+				<div class="hline tip2">IP: {:regist_ip:}</div>
+			</td>
+			<td align="left">
+				{:consult:}
+			</td>
+			<td>
+				{:regist_time:}
+			</td>
+			<td>
+				<select name="status" onChange="lconsult.status(this, {:no:})" _default="{:answer_status:}">
+				<option value="no">미답변</option>
+				<option value="yes"{:on_selected:}>답변완료</option>
+				</select>
+				{:on_answered_time:}
+			</td>
+			<td>
+				<a onClick="lconsult.del(\'{:no:}\')"><img src="../../Libs/_images/btn_delete_s.gif" align="absmiddle" /></a>
+			</td>
+		</tr>'
+	),
+	'time_format' => 'Y-m-d<\b\r />H:i:s',
+	'on_uid' => ' <a href="../rankup_member/member_detail.html?uid={:uid:}"><span class="tip">({:uid:})</span></a>',
+	'on_selected' => ' selected',
+	'on_answered_time' => '<div class="hline tip2">{:answered_time:}</div>'
+), $limits=15);
+
+?>
+
+	<div id="sub_title">총 <b class="orange_b"><?=number_format($totals)?> 건</b>의 문의글이 검색되었습니다.</div>
+	<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+		<col width="35" />
+		<col width="160" />
+		<col />
+		<col width="110" />
+		<col width="95" />
+		<col width="50" />
+		<tr class="gray_bg" align="center">
+			<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+			<td>문의자정보</td>
+			<td>문의내용</td>
+			<td>작성일시</td>
+			<td>답변상태</td>
+			<td>삭제</td>
+		</tr>
+		<tbody id="list_frame" align="center" valign="top">
+		<?=$contents?>
+		</tbody>
+	</table>
+
+	<div style="margin-top:8px;text-align:left">
+		<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+		<a onClick="lconsult.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+	</div>
+
+	<div id="paging">
+		<?=rankup_util::print_paging($totals, $limits)?>
+	</div>
+
+</div>
+</center>
+
+<script type="text/javascript">
+//<![CDATA[
+checker.initialize('list_frame', 'input[name="no[]"]');
+
+var lconsult = {
+	del: function(no) {
+		var nos = no || checker.get();
+		if(!nos.length) {
+			alert('삭제하실 문의글을 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('선택하신 문의글을 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del', nos:nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				location.reload();
+			}
+		}, false);
+	},
+	status: function(el, no) {
+		if(!confirm('답변상태를 변경하시겠습니까?')) {
+			el.value = el.getAttribute('_default');
+			return false;
+		}
+		proc.parameters({mode: 'set_status', status:el.value, no:no});
+		proc.process(function(trans) {
+			var json = trans.responseText.evalJSON();
+			if(!json) proc.response(trans);
+			else {
+				el.setAttribute('_default', el.value);
+				alert('변경되었습니다.');
+				if(el.value=='no') {
+					var spot = $(el).next();
+					if(spot!=null) spot.remove();
+				}
+				else {
+					new Insertion.After(el, new Template('<div class="hline tip2">#{answered_time}</div>').evaluate(json));
+				}
+			}
+		}, false);
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

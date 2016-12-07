@@ -1,0 +1,37 @@
+<div class="footer">
+	<div style="height:1px;background:url(../images/lite_bg.png) repeat left bottom"></div>
+	<ul class="ft">
+		<li><a href="<?=$m_domain?>"><span>홈</span></a></li>
+		<?php
+		if($mobile->settings['membership_use']=='yes') {
+			if($member_info['uid']) {
+				echo '
+				<script type="text/javascript">
+				//<![CDATA[
+				var logout = function() {
+					proc.parameters({mode: \'logout\'});
+					proc.process(function(trans) { proc.response(trans) }, false, \''.$m_domain.'etc\');
+				}
+				//]]>
+				</script>';
+				echo '<li><a onClick="logout()"><span>로그아웃</span></a></li>';
+			}
+			else {
+				$pre_page = urlencode('http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI']);
+				echo '<li><a href="'.$m_domain.'etc/login.html?pre_page='.$pre_page.'"><span>로그인</span></a></li>';
+			}
+		}
+		?>
+		<li><a href="<?=$m_domain?>pc_index.html"><span>PC버전</span></a></li>
+		<li><a onClick="window.scrollTo(0,0)"><span>TOP</span></a></li>
+	</ul>
+	<div style="font-size:10px;padding:0 0 10px 0;"><?=$mobile->configs['copyright']?></div>
+</div>
+<?php
+// 구글 Analytics 스크립트 출력
+include_once $base_dir.'rankup_module/rankup_analytics/rankup_analytics.class.php';
+$analytics = new rankup_analytics;
+echo $analytics->configs['google_scripts'];
+?>
+</body>
+</html>

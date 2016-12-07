@@ -1,0 +1,33 @@
+/* nav bgcolor */
+.nav {background-color:#104A95;border-bottom:solid 1px #092952}
+
+/* menu_wrap bgcolor */
+#gnb{border-bottom:solid 1px #092952}
+.gbm .gbi{border-top:solid 1px #092952}
+.gbf .gbi,.gbm .gbi{height:30px;line-height:30px;border-right:solid 1px #092952}
+
+/* menu on/off color */
+.gbf .gbi,.gbm .gbi,.flip{
+	background:#296CCC;color:#FFFFFF;
+	background:-webkit-gradient(linear,0 0,0 100%,from(#3376d6),to(#1f62c2));
+	-webkit-box-shadow:inset 1px 1px #3d80e0,inset -1px -1px #1558b8;
+	-moz-box-shadow:inset 1px 1px #3d80e0,inset -1px -1px #1558b8;
+}
+.gbf .gbi.on,.gbm .gbi.on{
+	background:#296CCC;color:#FFF100;
+	background:-webkit-gradient(linear,0 0,0 100%,from(#3376d6),to(#1f62c2));
+	-webkit-box-shadow:inset 1px 1px #3d80e0,inset -1px -1px #1558b8;
+	-moz-box-shadow:inset 1px 1px #3d80e0,inset -1px -1px #1558b8;
+}
+/* common frame color set */
+.box th {background:#1558b8;}
+.paging .cur {color:#1558b8;}
+span.ic1 {background:#5194f4;border:1px solid #3d80e0}
+a.submit {background-color:#3d80e0}
+/* gallery title-bar */
+.gc .gt {
+	background-color:#296CCC;
+	background:-webkit-gradient(linear,0 0,0 100%,from(#2e71d1),to(#2467c7));
+	-webkit-box-shadow:inset 1px 1px #3376d6,inset -1px -1px #1f62c2
+	-moz-box-shadow:inset 1px 1px #3376d6,inset -1px -1px #1f62c2
+}

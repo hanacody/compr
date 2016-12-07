@@ -1,0 +1,150 @@
+<?php
+/**
+ * 관리자 답변메일 설정
+ *@author: kurokisi
+ *@authDate: 2012.01.05
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+// 폼빌더 로드
+include_once 'rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+if(!$_GET['kind']) {
+	$fno = $fbuilder->get_first_form();
+	if(!$fno) {
+		scripts('alert("죄송합니다. 현재 생성된 등록폼이 없습니다.\n\n먼저 폼(FORM)관리에서 등록폼을 생성하시기 바랍니다.");');
+		exit;
+	}
+	$_GET['kind'] = 'answer_'.$fno;
+}
+
+include_once '../rankup_mailing/rankup_mailing.class.php';
+$mailing = new rankup_mailing($_GET['kind']);
+
+$rankup_control->print_admin_head('메일폼관리');
+?>
+<body>
+<div class="bar"><script> titleBar('메일폼관리') </script></div>
+<div id="topmenu" style="margin-bottom:30px">
+	<ul>
+		<?php
+		// 폼 출력
+		echo $fbuilder->print_forms(array(
+			'value' => preg_replace('/[^\d]/', '', $_GET['kind']),
+			'entry' => array(
+				0 => '<li class="left_menu2"><a href="../../rankup_module/rankup_fbuilder/form_builder.html" target="right" style="color:#999"> 폼을 등록하세요</a></li>',
+				1 => '<li class="left_menu2"><a href="../../rankup_module/rankup_fbuilder/mail_forms.html?kind=answer_{:no:}" target="right"{:on_hover:}>{:form_name:}</a></li>'
+			),
+			'on_hover' => ' style="font-weight:bold"'
+		));
+		?>
+	</ul>
+</div>
+
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<style type="text/css">
+#kinds_frame ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	height: 40px;
+}
+#kinds_frame li {
+	display: inline;
+	margin-right: 10px;
+	background: url('../../Libs/_images/ic_arrow1.gif') no-repeat 0 3px;
+	padding-left: 10px;
+}
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;text-align:left;margin-top:30px">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+			<input type="hidden" name="kind" value="<?=$_GET['kind']?>" />
+			<input type="hidden" name="used" value="yes" />
+			<input type="hidden" name="alarm" value="no" />
+			<div id="sub_title">이메일 머지(치환)문자</div>
+			<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+				<col width="120" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> {이름}</td>
+					<td>회원의 이름으로 치환됩니다. <span id="tip" style="letter-spacing:0;font-family:verdana;">ex) {이름}님 안녕하세요 → 홍길동님 안녕하세요</span></td>
+				</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">이메일 설정</div>
+			<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+				<col width="120" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 이메일 제목</td>
+					<td>
+						<input type="text" name="subject" required hname="이메일 제목" value="<?=$mailing->settings['subject']?>" size="80" maxlength="100" class="simpleform" />
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 이메일 중요도</td>
+					<td>
+						<div style="float:left">
+							<select id="priority" name="priority">
+							<option value="5">낮음</option>
+							<option value="3"<? if($mailing->settings['priority']=='3') echo ' selected' ?>>중간</option>
+							<option value="1"<? if($mailing->settings['priority']=='1') echo ' selected' ?>>높음</option>
+							</select>
+							<span id="tip">중요도 수준이 설정된 이메일은 받는사람의 편지함에 중요도가 표시됩니다.</span>
+						</div>
+						<div style="float:right"><a onClick="$('priority_help').toggle()"><img src="../../Libs/_images/btn_help.gif" align="absmiddle" /></a></div>
+						<div id="priority_help" class="help_bg" style="margin-top:6px;clear:both;display:none;padding-top:6px;">
+							이메일의 중요도 수준을 설정하여 받는사람이 즉시 확인해야 하는 메시지인지, 아니면 나중에 확인해도 되는 메시지인지를 지정할 수 있습니다.<br />
+							<ul class="help_ul" style="margin-top:8px">
+								<li><span style="color:#336699">일반적인 이메일은 중요도를 '중간'으로 설정하시면 됩니다.</span></li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+
+			<div style="margin-top:8px">
+				<textarea type="editor" id="content" name="content" required hname="발송될 이메일 내용" style="width:100%;height:400px" nofocus><?=$mailing->settings['body']?></textarea>
+			</div>
+
+		</form>
+	</div>
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+Wysiwyg.createELM();
+
+// $form submit setting
+$form.debug = false;
+$form.url = '../rankup_mailing';
+$form.hashes = {mode: 'set_mailing'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+//]]>
+</script>
+
+
+</body>
+</html>

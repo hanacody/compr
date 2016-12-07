@@ -1,0 +1,87 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+if($member_info['uid']) {
+	scripts('location.replace(\''.$m_domain.'\')');
+	exit;
+}
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+
+// 저장 아이디 확인
+$sess = $mobile->get_session();
+if($sess['keepid']=='on') {
+	$keeps['userid'] = $sess['userid'];
+	$keeps['userpw'] = '';
+}
+else if(rankup_basic::is_demo()) {
+	$keeps['userid'] = 'rankup'; // 개인회원
+	$keeps['userpw'] = 'rankup';
+}
+
+// 되돌아가기 주소
+$pre_page = $_GET['pre_page'] ? $_GET['pre_page'] : $_SERVER['HTTP_REFERER'];
+if($rankup_control->check_encoding() && $rankup_control->check_unicode($pre_page)) {
+	$pre_page = $rankup_control->change_encoding($pre_page, 'IN'); // keyword fix
+}
+
+?>
+<script type="text/javascript" src="<?=$m_domain?>scripts/form.js"></script>
+<div id="container">
+
+	<div class="tit0">
+		<div class="tit_t">로그인</div>
+	</div>
+	<div class="text">
+		<form id="login_form" name="login_form" onSubmit="return false">
+			<input type="hidden" name="pre_page" value="<?=$pre_page?>" />
+			<table width="90%" cellpadding="0" cellspacing="0" border="0" style="margin:0 auto">
+			<tr>
+				<td height="10" colspan="3"></td>
+			</tr>
+			<tr>
+				<td width="60"><img src="../images/module_dot.gif"> 아이디</td>
+				<td style="padding-left:10px"><input type="text" name="user_id" required hname="아이디" option="userid" value="<?=$keeps['userid']?>" style="width:100%"></td>
+				<td width="70" rowspan="3" style="padding-left:10px" align="right">
+					<a onClick="$form.submit(this, 'login_form')" class="button submit"><div><span>로그인</span></div></a>
+				</td>
+			</tr>
+			<tr><td colspan="2" height="5"></td></tr>
+			<tr>
+				<td><img src="../images/module_dot.gif"> 패스워드</td>
+				<td style="padding-left:10px"><input type="password" name="user_pwd" required hname="아이디" option="userpw" value="<?=$keeps['userpw']?>" style="width:100%"></td>
+			</tr>
+			<tr>
+				<td colspan="3">
+					<div style="margin:10px 0 6px 0;border-top:1px #ccc solid;padding-top:6px;text-align:center">
+						<input type="checkbox" name="keep_id"<? if($sess['keepid']=='on') echo ' checked' ?> id="keep_id" /> <label for="keep_id">아이디저장</label>
+						&nbsp; &nbsp;
+						<input type="checkbox" name="keep_login"<? if($sess['keeplogin']=='on') echo ' checked' ?> id="keep_login" /> <label for="keep_login">자동로그인</label>
+					</div>
+				</td>
+			</tr>
+			</table>
+		</form>
+	</div>
+	<div class="text tbr">
+		<p>· 회원가입 및 아이디/패스워드찾기는 <b>[PC버전]</b>에서 이용하실 수 있습니다.</p>
+		<p>· 자동로그인 사용시 <b>[로그아웃]</b>을 하시면 자동로그인이 해제됩니다.</p>
+	</div>
+</div>
+
+<script type="text/javascript">
+$form.waiting = '';
+$form.hashes = {mode: 'login'};
+$form.handler = function(trans) { proc.response(trans) };
+</script>
+
+<?php
+include_once $m_dir.'include/bottom.html';
+?>

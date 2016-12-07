@@ -1,0 +1,82 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "../../Libs/_php/rankup_social_statistics.class.php";
+$rankup_control->check_admin();
+$rankup_estate_statistics = new rankup_social_statistics;
+
+if(!$_GET['syear']) $_GET['syear'] = date('Y');
+
+$rankup_control->print_admin_head("월별통계");
+?>
+<body>
+<?php include_once $base_dir."rankup_module/rankup_statistics/top_menu.html";?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name="searchFrm" action="./month_statistic.html" method="GET">
+					<tr>
+						<td class="gray_bg">
+							<table cellpadding="0" cellspacing="3" border="0" align="center">
+							<tr align="center">
+								<td>
+									<select id="syear" name="syear">
+									<?php
+									echo $rankup_estate_statistics->print_periods('monthly', '<option value="{:value:}"{:selected:}>{:text:}년</option>');
+									?>
+									</select>
+								<td>
+								<input type="image" src="../../Libs/_images/btn_search.gif" alt="검색" align="absmiddle">
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</form>
+					</table>
+					<script type="text/javascript">
+						$('syear').value = "<?=$_GET[syear]?>";
+					</script>
+				</td>
+			</tr>
+			<tr><td height="20"></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<col />
+						<col width="21%" span="4"/>
+						<tr align="center" class="blue_bg">
+							<td>날짜</td>
+							<td>회원가입</td>
+							<td>매물등록</td>
+							<td>계약완료</td>
+							<td>수수료</td>
+						</tr>
+						<tbody align="center">
+						<?php
+						echo $rankup_estate_statistics->print_period_statistics('monthly', array(
+						'entry' => '
+							<tr>
+								<td bgcolor="#f7f7f7">{:day:} 월</td>
+								<td>{:join:} 명</td>
+								<td>{:estate:} 건</td>
+								<td>{:contract:} 건</td>
+								<td>{:commission:} 원</td>
+							</tr>'
+						));
+						?>
+						</tbody>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+</body>
+</html>

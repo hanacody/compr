@@ -1,0 +1,107 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+
+$db = new db_class;
+$often = new often_class;
+
+$todayyear = date("Y");
+$todaydate = date("m");
+$todayday = date("d");
+$today = $todayyear."-".$todaydate."-".$todayday;
+
+$paging = "day1yy=$day1yy&day1mm=$day1mm&day1dd=$day1dd&day2yy=$day2yy&day2mm=$day2mm&day2dd=$day2dd";
+
+if($_GET['mode'] == 'search') {
+	$searchday1 = $_GET['day1yy']."-".$_GET['day1mm']."-".$_GET['day1dd'];
+	$searchday2 = $_GET['day2yy']."-".$_GET['day2mm']."-".$_GET['day2dd'];
+	$connection = "and wdate >= '$searchday1' and wdate <= '$searchday2'";
+}
+else {
+	$connection = "and wdate >= '$today' and wdate <= '$today'";
+}
+
+$result = $db->sel("rankuplog_shortdomain","where no $connection group by content","content,sum(num) as num");
+$totalList = $result['cnt'];
+
+$often->fPagset(20,10);          //페이징 분할 갯수 정하기
+$domain_peg = $often->fPaging($totalList,$paging); //페이징 분할 스크립터
+
+
+$select = $db->sel("rankuplog_shortdomain","where no $connection group by content order by num desc limit ".START.",".SCALE, "content,sum(num) as num");
+
+include_once "./rankup_toplink.html";
+?>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">2005년1월1일 하루 날짜를 알고 싶을때는 2005-1-1~2005-1-1 선택하시고 검색하시면 됩니다</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name=form method=get action=<?php echo $_SERVER['PHP_SELF'];?>>
+					<input type=hidden name=mode value=search>
+					<tr>
+						<td class="gray_bg" align="center"><?php $often->calendar("form","day1"); echo"~"; $often->calendar("form","day2");?>&nbsp;&nbsp;<input type=image src=../../Libs/_images/btn_search.gif border=0 align=absmiddle alt='검색'></td></tr>
+					</form>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="20"></td></tr>
+			<tr>
+				<td height="25">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td><div id="sub_title">접속전 도메인 통계</div>&nbsp;</td>
+							<td align="right"><a href=regist.php?mode=domaindel onclick="return confirm('삭제하시겠습니까?')"><img src=images/btn_domain_del.gif border=0 alt='도메인정보 삭제하기'></a></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<tr class="blue_bg" align=center>
+							<td>접속전 도메인</td>
+							<td width="80">접속수</td>
+							<td width="80">상세정보</a></td>
+						</tr>
+		<? while($fatch = mysql_fetch_array($select['result'])) { ?>
+						 <tr onMouseOver=this.style.backgroundColor='#faf6ec' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td>&nbsp;&nbsp;<?=$fatch[0]?></td>
+							<td align=center><?=$fatch[1]?> 명</td>
+							<td align=center><a href=rankuplog_domain_detail.html?content=<?php echo $fatch[0]; ?>><img src=../../Libs/_images/btn_detail.gif border=0 align=absmiddle alt='상세정보'></a></td>
+						</tr>
+		<? } ?>
+					</table>
+				</td>
+			</tr>
+			<tr><td align="center" height="40"><?php echo $domain_peg; ?></td></tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

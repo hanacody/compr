@@ -1,0 +1,126 @@
+<?PHP
+#start
+require_once "../../../Libs/_php/rankup_basic.class.php";
+require_once "../config.inc.php";
+
+$rankup_control->check_admin($rankup_admin->is_admin(),1);
+if($is_Demo) {
+	//$rankup_control->popup_msg_js("죄송합니다. 데모버젼에서는 조회하실 수 없습니다.", "../intro.html");
+	echo "<meta http-equiv='refresh' content='0;url=../intro.html'>";
+	exit;
+}
+
+
+// 테이블 유효성 검사
+$ROW = $rankup_control->queryR("show table status like '$table_name'");
+if(empty($ROW)) $rankup_control->query($table_schema);
+
+#end
+?>
+<html>
+<head>
+<title></title>
+<META name="Author" content="RANKUP">
+<META name="Keywords" content="Keywords">
+<META name="Description" content="Description">
+<META http-equiv="imagetoolbar" content="no">
+<META http-equiv="robots" content="noindex">
+<META http-equiv="pragma" content="no-cache"> 
+<META http-equiv="Content-Style-Type" content="text/css"> 
+<META http-equiv="Content-Script-Type" content="text/javascript"> 
+<META http-equiv="Content-Type" content="text/html; charset=euc-kr">
+<script type="text/javascript">
+<!--
+function viewDescFrmDiv(table,obj,e) {
+	var tx = e?e.pageX:document.body.scrollLeft + event.x;
+	var ty = e?e.pageY:document.body.scrollTop + event.y;
+	document.descFrm.ftable.value = table;
+	document.descFrm.fobject.value = obj;
+	document.getElementById('descFrmDiv').style.left = (tx < document.body.offsetWidth - 390) ? tx + 14 : document.body.offsetWidth - 390;
+	document.getElementById('descFrmDiv').style.top = ty - 14;
+	document.getElementById('destination').innerHTML = obj ? table +'.'+ obj : table;
+	document.descFrm.description.value = document.getElementById(table+obj).innerHTML;
+	document.getElementById('descFrmDiv').style.visibility = "visible";
+	document.descFrm.description.focus();
+	document.descFrm.description.select();
+}
+function getXMLHttpRequest() { 
+	var xmlreq = false; 
+	if(window.XMLHttpRequest) xmlreq = new XMLHttpRequest(); 
+	else if(window.ActiveXObject) {
+		try { xmlreq = new ActiveXObject("Msxml2.XMLHTTP"); }
+		catch (e1) { try { xmlreq = new ActiveXObject("Microsoft.XMLHTTP"); } catch (e2) { } } 
+	}
+	return xmlreq; 
+}
+function getList() {
+	var list = getXMLHttpRequest();
+	list.onreadystatechange = function () {
+		if(list.readyState == 4 && list.status == 200) {
+			document.getElementById('viewInfoDiv').style.visibility = "hidden";
+			document.getElementById('LIST').innerHTML = list.responseText;
+		}
+	}
+	list.open("POST","get_list.php",true);
+	list.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	list.send(null);
+}
+function getInfo(table,e) {
+	var tx = e?e.pageX:event.x;
+	var ty = e?e.pageY:document.body.scrollTop + event.y;
+	var info = getXMLHttpRequest();
+	document.getElementById('descFrmDiv').style.visibility = "hidden";
+	document.getElementById('viewInfoDiv').style.left = tx + 14;
+	document.getElementById('viewInfoDiv').style.top = ty - 14;
+	info.onreadystatechange = function () {
+		if(info.readyState == 4 && info.status == 200) {
+			document.getElementById('viewInfoDiv').innerHTML = info.responseText;
+			document.getElementById('viewInfoDiv').style.visibility = "visible";
+		}
+	}
+	info.open("POST","get_list.php",true);
+	info.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	info.send("table="+table);
+}
+//-->
+</script>
+<style type="text/css">
+a:link, a:visited { text-decoration: none; color:#6B6F5B; }
+a:hover, a:active { text-decoration: none; color:#3366CC; }
+td { color:#2E2E2E;font-family:doutm;font-size:9pt; }
+.d8 { font-family:dotum;font-size:8pt;}
+.gd8 { color:gray;font-family:dotum;font-size:8pt;}
+.fw { color:#243964;border:solid 0 #243964;padding:4px;font-size:9pt;font-family:dotum;width:100%;height:100%;line-height:140%; }
+</style>
+</head>
+<body style="margin:4px;overflow-x:hidden" onLoad="getList()">
+<iframe name="descProc" style="width:100%;height:0"></iframe>
+<div id="viewInfoDiv" style="position:absolute;visibility:hidden;background:#F7F7F7;padding:2px;border:silver 1px solid;z-index:100"></div>
+<div id="descFrmDiv" style="position:absolute;visibility:hidden;top:0px;left:-360px;width:360px;height:90px;border:#ACACAC 2px solid;padding:8px;background:#E7E7E7;z-index:200">
+	<table width="100%" height="100%" cellpadding="3" cellspacing="0" border="0">
+	<tr><td colspan="2"><table width="100%" cellpadding="0" cellspacing="0"><tr><td width="20"><img src="../img/icon_table.gif" align="absmiddle" title="TABLE명" alt="TABLE명"></td><td nowrap style="overflow-x:hidden"><span id="destination" style="padding:2 2 0 2px;background-color:#DEDEDE;color:#333399;border:silver 1 dotted;line-height:150%"></span><font color="gray">'s Description</font></td></tr></table></td></tr>
+	<tbody align="center">
+	<form name="descFrm" method="POST" action="desc_registProc.php" target="descProc" onSubmit="return confirm('입력하신 사항을 DB에 저장하시겠습니까?          ');">
+	<input type="hidden" name="ftable">
+	<input type="hidden" name="fobject">
+	<tr height="30"><td colspan="2"><input type="text" name="description" maxlength="255" class='fw'></td></tr>
+	<tr height="32" valign="bottom"><td align="right"><input type="image" src="../img/btn_submit.gif" value="입력하기"></td><td align="left"><a href="javascript:void(0)" onClick="document.getElementById('descFrmDiv').style.visibility='hidden'"><img src="../img/btn_back.gif" border="0" title="돌아가기" alt="돌아가기"></a></td></tr>
+	</form>
+	</tbody>
+	</table>
+</div>
+<div id='LIST'>Loading...</div>
+<table width=100% cellpadding=5 cellspacing=0 style="margin-top:10px">
+<tr height=20 bgcolor='#E7E7E7'><td style="font-weight:bold;line-height:140%">주요기능 안내</td></tr>
+<tr><td style="padding:4px">
+<pre style='color:gray'>
+1. 설명(주석)을 편집하려면 연필 아이콘을 클릭하거나 입력된 설명을 클릭
+2. 입력된 설명을 지우려면 편집창에 입력된 내용을 모두 지운 후 [입력하기] 버튼을 클릭
+3. 테이블 내용을 보려면 테이블명을 클릭
+   (테이블 내용을 닫으려면 테이블 내용창의 [내용닫기] 버튼을 클릭)
+4. 존재하지 않는 테이블 또는 필드에 대한 DB 정보는 자동으로 삭제 됨
+</pre>
+</td></tr>
+</table>
+</body>
+</html>

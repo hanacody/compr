@@ -1,0 +1,108 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+$db = new db_class;
+$often = new often_class;
+
+$often->getSession();  //관리자인증 체크
+?>
+<script>
+function chk(){
+	if(!document.chform.uid.value){
+		alert('변경하실아이디를입력해주세요');
+		document.chform.uid.focus();
+		return false;
+	}
+	if(!document.chform.hauid.value){
+		alert('아이디확인을해주세요');
+		document.chform.hauid.focus();
+		return false;
+	}
+	if(!document.chform.upasswd.value){
+		alert('변경하실패스워드를입력해주세요');
+		document.chform.upasswd.focus();
+		return false;
+	}
+	if(!document.chform.haupasswd.value){
+		alert('패스워드확인을해주세요');
+		document.chform.haupasswd.focus();
+		return false;
+	}
+	if(document.chform.uid.value != document.chform.hauid.value){
+		alert('아이디가일치하지않습니다확인해주세요');
+		document.chform.uid.focus();
+		return false;
+	}
+	if(document.chform.upasswd.value != document.chform.haupasswd.value){
+		alert('패스워드가일치하지않습니다확인해주세요');
+		document.chform.uid.focus();
+		return false;
+	}
+
+}
+</script>
+<table width="500" border="0" cellpadding="0" cellspacing="0" align='center'>
+<tr><td><img src='images/log_bg01.gif'></td></tr>
+<tr><td background='images/log_bg02.jpg' align=center>
+<?php include "./rankup_toplink.html"; ?>
+<table border=0 cellpadding=0 cellspacing=0 width='685' align='center'>
+<tr><td><br>
+<table border=0 cellpadding=0 cellspacing=0 bgcolor='dddddd' width='685' align='center'>
+<input type=hidden name=mode value=change>
+	<tr><td><img src=./images/search_bg1.gif></td></tr>
+	<tr bgcolor=f7f7f7><td background=./images/search_bg2.gif align=center>
+	<table cellpadding=3 cellspacing=1 width=480 align='center'>
+	<form name=chform method=post action=regist.php onsubmit="return chk();">
+	<input type=hidden name=mode value=change>
+	<tr><td colspan=2 height=50><img src=images/log_bar.gif></td></tr>
+	<tr bgcolor=ffffff>
+		<td width=35%><img src=images/icon05.gif align=absmiddle> 변경하실아이디</td>
+		<td width=65%><input type=text name=uid class=simpleform></td>
+	</tr>
+	<tr bgcolor=ffffff>
+		<td><img src=images/icon05.gif align=absmiddle> 아이디확인</td>
+		<td><input type=text name=hauid  class=simpleform></td>
+	</tr>
+	<tr bgcolor=ffffff>
+		<td><img src=images/icon05.gif align=absmiddle> 변경하실패스워드</td>
+		<td><input type=password name=upasswd  class=simpleform></td>
+	</tr>
+	<tr bgcolor=ffffff>
+		<td><img src=images/icon05.gif align=absmiddle> 패스워드확인</td>
+		<td><input type=password name=haupasswd  class=simpleform></td>
+	</tr>
+	<tr bgcolor=ffffff>
+		<td colspan=2 align=center>&nbsp;&nbsp;
+			<input type=image src=./images/button_submit.gif border=0 align=absmiddle></td>
+	</tr>
+	</form></table>
+	</td></tr>
+	<tr><td><img src=./images/search_bg3.gif></td></tr>
+</table>
+</td></tr>
+<tr>
+<td height='25' align='right'>&nbsp;&nbsp;</td>
+</tr>
+<tr><td>
+<table border=0 cellpadding=0 cellspacing=0 bgcolor='dddddd' width='685' align='center'>
+<tr><td><img src=./images/search_bg1.gif></td></tr>
+<tr bgcolor=f7f7f7><td background=./images/search_bg2.gif align=center>
+<table border=0 cellpadding=3 cellspacing=1 width='480' align='center'>
+	<tr>
+		<td><img src=images/log_bar2.gif></td>
+	</tr>
+	<tr>
+		<td><font color=red><B>주의요망!!!</B> 클릭하시면 설치당시에 생성된 DB테이블들이 삭제됩니다 </font>&nbsp;<a href=regist.php?mode=tabledelete onclick="return confirm('삭제하시겠습니까?')"><img src=images/delete_button.gif border=0 align=absmiddle></a></td>
+	</tr>
+
+</table>
+</td></tr></table>
+</td></tr>
+<tr><td><img src=./images/search_bg3.gif></td></tr></table>
+</td></tr>
+<tr><td>
+<img src="images/log_bg03.jpg" width="825" height="49" border="0" usemap="#Map"></td></tr>
+<map name="Map">
+  <area shape="rect" coords="317,2,558,23" href="http://www.rankup.co.kr" target="_blank">
+</map></table>

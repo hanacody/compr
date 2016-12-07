@@ -1,0 +1,176 @@
+<?php
+/**
+ * 제품관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../../rankup_module/rankup_builder/attachment.class.php';
+include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+include_once '../class/product.class.php';
+$product = new product;
+
+$attach = new attachment('', $base_dir.'product/');
+$cate = new rankup_category;
+
+$rankup_control->print_admin_head('제품관리 - 전체제품');
+?>
+<body>
+<div class="bar"><script> titleBar('제품관리 - 전체제품') </script></div>
+
+<style type="text/css">
+#list_frame * {letter-spacing:0;font-family:verdana;font-size:11px}
+.info span.cate {color:#3366cc;font-weight:bold;font-size:11px;letter-spacing:-1px;font-family:dotum !important}
+.info div {position:relative;margin-top:5px}
+.info p {position:relative;width:125px;margin-left:5px}
+.info blockquote {position:absolute;margin:0;top:7px;right:7px;width:300px;height:90px;overflow:hidden;color:#999}
+.info img {border: 1px #aaa solid;width:115px;height:95px}
+</style>
+
+<center>
+<div style="width:760px;text-align:left">
+
+	<form id="search_form" name="search_form" action="products.html" method="GET" style="margin-top:30px">
+		<table width="100%" align="center" cellpadding="4" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+		<tr>
+			<td class="gray_bg">
+				<table cellpadding="2" cellspacing="1" border="0" align="center">
+				<tr>
+					<td>
+						<select name="view">
+						<option value="">-출력여부-</option>
+						<option value="yes"<?if($_GET['view']=='yes') echo ' selected'?>>출력함</option>
+						<option value="no"<?if($_GET['view']=='no') echo ' selected'?>>출력안함</option>
+						</select>
+
+						<select name="cate1" onChange="product.load_cates(this.value, 2, 'cate2')" style="width:150px;margin-left:10px">
+						<option value="">-1차분류-</option>
+						<?php
+						include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+						$cate = new rankup_category;
+						echo $cate->print_contents('product', '', array(
+							'value' => $_GET['cate1'],
+							'entry' => '<option value="{:no:}"{:on_selected:}>{:item:}</option>',
+							'on_selected' => ' selected'
+						));
+						?>
+						</select>
+
+						<select id="cate2" name="cate2" required hname="2차분류" style="width:150px">
+						<option value="">-2차분류-</option>
+						<?php
+						if($_GET['cate1']) {
+							echo $cate->print_contents('product', $_GET['cate1'], array(
+								'value' => $_GET['cate2'],
+								'entry' => '<option value="{:no:}"{:on_selected:}>{:item:}</option>',
+								'on_selected' => ' selected'
+							));
+						}
+						?>
+						</select>
+
+						<select name="smode" style="margin-left:10px">
+						<option value="">제품명</option>
+						</select>
+						<input type="text" name="skey" value="<?=htmlspecialchars($_GET['skey'])?>" maxlength="15" class="simpleform" style="background-color:white" />
+						<input type="image" src="../../Libs/_images/btn_search.gif" alt="검색" align="absmiddle" />
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</form>
+
+<?php
+
+// 제품목록
+list($totals, $contents) = $product->print_contents(array(
+	'category' => true,
+	'entry' => array(
+		0 => '
+		<tr>
+			<td height="40" colspan="6" valign="middle"><span disabled>등록된 제품이 없습니다.</span></td>
+		</tr>',
+		1 => '
+		<tr>
+			<td><input type="checkbox" name="no[]" value="{:no:}" /></td>
+			<td align="left" class="info">
+				<span class="cate">[{:cate1_text:} {:cate2_text:}]</span> <b>{:title:}</b>
+				<div class="hline gray_bg">
+					<p><img src="../../{:save_folder:}{:filename:}" align="absmiddle" /></p>
+					<blockquote>{:comment:}</blockquote>
+				</div>
+			</td>
+			<td>
+				<div>{:view_text:}</div>
+				<div class="hline">메인{:main_view_text:}</div>
+			</td>
+			<td>{:regist_time:}</td>
+			<td><a href="regist.html?no={:no:}"><img src="../../Libs/_images/btn_modify_s.gif" align="absmiddle" /></a></td>
+			<td><a onClick="product.del(\'{:no:}\')"><img src="../../Libs/_images/btn_delete_s.gif" align="absmiddle" /></a></td>
+		</tr>'
+	),
+	'save_folder' => $attach->presets['product']['save']['folder'],
+	'time_format' => 'Y.m.d',
+	'view_texts' => array(
+		'yes' => '<span style="color:#3366cc">출력함</span>',
+		'no' => '<span style="color:#ff6600">출력안함</span>'
+	)
+), $limits=15);
+
+?>
+
+	<div style="margin-top:25px">
+		<div id="sub_title">총 <b class="orange_b"><?=number_format($totals)?> 건</b>의 제품이 등록되어 있습니다.</div>
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top" style="table-layout:fixed;margin-top:3px">
+		<col width="35" />
+		<col />
+		<col width="90" />
+		<col width="80" />
+		<col width="50" />
+		<col width="50" />
+		<tr class="gray_bg" align="center">
+			<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+			<td>제품정보</td>
+			<td>출력여부</td>
+			<td>등록일자</td>
+			<td>수정</td>
+			<td>삭제</td>
+		</tr>
+		<tbody id="list_frame" align="center" valign="top">
+		<?=$contents?>
+		</tbody>
+		</table>
+
+		<div style="position:relative;margin-top:8px">
+			<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+			<a onClick="product.del()" id="checker_bottom"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+
+			<select onChange="product.view(this, 'main_view')">
+			<option value="">-메인출력 설정-</option>
+			<option value="yes">출력함</option>
+			<option value="no">출력안함</option>
+			</select>
+			<select onChange="product.view(this, 'view')">
+			<option value="">-출력 설정-</option>
+			<option value="yes">출력함</option>
+			<option value="no">출력안함</option>
+			</select>
+			<div style="position:absolute;top:0;right:0"><a href="regist.html">[제품등록+]</a></div>
+		</div>
+		<div id="paging" style="margin-top:10px">
+			<?=$rankup_control->print_paging($totals, $limits)?>
+		</div>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript" src="products.class.js"></script>
+<script type="text/javascript"> checker.initialize('list_frame', 'input[name="no[]"]') </script>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<?php
+ob_start();
+$rows = $rankup_social->get_social($_GET['no']);
+$hphone = explode("-",$member_info[hphone]);
+?><![CDATA[<div style="height:26px;background-color:#3f3f3e;border:0px #999 solid;padding:0px;margin-bottom:15px;cursor:pointer" onmousedown="rankup_popup.div_move_check(1, event, 'form_frame')">
+		<ul style="margin:0;list-style:none;color:white">
+			<li style="float:left"><img src="../images/pop_title_sms.gif" alt="sms로 알리기"></li>
+			<li style="float:right"><a onClick="rankup_popup.closeForm()" style="color:white"><img src="../images/pop_title_close.gif" alt="닫기"></a></li>
+		</ul>
+	</div>
+	<center>
+	<input type="hidden" name="mode" value="sms_post">
+	<input type="hidden" name="no" value="<?=$_GET[no]?>">
+	<table width="95%" cellpadding="2" cellspacing="0" border="0">
+		<tr>
+			<td height="30">
+				<table width="100%" cellpadding="0" cellspacing="0" align="center" border="0">
+				<tr>
+					<td width="80"><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>보내는사람</b></td>
+					<td align="left">
+						<input type="text" name="from_hphone1" value="<?=$hphone[0]?>" class="simpleform" hname="보내는 사람 휴대전화" option="hphone" required size="5" maxlength="3" span="3" glue="-"> -
+						<input type="text" name="from_hphone2" value="<?=$hphone[1]?>" class="simpleform" size="5" maxlength="4"> -
+						<input type="text" name="from_hphone3" value="<?=$hphone[2]?>" class="simpleform" size="5" maxlength="4">
+					</td>
+				</tr>
+				<tr>
+					<td><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>받는사람</b></td>
+					<td align="left">
+						<input type="text" name="to_hphone1" value="" class="simpleform" hname="받는사람 휴대전화" option="hphone" required size="5" maxlength="3" span="3" glue="-"> -
+						<input type="text" name="to_hphone2" value="" class="simpleform" size="5" maxlength="4"> -
+						<input type="text" name="to_hphone3" value="" class="simpleform" size="5" maxlength="4"></TD></TR><!--회신번호 입력-->
+					</td>
+				</tr>
+				<tr>
+					<td><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>내용</b></td>
+					<td align="left">
+						<textarea name="msg" id="msg" style="width:100%;height:150px" required hname="내용" onkeyup="rankup_popup.checkLen(this);" onclick="alert('지정된 문구 이외의 전송은 불가합니다.');"  readOnly><?=$rows[sms_msg]?></textarea>
+						<p style="float:right"><input class="phonemsglen" readOnly  maxLength=2 size=2 value=0 id="msglen" style="border:0px;text-align:right;font-size:9pt;padding-top:2px"><FONT  style="FONT-SIZE: 9pt">/80 byte</FONT></p>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td height="36" valign="bottom">
+				<table width="100%" cellpadding="0" cellspacing="0" align="center">
+				<tr align="center">
+					<td style="padding-top:10px;">
+						<a onClick="rankup_popup.submitFrom('sms')"><img src="../images/btn_pop_send.gif" alt="보내기"></a>
+						<a onClick="rankup_popup.closeForm()"><img src="../images/btn_pop_close.gif" alt="닫기" onload="rankup_popup.checkLen($('msg'))"></a>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</center>]]>
+<?
+$message = ob_get_contents();
+ob_end_clean();
+?>

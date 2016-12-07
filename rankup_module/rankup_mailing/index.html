@@ -1,0 +1,157 @@
+<?php
+/**
+ * 랭크업 메일링 설정
+ *@author: kurokisi
+ *@authDate: 2011.09.01
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../rankup_member/top_menu.inc.php';
+include_once 'rankup_mailing.class.php';
+
+if($_GET['kind']) {
+	$mailing = new rankup_mailing($_GET['kind']);
+}
+else {
+	$mailing = new rankup_mailing;
+	$_GET['kind'] = array_shift(array_keys($mailing->kinds));
+	$mailing->get_settings($_GET['kind']);
+}
+?>
+
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<style type="text/css">
+#kinds_frame ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	height: 40px;
+}
+#kinds_frame li {
+	display: inline;
+	margin-right: 10px;
+	background: url('../../Libs/_images/ic_arrow1.gif') no-repeat 0 3px;
+	padding-left: 10px;
+}
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;text-align:left">
+
+		<div id="kinds_frame">
+			<ul style="list-style:none;margin:0;padding:0">
+			<?php
+			foreach($mailing->kinds as $key=>$name) {
+				if($_GET['kind']==$key) $name = '<b>'.$name.'</b>';
+				echo sprintf('<li><a href="?kind=%s">%s</a></li>', $key, $name);
+			}
+			?>
+			</ul>
+		</div>
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+			<input type="hidden" name="kind" value="<?=$_GET['kind']?>" />
+
+			<div id="sub_title">이메일 머지(치환)문자</div>
+			<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+				<col width="120" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> {이름}</td>
+					<td>회원의 이름으로 치환됩니다. <span id="tip" style="letter-spacing:0;font-family:verdana;">ex) 홍길동</span></td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> {아이디}</td>
+					<td>회원의 아이디로 치환됩니다. <span id="tip" style="letter-spacing:0;font-family:verdana;">ex) rankup</span></td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> {비밀번호}</td>
+					<td>회원의 비밀번호로 치환됩니다. <span id="tip" style="letter-spacing:0;font-family:verdana;">ex) rank*****</span></td>
+				</tr>
+			</table>
+			<br />
+			<br />
+
+
+			<div id="sub_title">이메일 설정</div>
+			<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+				<col width="120" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 이메일 제목</td>
+					<td>
+						<input type="text" name="subject" required hname="이메일 제목" value="<?=$mailing->settings['subject']?>" size="80" maxlength="100" class="simpleform" />
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 이메일 사용여부</td>
+					<td>
+						<input type="radio" name="used" checked value="yes" id="used_yes"><label for="used_yes">사용함</label>
+						<input type="radio" name="used"<? if($mailing->settings['used']=='no') echo ' checked' ?> value="no" id="used_no"><label for="used_no">사용안함</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 관리자 동보발송</td>
+					<td>
+						<input type="radio" name="alarm" checked value="yes" id="alarm_yes"><label for="alarm_yes">사용함</label>
+						<input type="radio" name="alarm"<? if($mailing->settings['alarm']=='no') echo ' checked' ?> value="no" id="alarm_no"><label for="alarm_no">사용안함</label>
+						<span id="tip">회원이 받는 이메일을 관리자도 동일하게 받아볼 수 있습니다.</span>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> 이메일 중요도</td>
+					<td>
+						<div style="float:left">
+							<select id="priority" name="priority">
+							<option value="5">낮음</option>
+							<option value="3"<? if($mailing->settings['priority']=='3') echo ' selected' ?>>중간</option>
+							<option value="1"<? if($mailing->settings['priority']=='1') echo ' selected' ?>>높음</option>
+							</select>
+							<span id="tip">중요도 수준이 설정된 이메일은 받는사람의 편지함에 중요도가 표시됩니다.</span>
+						</div>
+						<div style="float:right"><a onClick="$('priority_help').toggle()"><img src="../../Libs/_images/btn_help.gif" align="absmiddle" /></a></div>
+						<div id="priority_help" class="help_bg" style="margin-top:6px;clear:both;display:none;padding-top:6px;">
+							이메일의 중요도 수준을 설정하여 받는사람이 즉시 확인해야 하는 메시지인지, 아니면 나중에 확인해도 되는 메시지인지를 지정할 수 있습니다.<br />
+							<ul class="help_ul" style="margin-top:8px">
+								<li><span style="color:#336699">일반적인 이메일은 중요도를 '중간'으로 설정하시면 됩니다.</span></li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+			</table>
+
+			<div style="margin-top:8px">
+				<textarea type="editor" id="content" name="content" required hname="발송될 이메일 내용" style="width:100%;height:400px" nofocus><?=$mailing->settings['body']?></textarea>
+			</div>
+
+		</form>
+	</div>
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script type="text/javascript">
+	Wysiwyg.createELM();
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'set_mailing'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			alert('저장되었습니다.');
+		}
+	}
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

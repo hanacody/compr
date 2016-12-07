@@ -1,0 +1,85 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+// 작업 필드 이름
+$code = $rankup_control->getParam('code');
+$info = $rankup_control->get_config_info($code);
+
+$title = "사이트기본환경설정 - ";
+switch($code) {
+	case "copyright": $title .= "카피라이트"; break;
+	case "agreement": $title .= "회원약관"; break;
+	case "guide": $title .= "이용안내"; break;
+	case "privacy": $title .= "개인정보취급방침"; break;
+	case "mem_privacy": $title .= "개인정보수집 및 안내"; break;
+	case "company": $title .= "회사소개 설정"; break;
+}
+
+$rankup_control->print_admin_head($title);
+?>
+<body>
+<script type="text/javascript">var direct_board = true</script>
+<script type="text/javascript" src="<?=$base_url.$wysiwyg_dir?>wysiwyg.js"></script>
+<?
+if(!$_GET[category_code]){
+?>
+<div class="bar"><script> titleBar("<?=$title?>", 400) </script></div>
+<?}?>
+<?php
+include "./e_link.html";
+?>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<form name="registFm1" method="POST" action="./e_regist.php" onSubmit="return (Wysiwyg.submit_start()&&validate(this)&&confirms('입력하신 내용을 저장하시겠습니까?'))">
+			<input type="hidden" name="type" value="insert">
+			<input type="hidden" name="mode" value="<?=$code?>">
+			<tr><td height="25"><div id="sub_title"><?=$title?></div></td></tr>
+			<?
+			// 이용안내, 회사소개 사용여부 폼 활성화
+			if(in_array($_GET['code'], array("guide", "company"))) {
+			?>
+			<tr>
+				<td class="list_top">
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+						<tr>
+							<td width="100" height="38"  class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;사용여부</td>
+							<td>
+							<input type="radio" name="used" value="yes" id="used_id1"><label for="used_id1">사용</label>
+							<input type="radio" name="used" value="no" id="used_id2"><label for="used_id2">미사용</label>
+							</td>
+						</tr>
+					</table>
+					<script type="text/javascript">
+					var used = document.getElementsByName('used');
+					for(var i=0; i<used.length; i++) {
+						if(used[i].value!="<?=$config_info["use_$_GET[code]"]?>") continue;
+						used[i].checked = true;
+						break;
+					}
+					</script>
+				</td>
+			</tr>
+			<?
+			}
+			?>
+			<tr>
+				<td style="padding-top:10px;">
+					<textarea name="content" type="editor" required hname="내용" style="width:100%;height:500px" nofocus><?=$info?></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td height="40" align="center"><input type="image" src="../../Libs/_images/btn_regist1.gif" alt="등록하기"></td>
+			</tr>
+			</form>
+		</table>
+		<script type="text/javascript"> Wysiwyg.createELM() </script>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<?php
+$rows = $rankup_social->get_social($_GET['no']);
+$email = explode("@",$member_info[email]);
+$subject = "[$config_info[site_name]] ".$rows[subject];
+ob_start();
+?><![CDATA[<div style="height:25px;background-color:#3f3f3e;border:0px #999 solid;padding:0px;margin-bottom:15px;cursor:pointer" onmousedown="rankup_popup.div_move_check(1, event, 'form_frame')">
+		<ul style="margin:0;list-style:none;color:white">
+			<li style="float:left"><img src="../images/pop_title_email.gif" alt="e-mail로 알리기"></li>
+			<li style="float:right"><a onClick="rankup_popup.closeForm()" style="color:white"><img src="../images/pop_title_close.gif" alt="닫기"></a></li>
+		</ul>
+	</div>
+	<center>
+	<input type="hidden" name="mode" value="mail_post">
+	<input type="hidden" name="no" value="<?=$_GET[no]?>">
+	<table width="95%" cellpadding="2" cellspacing="0" border="0">
+		<tr>
+			<td height="30">
+				<table width="100%" cellpadding="0" cellspacing="0" align="center" border="0">
+				<tr>
+					<td width="80"><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>보내는사람</b></td>
+					<td align="left"><input type="text" name="from_email_1" required hname="보내는사람 이메일" style="width:100px;" class="simpleform" value="<?=$email[0]?>"> @ <input type="text" name="from_email_2" required hname="보내는사람 이메일"  style="width:100px" class="simpleform" value="<?=$email[1]?>">
+					<select style="width:95px;" onchange="rankup_popup.emailCheck('emailSelect_1');" id="emailSelect_1">
+						<option value="N">직접입력</option>
+						<option value="daum.net">daum.net</option>
+						<option value="naver.com">naver.com</option>
+						<option value="nate.com">nate.com</option>
+						<option value="hotmail.com">hotmail.com</option>
+						<option value="empal.com">empal.com</option>
+						<option value="hanafos.com">hanafos.com</option>
+						<option value="freechal.com">freechal.com</option>
+						<option value="dreamwiz.com">dreamwiz.com</option>
+						<option value="korea.com">korea.com</option>
+						<option value="empas.com">empas.com</option>
+						<option value="yahoo.co.kr">yahoo.co.kr</option>
+						<option value="msn.co.kr">msn.co.kr</option>
+						<option value="paran.com">paran.com</option>
+						<option value="netian.com">netian.com</option>
+					</select>
+					</td>
+				</tr>
+				<tr>
+					<td><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>받는사람</b></td>
+					<td align="left"><input type="text" name="to_email_1" required hname="받는사람 이메일" style="width:100px;" class="simpleform"> @ <input type="text" name="to_email_2" required hname="받는사람 이메일"  style="width:100px" class="simpleform">
+					<select style="width:95px;" onchange="rankup_popup.emailCheck('emailSelect_2');" id="emailSelect_2">
+						<option value="N">직접입력</option>
+						<option value="daum.net">daum.net</option>
+						<option value="naver.com">naver.com</option>
+						<option value="nate.com">nate.com</option>
+						<option value="hotmail.com">hotmail.com</option>
+						<option value="empal.com">empal.com</option>
+						<option value="hanafos.com">hanafos.com</option>
+						<option value="freechal.com">freechal.com</option>
+						<option value="dreamwiz.com">dreamwiz.com</option>
+						<option value="korea.com">korea.com</option>
+						<option value="empas.com">empas.com</option>
+						<option value="yahoo.co.kr">yahoo.co.kr</option>
+						<option value="msn.co.kr">msn.co.kr</option>
+						<option value="paran.com">paran.com</option>
+						<option value="netian.com">netian.com</option>
+					</select>
+					</td>
+				</tr>
+				<tr>
+					<td><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>제목</b></td>
+					<td align="left"><input type="text" name="subject" required hname="제목" style="width:100%" class="simpleform" value="<?=$subject?>"></td>
+				</tr>
+				<tr>
+					<td><img src="../images/pop_icon.gif" alt="" align="absmiddle"><b>내용</b></td>
+					<td align="left"><textarea name="content" id="msg" style="width:100%;height:150px" required hname="내용"></textarea>
+					<p id="tip">상위내용 출력 후 해당상품의 정보를 동시에 발송합니다.</p>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td height="36" valign="bottom">
+				<table width="100%" cellpadding="0" cellspacing="0" align="center">
+				<tr align="center">
+					<td style="padding-top:10px;">
+						<a onClick="rankup_popup.submitFrom('mail')"><img src="../images/btn_pop_send.gif" alt="보내기"></a>
+						<a onClick="rankup_popup.closeForm()"><img src="../images/btn_pop_close.gif" alt="닫기"></a>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+	</table>
+	</center>]]>
+<?
+$message = ob_get_contents();
+ob_end_clean();
+?>

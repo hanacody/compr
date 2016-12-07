@@ -1,0 +1,318 @@
+<?php
+/**
+ * 일정관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../class/calendar.class.php';
+$calendar = new calendar;
+
+$rows = $calendar->get_settings($_GET['no']);
+
+include_once '../class/schedule.class.php';
+$schedule = new schedule;
+if(!$_GET['date']) $_GET['date'] = date('Y-m');
+
+$rankup_control->print_admin_head('일정관리 - '.$rows['subject']);
+
+// 일정분류사용시 노출
+if($rows['use_cate']=='yes') {
+	include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+	$category = new rankup_category;
+	$cate_res = $category->get_bundles('calendar', $rows['no']);
+	$cates = fetch_contents($cate_res, '<p class="c{:no:}">{:item:}</p>', array($calendar, '_c74'));
+	$cate_styles = fetch_contents($cate_res, '.c{:no:}{background-color:{:bgcolor:};color:{:color:}}', array($calendar, '_c74'));
+	$cate_options = fetch_contents($cate_res, '<option value="{:no:}" class="c{:no:}">{:item:}</option>', array($calendar, '_c74'));
+	if(in_array($rows['print_type'], array('cate', 'both'))) {
+		$cate_texts = array();
+		while($crows = $category->fetch($cate_res)) {
+			$cate_texts[$crows['no']] = $crows['item'];
+		}
+	}
+}
+?>
+<body>
+<div class="bar"><script> titleBar('일정관리 - <?=$rows['subject']?>', 400) </script></div>
+
+<style type="text/css">
+@import url('schedules.css');
+/* calendar styles * /
+#calendar_frame {background-color:<?=$rows['frame']['color']?>}
+#calendar_title td {background-color:<?=$rows['title']['bgcolor']?>;color:<?=$rows['title']['color']?>}
+#calendar_body .day {color:<?=$rows['basic']['color']?>}
+#calendar_body .offday {background-color:<?=$rows['frame']['bgcolor']?>}
+#calendar_body .onday {background-color:<?=$rows['basic']['bgcolor']?> !important}
+#calendar_body .today,.today div.day {background-color:<?=$rows['today']['bgcolor']?> !important;color:<?=$rows['today']['color']?> !important}
+/* category styles */
+<?=$cate_styles?>
+</style>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+	<div style="text-align:center">
+		<a href="./schedules.html<?=params('date='.date('Y-m', strtotime("$_GET[date]-01 -1 month")))?>">[이전]</a> &nbsp; &nbsp;
+		<b style="font-size:25px;font-family:thoma"><?=date('Y년 n월', strtotime($_GET['date']))?></b> &nbsp; &nbsp;
+		<a href="./schedules.html<?=params('date='.date('Y-m', strtotime("$_GET[date]-01 1 month")))?>">[다음]</a>
+	</div>
+
+<?php
+if($rows['use_cate']=='yes') {
+?>
+	<div id="cates" style="margin:5px 0;text-align:right">
+		<?=$cates?>
+		<a href="calendar_regist.html?no=<?=$_GET['no']?>" style="margin-left:5px">[달력설정]</a>
+	</div>
+<?php
+}
+?>
+
+	<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top">
+	<tr class="gray_bg" align="center">
+		<td id="checker_top">일/SUN</td>
+		<td>월/MON</td>
+		<td>화/TUE</td>
+		<td>수/WED</td>
+		<td>목/THU</td>
+		<td>금/FRI</td>
+		<td>토/SAT</td>
+	</tr>
+	<tbody id="calendar_body" bgcolor="white" valign="top">
+	<?php
+	echo $schedule->print_contents($_GET['no'], array(
+		'times' => 7,
+		'entry_wrap' => array('<tr>', '</tr>'),
+		'entry' => array(
+			0 => '<td class="offday"></td>',
+			1 => '
+			<td class="{:bgcolor:}">
+				{:on_date:}
+				{:on_schedule:}
+			</td>'
+		),
+		'bgcolors' => array(
+			'on' => ' onday',
+			'off' => ' offday', // 빈셀
+			'today' => ' today' // 오늘
+		),
+		'colors' => array(
+			'sat' => ' sat', // 토요일
+			'rest' => ' rest', // 일요일 & 공휴일 색상
+		),
+		'on_day_text' => '<span>{:day_text:}</span>',
+		'on_date' => '
+			<div class="day{:color:}">
+				{:day:} <a onClick="schedule.open(\'{:date:}\')"><img src="./img/btn_write.gif" align="absmiddle" /></a> {:on_day_text:}
+			</div>',
+		// 일정 entry
+		'schedule_entry' => array(
+			'entry' => array(
+				1 => '
+				<div id="item" no="{:no:}">
+					<ul class="c{:cate:}">
+						<li><input type="checkbox" name="no[]" value="{:no:}" /><a onClick="schedule.open(\'{:date:}\', \'{:no:}\')">{:on_cate:}{:subject:}</a></li>
+						<li class="tool"><a onClick="schedule.exclude(this, \'{:date:}\', \'{:no:}\')">×</a></li>
+					</ul>
+				</div>'
+			),
+			'on_cate' => '[{:cate_text:}] ', // 분류명
+			'print_type' => $rows['print_type'], // 일정출력사항
+			'cate_texts' => $cate_texts // 카테고리 이름
+		),
+		'view_holyday' => $rows['view_holyday'] // 국경일 출력여부
+	), true);
+	?>
+	</tbody>
+	</table>
+
+	<div style="margin-top:10px">
+		<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+		<a onClick="schedule.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<div id="schedule_frame" style="display:none">
+	<form id="save_form" name="save_form" onSubmit="return false">
+		<input type="hidden" id="no" name="no" />
+		<div class="titlebar">
+			<p id="sub_title">일정등록</p>
+			<p style="position:absolute;top:0;right:0"><a onClick="schedule.close()">×</a></p>
+		</div>
+		<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1" style="table-layout:fixed">
+		<col width="100" />
+		<col />
+		<tr>
+			<td width="100" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 제목</td>
+			<td><input type="text" id="subject" name="subject" required hname="제목" size="50" maxlength="30" class="simpleform" /></td>
+		</tr>
+<?php
+if($rows['use_cate']=='yes') {
+?>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 분류</td>
+			<td>
+				<select id="cate" name="cate" required hname="분류">
+				<?=$cate_options?>
+				</select>
+			</td>
+		</tr>
+<?php
+}
+?>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 기간</td>
+			<td>
+				<span style="float:left"><input type="text" id="sdate" name="sdate" required hname="기간" readOnly onClick="rankup_calendar.draw_calendar(this)" class="calendar" /> ~&nbsp;</span>
+				<span style="float:left"><input type="text" id="edate" name="edate" required hname="기간" readOnly onClick="rankup_calendar.draw_calendar(this)" class="calendar" /></span>
+				<br style="clear:both" />
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 제외기간</td>
+			<td>
+				<div style="font-size:11px;letter-spacing:-1px">
+					<input type="checkbox" name="xdays[]" value="mon" id="xday_mon" /><label for="xday_mon">월요일</label>
+					<input type="checkbox" name="xdays[]" value="tue" id="xday_tue" /><label for="xday_tue">화요일</label>
+					<input type="checkbox" name="xdays[]" value="wed" id="xday_wed" /><label for="xday_wed">수요일</label>
+					<input type="checkbox" name="xdays[]" value="thu" id="xday_thu" /><label for="xday_thu">목요일</label>
+					<input type="checkbox" name="xdays[]" value="fri" id="xday_fri" /><label for="xday_fri">금요일</label>
+					<input type="checkbox" name="xdays[]" value="sat" id="xday_sat" /><label for="xday_sat" class="sat">토요일</label>
+					<input type="checkbox" name="xdays[]" value="sun" id="xday_sun" /><label for="xday_sun" class="rest">일요일</label>
+					<input type="checkbox" name="xdays[]" value="rest" id="xday_rest" /><label for="xday_rest" class="rest">국가공휴일 제외</label>
+				</div>
+				<div id="xdate_tab"><a onClick="schedule.xdate.add('xdate_frame')">제외날짜추가 +</a></div>
+				<div id="xdate_frame" style="display:none"></div>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 내용</td>
+			<td>
+				<textarea id="comment" name="comment" required hname="내용" style="width:100%;height:250px" class="simpleform"></textarea>
+			</td>
+		</tr>
+		</table>
+	</form>
+	<div style="margin:10px 0;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정하신 일정을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" /></a>
+		<a onClick="schedule.del($F('no'))"><img src="../../Libs/_images/btn_delete.gif" align="absmiddle" /></a>
+		<a onClick="schedule.close()"><img src="../../Libs/_images/btn_close.gif" align="absmiddle" /></a>
+	</div>
+</div>
+
+
+<script type="text/javascript">
+//<![CDATA[
+var schedule = {
+	initialize: function(content, frame) {
+		this.content = $(content);
+		this.frame = $(frame);
+	},
+	open: function(date, no) {
+		$esc.add('schedule.close()');
+		if(no) {
+			var self = this;
+			proc.parameters({mode: 'load_schedule', no:no});
+			proc.process(function(trans) {
+				var json = trans.responseText.evalJSON();
+				$w('no subject cate sdate edate comment').each(function(field) { $(field).value = json[field] });
+				$w('mon tue wed thu fri sat sun rest').each(function(field) { $('xday_'+ field).checked =false });
+				if(json.xdays) $A(json.xdays.split(/,/g)).each(function(field) { $('xday_'+ field).checked = true }); // xday
+				$A(json.xdates.split(/,/g)).each(function(date) { // xdate
+					if(date) self.xdate.add('xdate_frame', {xdate:date});
+				});
+				blind.draw();
+				self.frame.show();
+				position.center(self.frame);
+				$('subject').focus();
+			}, false);
+		}
+		else {
+			blind.draw();
+			this.frame.show();
+			position.center(this.frame);
+			$('sdate').value = $('edate').value = date;
+			$('subject').focus();
+		}
+	},
+	close: function() {
+		this.frame.hide();
+		blind.remove();
+		$('save_form').reset(); // form reset
+		// xdates remove
+		$A(this.xdate.frame.select('p')).each(function(item) {
+			this.xdate.del(item.select('a')[0]);
+		}, this);
+		$esc.remove('schedule.close()');
+	},
+	xdate: {
+		frame: $('xdate_frame'),
+		template: new Template(' <p><input type="text" name="xdates[]" required hname="제외날짜" value="#{xdate}" class="d" maxlength="10" /><a class="tool" onClick="schedule.xdate.del(this)">×</a></p>'),
+		add: function(frame, values) {
+			this.frame.show();
+			var spot = this.frame.select('p');
+			var item = this.template.evaluate(values ? values : {});
+			spot.length ? new Insertion.After(spot.last(), item) : this.frame.update(item);
+		},
+		del: function(el) {
+			$(el).up().remove();
+			var items = this.frame.select('p');
+			if(!items.length) this.frame.hide();
+		}
+	},
+	exclude: function(el, date, no) {
+		if(!confirm('선택하신 날짜를 일정에서 제외하시겠습니까?')) return false;
+		proc.parameters({mode: 'exclude_date', no:no, date:date});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('처리되었습니다.');
+				el = $(el).up();
+				while(!el.nodeName.match(/div/i)) el = $(el).up();
+				el.remove();
+			}
+		}, false);
+	},
+	del: function(no) {
+		var nos = no ? no : checker.get();
+		if(!nos.length) {
+			alert('삭제하실 일정을 선택하여 주십시오.');
+			return false;
+		}
+		var self = this;
+		if(!confirm('선택하신 일정을 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_schedule', nos:nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				$A(nos.split('__')).each(function(no) {
+					$A($(self.content).select('div[no="'+ no +'"]')).each(function(item) { item.remove() });
+				});
+			}
+		}, false);
+	}
+}
+/* checker initialize */
+checker.initialize('calendar_body', 'input[name="no[]"]');
+
+/* form initialize */
+$form.hashes = {mode:'save_schedule', calendar:<?=$_GET['no']?>}
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+		location.reload();
+	}
+}
+
+schedule.initialize('calendar_body', 'schedule_frame');
+//]]>
+</script>
+
+</body>
+</html>

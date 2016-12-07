@@ -1,0 +1,401 @@
+<!-- 게시물 상세보기 -->
+<script type="text/javascript" src="<?=$this->base_url?>Libs/_js/common.js"></script>
+<script type="text/javascript" src="<?=$this->base_url?>Libs/_js/form.js"></script>
+<script type="text/javascript" src="<?=$this->board_url?>rankup_board.js"></script>
+<script type="text/javascript">
+<!--
+rankup_board.board_id = "<?=$this->board_id?>";
+rankup_board.index_url = "<?=$this->index_url?>";
+rankup_board.no = "<?=$board_infos->no?>";
+//-->
+</script>
+<link rel="stylesheet" type="text/css" href="<?=$this->skin_url?>skin_style.css">
+<table border="0" cellpadding="0" cellspacing="0" align="right" style="width:<?=$this->slayout['board_width']?>px;table-layout:fixed;">
+<?
+//게시판 상단 파일
+if($this->sfunction['sheader_file'] && is_file($this->etc_file_dir.$this->sfunction['sheader_file'])) { ?>
+	<tr>
+		<td>
+			<?php
+			ob_start();
+			include_once $this->etc_file_dir.$this->sfunction['sheader_file'];
+			echo ob_get_clean();
+			?>
+		</td>
+	</tr>
+<? } if($this->soption['use_hit_best']=="on") { ?>
+	<tr>
+		<td>
+			<!-- 조회수 베스트 -->
+			<table border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="padding-left:3px" height="25"><b>조회수 <span class="best">BEST</span></td>
+				</tr>
+			</table>
+			<table border="0" cellpadding="2" cellspacing="0" width="100%" class="best_bg">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="white">
+							<tr>
+								<td style="padding:5 10 5 10px">
+									<table width="100%" cellpadding="3" cellspacing="0" border="0">
+									<?=$this->get_best_articles("hit_best")?>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+<? } ?>
+	<tr>
+		<td>
+			<!-- 상세보기 -->
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<? if($this->display_subject==true) { ?>
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<tr>
+								<td class="title" style="padding-left:3px"><?=$this->board_name?></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height="5"></td>
+				</tr>
+<? } ?>
+				<tr>
+					<td>
+						<table border="0" cellpadding="2" cellspacing="1" width="100%" class="view_outline">
+						<tr><td bgcolor="#ffffff">
+							<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<tr>
+								<td height="34" style="padding-left:7px" background="<?=$this->skin_url?>view_titlebar.gif" class="view_title"><?=$board_infos->subject?></td>
+							</tr>
+							<tr>
+								<td>
+									<table border="0" cellpadding="5" cellspacing="0" width="100%">
+										<tr>
+											<td><font class="view_text">작성자:</font> <?=$board_infos->unick?></td>
+											<td align="right">
+											<? if($this->is_admin()){?>
+												<font class="view_text">IP:</font> <?=$board_infos->uip?>
+											<?}?>
+											<? if($this->sfunction['use_vote']=="on") { ?>
+												<font class="view_text">추천:</font> <?=$board_infos->gnum?>건
+											<? if($this->sfunction['use_only_good']!="on") { ?>
+												<font class="view_text">반대:</font> <?=$board_infos->bnum?>건
+											<? }} ?>
+												<font class="view_text">조회:</font> <?=$board_infos->hnum?>
+												<font class="view_text">등록일:</font> <?=$board_infos->wdate?>
+											</td>
+										</tr>
+										<? if($this->sattach['use_attach']=="on" && $this->sattach['use_detail_attach']=="on" && is_array($board_infos->attach) && count($board_infos->attach)) { ?>
+										<tr>
+											<td colspan="2">
+												<table width="100%" cellspacing="0" cellpadding="0">
+													<tr valign="top">
+														<td width="60" style="padding-top:2px"><font class="view_text">첨부파일:</font></td>
+														<td id="div_download"><?=$attach_files?></td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+<? } ?>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td bgcolor="#DEDEDE" height="1"></td>
+							</tr>
+							<tr>
+								<td>
+									<div id="div_content" name="div_content" style="height:100%;width:100%;font-size:9pt;font-family:verdana;float:left"></div>
+									<div style="clear:both"></div>
+									<textarea id="tmp_content" name="tmp_content" style="display:none;"><?=$board_infos->content?></textarea>
+									<script type="text/javascript"> $('div_content').update($('tmp_content').value) </script>
+								</td>
+							</tr>
+<? if($this->is_scrapable($board_infos) || $this->is_votable($board_infos) || $this->is_reportable($board_infos) || $this->is_printable()) { ?>
+							<tr>
+								<td align="center"  class="view_subbg_color" height="30" style="padding-top:3px">
+									<table border="0" cellpadding="0" cellspacing="0">
+										<tr>
+<? if($this->is_scrapable($board_infos)) { ?>
+											<td><a onClick="rankup_board.article_scrap()"><img border="0" src="<?=$this->board_url?>img/bt_scrap.gif"></a></td>
+											<td width="2"></td>
+<? } if($this->is_votable($board_infos)) { ?>
+											<td><a onClick="rankup_board.article_vote('good')"><img border="0" src="<?=$this->skin_url?>bt_good.gif" alt="추천"></a></td>
+											<td width="2"></td>
+<? if($this->is_votable($board_infos, true)) { ?>
+											<td><a onClick="rankup_board.article_vote('bad')"><img border="0" src="<?=$this->skin_url?>bt_bad.gif" alt="반대"></a></td>
+											<td width="2"></td>
+<? }} if($this->is_reportable($board_infos)) { ?>
+											<td><a onClick="rankup_board.article_report()"><img border="0" src="<?=$this->skin_url?>bt_complain.gif"></a></td>
+											<td width="2"></td>
+<? } if($this->is_printable()) { ?>
+											<td><a onClick="rankup_board.article_print(<?=$board_infos->no?>)"><img border="0" src="<?=$this->skin_url?>bt_print.gif" alt="인쇄"></a></td>
+<? } ?>
+										</tr>
+									</table>
+								</td>
+							</tr>
+<? } ?>
+							</table>
+						</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height="30">
+						<table width="100%" border="0" cellpadding="2" cellspacing="0">
+							<tr>
+<?php
+if($rankup_sns->sns_settings['use_sns'] == "yes" && $this->sfunction['use_snssend'] == 'on') {
+?>
+								<td align="left">
+<?php
+$sns_datas['link'] = $config_info['domain']."board/index.html?no=$board_infos->no&".$board_links;
+$sns_datas['no'] = $board_infos->no;
+$sns_datas['id'] = $this->board_id;
+echo $rankup_sns->sns_link_list($sns_datas);
+?>
+								</td>
+<? } ?>
+								<td align="right">
+									<table border="0" cellpadding="2" cellspacing="0">
+									<tr>
+										<td><a href="./index.html?<?=$board_links?>"><img src="<?=$this->skin_url?>bt_list.gif"></a></td>
+		<? if($this->is_registable()) { ?>
+										<td><a href="./index.html?<?=$board_links?>&mode=write"><img src="<?=$this->skin_url?>bt_write.gif"></a></td>
+		<? } if($this->is_replyable($board_infos)) { ?>
+										<td><a href="./index.html?<?=$board_links?>&mode=write&pano=<?=$board_infos->no?>"><img src="<?=$this->skin_url?>bt_reply.gif"></a></td>
+		<? } if($this->is_modifiable($board_infos)) { ?>
+										<td><a onClick="rankup_board.article_modify(this)"><img src="<?=$this->skin_url?>bt_edit.gif"></a></td>
+		<? } if($this->check_admin_registable()) {?>
+										<td><a onClick="rankup_board.article_delete(this)"><img src="<?=$this->skin_url?>bt_del.gif"></a></td>
+		<? } ?>
+									</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+<? if($this->sfunction['use_comment']=="on") { ?>
+	<tr>
+		<td>
+			<!-- 댓글 -->
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td background="<?=$this->skin_url?>reply_bg.gif" class="reply_title" height="28" id="div_comment_nums">댓글 : <b><span><?=$board_infos->cnum?></span></b> 건</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="div_comment_articles"></div>
+						<script type="text/javascript"> rankup_board.comment_load() </script>
+					</td>
+				</tr>
+<? if($this->check_granted("comment_level") && $board_infos->dval=="no") { ?>
+				<tr id="commentRegistFrame">
+					<td>
+						<table border="0" cellpadding="10" cellspacing="0" width="100%" style="border-top:1px #ddd solid;border-bottom: 1px #eee solid;margin-bottom: -1px;">
+							<tr>
+								<td class="reply_color2" height="100">
+									<div id="div_comment_icon_box"></div>
+									<iframe name="commentRegistFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0"></iframe>
+									<form name="commentRegistFrm" action="./index.html" method="POST" target="commentRegistFrame" onSubmit="return validate(this)" autocomplete="off">
+									<input type="hidden" name="mode" value="regist_comment">
+									<input type="hidden" name="id" value="<?=$this->board_id?>">
+									<input type="hidden" name="no" value="<?=$board_infos->no?>">
+									<input type="hidden" name="pno" id="pno" value="0">
+									<input type="hidden" name="icon"  id="icon" value="1">
+									<table border="0" cellpadding="0" cellspacing="0" width="100%">
+										<tr>
+											<td id="reply_margin" width="16" valign="top" style="display: none;">
+												<img src="<?=$this->board_url?>icon/icon_reply.gif">
+											</td>
+											<td>
+												<table width="100%" cellspacing="0" cellpadding="0">
+													<tr>
+														<td width="45">
+															<div id="div_comment_icon" onClick="rankup_board.select_icon()"><img src="<?=$this->base_url?>rankup_module/rankup_board/icon/face_1.gif" align="absmiddle"><span style="font-size:5pt;margin-left:4px;color:#555555">▼</span></div>
+														</td>
+														<td class="reply_text">
+<? if(!empty($this->member_id)) { ?>
+															작성자: <input type="hidden" name="nickname" value="<?=$this->member_name?>"><?=$this->member_name?>
+<? } else { ?>
+															작성자 <input type="text" id="hnickname" name="nickname" value="<?=$this->member_name?>" required hname="작성자" size="14" maxlength="20" class="enable" align="absmiddle">
+															비밀번호 <input type="password" name="passwd" required hname="비밀번호" option="userpw" size="14" maxlength="20" class="enable" align="absmiddle">
+<? } ?>
+														</td>
+													</tr>
+													<tr>
+														<td colspan="3" style="padding-top:5px;">
+															<textarea id="content" name="content" style="width:98%;height:70px;padding:4px;overflow-y:scroll;" required hname="내용" class="enable"></textarea>
+														</td>
+													</tr>
+												</table>
+											</td>
+<? if(!$this->is_admin() && empty($this->member_id) && $this->confirm_used) { // 2010.06.17 added ?>
+											<td width="120" align="center" style="padding:27px 0 0 7px">
+												<table cellpadding="0" cellspacing="0">
+												<tr>
+													<td id="confirm_image" onClick="rankup_board.confirm_code_reset()" style="cursor:pointer" title="클릭시 스팸방지코드가 갱신됩니다">
+													<?php
+														// 보안코드 이미지 출력 - 2010.06.17 added
+														echo $this->print_confirm_image(array(110, 42), 'style="border:1px #ccc solid;"');
+													?>
+													</td>
+												</tr>
+												<tr>
+													<td style="padding-top:3px">
+													<?php
+														// 보안코드 입력필드 출력 - 2010.06.17 added
+														echo $this->print_confirm_field('keystring', ' required hname="스팸방지코드" class="enable" style="width:110px;height:22px;font-weight:bold;text-align:center;font-size:14px;font-family:verdana;padding:1px"');
+													?>
+													</td>
+												</tr>
+												</table>
+											</td>
+<? } ?>
+											<td width="45" align="center" style="padding:25px 0 0 7px">
+												<input type="image" src="<?=$this->skin_url?>reply_regist.gif">
+												<div id="view_form" style="display:none;padding-top:5px;"><img src="<?=$this->skin_url?>view_form.gif" onclick="javascript:rankup_board.comment_reply_form('bottom', $('reply_bottom'));" style="cursor:pointer;"></div>
+											</td>
+										</tr>
+									</table>
+									</form>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+<? } ?>
+
+			</table>
+		</td>
+	</tr>
+	<!-- 댓글입력 -->
+	<tr>
+		<td height="0" style="overflow-y: hidden;" id="reply_bottom"></td>
+	</tr>
+<? } if($this->soption['use_near_article']=="on" && ($board_infos->pano>0 || $board_infos->nano>0)) { ?>
+	<tr>
+		<td>
+			<!-- 이전/다음글 -->
+			<table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0">
+				<tr><td bgcolor="#E5E5E5" colspan="2" height="1"></td></tr>
+				<tr><td height="5" colspan="2"></td></tr>
+<? if($board_infos->pano>0) { ?>
+				<tr>
+					<td width="60"><img align="absmiddle" src="<?=$this->skin_url?>icon_prev.gif"> <span class="reply_pn">이전글</span></td>
+					<td><?=$previous_article?></td>
+				</tr>
+<? } if($board_infos->nano>0) { ?>
+				<tr>
+					<td width="60"><img align="absmiddle" src="<?=$this->skin_url?>icon_next.gif"> <span class="reply_pn"> 다음글</span></td>
+					<td><?=$next_article?></td>
+				</tr>
+<? } ?>
+				<tr><td height="5" colspan="2"></td></tr>
+				<tr><td bgcolor="#E5E5E5" colspan="2" height="1"></td></tr>
+			</table>
+		</td>
+	</tr>
+<? } ?>
+<? if($this->soption['use_detail_list']=="on") { ?>
+	<tr>
+		<td>
+<? if($this->board_configs['style']=="gallery") { ?>
+			<style type="text/css">
+			#div_article_contents th {width:<?=$gallery_cell_width?>%;}
+			#article_board_category {display:<?=$board_category_view?>;}
+			</style>
+<? } ?>
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<thead id="div_article_column" align="center">
+<?php
+// 일반형, 일대일형
+if(in_array($this->board_configs['style'], array("normal", "mantoman"))) {
+?>
+				<tr align="center" height="31">
+					<td width="3"><img src="<?=$this->skin_url?>titlebar01.gif"></td>
+					<td class="board_title" width="50" background="<?=$this->skin_url?>title_bg.gif">번호</td>
+					<?=$article_column?>
+					<td class="board_title" background="<?=$this->skin_url?>title_bg.gif">제목</td>
+					<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">작성자</td>
+<? if($this->sfunction['use_vote']=="on") { ?>
+					<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">추천</td>
+<? if($this->sfunction['use_only_good']!="on") { ?>
+					<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">반대</td>
+<? }} ?>
+					<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">조회</td>
+					<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">등록일</td>
+					<td width="3"><img src="<?=$this->skin_url?>titlebar03.gif"></td>
+				</tr>
+				<tr><td height="1"></td></tr>
+<?php
+}
+// 웹진형
+if($this->board_configs['style']=="webzin") {
+?>
+				<tr height="31">
+					<td width="3"><img src="<?=$this->skin_url?>titlebar01.gif"></td>
+					<td class="board_title" width="50" background="<?=$this->skin_url?>title_bg.gif">번호</td>
+					<td class="board_title">
+						<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr height="31" align="center">
+							<td class="board_title" width="1%" background="<?=$this->skin_url?>title_bg.gif"><?=$article_column?></td>
+							<td class="board_title" background="<?=$this->skin_url?>title_bg.gif">제목</td>
+							<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">작성자</td>
+							<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">조회</td>
+							<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">등록일</td>
+						</tr>
+						</table>
+					</td>
+					<td width="3"><img src="<?=$this->skin_url?>titlebar03.gif"></td>
+				</tr>
+				<tr><td height="1"></td></tr>
+<? } ?>
+				</thead>
+				<tbody id="div_article_contents">
+				<?=$article_contents?>
+				</tbody>
+				</table>
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr><td height="1" bgcolor="#D3D3D3" width="100%"></td></tr>
+				<tr>
+					<td align="center"  class="paging" height="30">
+						<div id="paging">
+						<?=$paging_button?>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+<?
+}
+//게시판 하단 파일
+if($this->sfunction['sfooter_file'] && is_file($this->etc_file_dir.$this->sfunction['sfooter_file'])) {
+?>
+	<tr>
+		<td>
+			<?php
+			ob_start();
+			include_once $this->etc_file_dir.$this->sfunction['sfooter_file'];
+			echo ob_get_clean();
+			?>
+		</td>
+	</tr>
+<? } ?>
+</table>

@@ -1,0 +1,111 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+$is_demo=rankup_basic::is_demo();
+
+$rankup_control->print_admin_head();
+?>
+<body>
+<div class="bar"><script> titleBar("DB백업관리", 270) </script></div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="600" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td height="25">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td><div id="sub_title">DB 백업 리스트 </div></td>
+						<td align="right"><a onClick="$('help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--도움말-->
+			<tr id="help" style="display:none;">
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">백업은 파일백업이 아닌 <font color="red">디비백업(이미지제외)만 가능</font>합니다.</td>
+							</tr>
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">백업해서 생긴 파일명을 클릭하시면 내 컴퓨터에 다운받으실 수 있습니다.</td>
+							</tr>
+							<tr>
+								<td style="line-height:170%"><img src="../../Libs/_images/ic_arrow2.gif"><font color="red">내컴퓨터에 다운받으신 후 반드시 백업파일삭제 버튼을 눌러주세요.</font><br>&nbsp;&nbsp;서버에 백업파일이 남아있으면 보안상 문제가 될 수 있습니다.</td>
+							</tr>
+							<tr>
+								<td style="line-height:170%"><img src="../../Libs/_images/ic_arrow2.gif">백업을 받으시면 dump파일이 로컬pc로 다운됩니다. <br>&nbsp;&nbsp;dump압축파일을 풀지마시고  에디트플러스(editplus)에서 dump파일그대로 여시면 됩니다.</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<!--도움말-->
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+						<tr align="center">
+							<td class="gray_bg">백업 리스트</td>
+							<td class="gray_bg" width="80">삭제</td>
+						</tr>
+						<?php
+						$fileDir = @opendir('./backup_list');  //저장권한이 있는지 실질적으로 존재하는 디렉토리인지 검사
+
+						while(($filename = readdir($fileDir)) != false) {
+
+						  if ($filename != "." && $filename != "..") {
+						?>
+								<tr>
+						<?php if(!$is_demo) { ?>
+								<td>
+								  <a href="./download.php?file_Name=<?php echo $filename; ?>"> <?php echo $filename; ?> </a>
+								</td>
+								<td align=center>
+								  <a href="./del.php?file_Name=<?php echo $filename; ?>" onclick="return confirm('삭제 하시겠습니까?');">삭제</a>
+								</td>
+						<?php } else { ?>
+								<td>
+								  <a href="javascript:void(0)" onclick="alert('데모버전입니다.');"> <?php echo $filename; ?> </a>
+								</td>
+								<td align=center>
+								  <a href="javascript:void(0)" onclick="alert('데모버전입니다.');">삭제</a>
+								</td>
+						<?php } ?>
+								</tr>
+						<?php
+						  }
+
+						}
+						closedir($fileDir);
+						?>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td height="50" align="center">
+					<?
+					if($is_demo) {
+						echo "<a href='javascript:void(0)' onclick=alert('데모버전입니다.')><img src='./img/btn_backup_down.gif' border='0' alt='백업후 다운받기'></a>";
+					}
+					else {
+						echo "<a href='./backup_start.php'><img src='./img/btn_backup_down.gif' border='0' alt='백업후 다운받기'></a>";
+					}
+					?>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

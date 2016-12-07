@@ -1,0 +1,77 @@
+#uploader_frame {
+	position: absolute;
+	width: 350px;
+	border: 1px black solid;
+	background-color: white;
+	padding: 10px;
+	z-index: 2;
+}
+#uploader_frame dl.titlebar {
+	margin: 0;
+	height: 26px;
+	border: 1px transparent solid;
+}
+#uploader_frame dl.titlebar dt {
+	float: left;
+	font-size: 13px;
+	font-weight: bold;
+	font-family: Arial;
+	color: black;
+}
+#uploader_frame dl.titlebar dd {
+	float: right;
+	width: 10px;
+	padding: 0;
+}
+#uploader_frame div.item_wrap {
+	padding: 10px;
+	background-color: #f7f7f7;
+	border: 1px #dedede solid;
+}
+#uploader_frame dl.item {
+	clear: both;
+	border: 1px transparent solid;
+	margin: 0;
+	height: 23px;
+}
+#uploader_frame dl.item dt {
+	float: left;
+	width: 55px;
+	height: 23px;
+	background: url('../../Libs/_images/ic_dot1.gif') no-repeat 0 8px;
+	padding-left: 10px;
+	padding-top: 3px;
+	font-weight: bold;
+	border: 0px red solid;
+}
+#uploader_frame dl.item dd {
+	float: left;
+	height: 23px;
+	margin: 0;
+	padding: 0;
+	padding-top: 3px;
+	border: 0px red solid;
+}
+#uploader_frame div.preview {
+	width: 328px;
+	height: 250px;
+	overflow: auto;
+	padding: 10px;
+	text-align: center;
+	border: 1px #ccc solid;
+	background-color: #ededed;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+#uploader_frame #base_name {
+	font-weight: bold;
+	color: #3366cc;
+}
+.clear {
+	clear: both;
+}

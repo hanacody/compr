@@ -1,0 +1,162 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include_once './rankup_mailing.class.php';
+$mailing = new rankup_mailing;
+
+include_once 'top_menu.inc.php';
+
+if(!$_GET['sdate']) $_GET['sdate'] = date('Y-m-d');
+if(!$_GET['edate']) $_GET['edate'] = date('Y-m-d');
+
+?>
+
+<table width="770" cellpadding="0" cellspacing="0" align="center">
+<tr>
+	<td>
+		<form name="searchFrm" method="GET" action="<?=$_SERVER['PHP_SELF']?>">
+		<table width="100%" cellpadding="0" cellspacing="1" bgcolor="#dedede">
+		<tr bgcolor="#f7f7f7">
+			<td>
+				<table cellpadding="2" cellspacing="1" border="0" align="center">
+				<tr align="center">
+					<td><input type="checkbox" id="use_date" name="use_date"<? if($_GET['use_date']) echo ' checked' ?>></td>
+					<td>
+						<select name="sdate_kind">
+						<option value="send">발송일자</option>
+						</select>
+					</td>
+					<td>
+						<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+					</td>
+					<td width="409" id="period_search_option">
+						<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="white">
+				<table cellpadding="2" cellspacing="1" border="0" align="center">
+				<tr>
+					<td>
+						<select name="smode">
+						<option value="subject">이메일제목</option>
+						<option value="body"<? if($_GET['smode']=='body') echo ' selected' ?>>이메일내용</option>
+						</select>
+					</td>
+					<td>
+						<input type="text" name="skey" value="<? echo $_GET['skey'] ?>" class="simpleform" size="20" maxlength="30">
+					</td>
+					<td>
+						<input type="image" src="../../Libs/_images/btn_search.gif" align="absmiddle">
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+		</form>
+	</td>
+</tr>
+</table>
+
+<?php
+
+// 발송내역 로드
+list($totals, $contents) = $mailing->print_newsletter(array(
+	'entry' => array(
+		0 => '
+		<tr>
+			<td height="40" colspan="5" align="center"><span disabled>발송내역이 존재하지 않습니다.</span></td>
+		</tr>',
+		1 => '
+		<tr>
+			<td><input type="checkbox" name="no[]" value="{:no:}"></td>
+			<td align="left"><a href="javascript:void(0)" onClick="mailing_pop({:no:})">{:subject:}</a></td>
+			<td align="right">{:qty:} 건</td>
+			<td>{:send_time:}</td>
+			<td><a onClick="mailing.del(\'{:no:}\')"><img src="../../Libs/_images/btn_delete_s.gif" /></a></td>
+		</tr>'
+	),
+	'time_format' => 'Y.m.d H:i:s'
+), $limits=15);
+
+?>
+
+<table width="770" cellpadding="0" cellspacing="0" align="center" style="margin-top:30px">
+<tr>
+	<td><div id="sub_title">총 <b class="orange_b"><?=number_format($totals)?> 건</b> 의 발송내역이 검색되었습니다.</div></td>
+</tr>
+<tr>
+	<td>
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+		<col width="35" />
+		<col />
+		<col width="70" />
+		<col width="130" />
+		<col width="45" />
+		<tr class="gray_bg" align="center">
+			<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+			<td>이메일 제목</td>
+			<td>발송건수</td>
+			<td>발송일시</td>
+			<td>삭제</td>
+		</tr>
+		<tbody id="item_frame" align="center">
+		<?=$contents?>
+		</tbody>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td>
+		<div style="margin-top:8px">
+			<a onClick="checker.all()" id="checker_bottom"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" /></a>
+			<a onClick="mailing.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" /></a>
+		</div>
+		<div id="paging">
+			<?php
+			echo rankup_util::print_paging($totals, $limits);
+			?>
+		</div>
+	</td>
+</tr>
+</table>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+var mailing_pop = function(no) {
+	var mpop = window.open('./mailing_pop.html?no='+no, 'mailing_pop', 'width=700,height=500,scrollbars=1');
+	mpop.focus();
+}
+
+checker.initialize('item_frame', 'input[name="no[]"]');
+
+var mailing = {
+	del: function(no) {
+		var nos = (no==undefined) ? checker.get() : no;
+		if(nos.blank()) {
+			alert('삭제하실 발송내역을 선택하여 주십시오.');
+			return false;
+		}
+		if(!confirm('선택하신 발송내역을 삭제하시겠습니까?')) return false;
+		proc.parameters({mode: 'del_mailing', nos: nos});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				alert('삭제되었습니다.');
+				location.reload();
+			}
+		}, false);
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

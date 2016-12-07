@@ -1,0 +1,73 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+$is_demo = $rankup_control->is_demo();
+
+$admin_id = $rankup_admin->get_admin_id();
+$admin_pw = $rankup_admin->get_admin_passwd();
+
+$rankup_control->print_admin_head("관리자 비밀번호 변경");
+?>
+<body>
+
+<div class="bar"><script> titleBar("관리자 비밀번호변경", 270) </script></div>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0"> 
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="500" border="0" cellpadding="0" cellspacing="0"> 
+			 <form name=Form method=post action="<?= $base_url;?>rankup_module/rankup_admin/regist.php" onSubmit="return validate(this)">
+             <input type=hidden name=mode value=change_id>
+			<tr><td height="25"><div id="sub_title">현재 아이디/패스워드</div></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed;">
+						<tr>
+							<td width="110" height="38"  class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;아이디</td>
+							<td><?= $admin_id;?></td>
+							<td width="110" height="38"  class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;패스워드</td>
+							<td><?= $admin_pw;?></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="30"></td></tr>
+			<tr><td height="25"><div id="sub_title">변경하실 아이디/패스워드</div></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed;">
+						<tr>
+							<td width="110" height="38"  class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;아이디</td>
+							<td><input type=text name=id hname="아이디" required class=simpleform></td>
+						</tr>
+						<tr>
+							<td width="110" height="38"  class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;패스워드</td>
+							<td><input type=password name=passwd hname="패스워드" required class=simpleform></td>
+						</tr>
+						<tr>
+							<td width="110" height="38"  class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;패스워드 확인</td>
+							<td><input type=password name=passwd_re hname="패스워드확인" required class=simpleform></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td align="center" height="50">
+					 <?php
+					 if($is_demo){	//데모버젼일경우, 아이디 변경을 제한
+					 ?>
+                      <a href="#" onClick="javascript:alert('데모버전이므로 변경하실수가 없습니다.');"><img src='../../Libs/_images/btn_modify1.gif' border=0></a>
+					  <?php } else { ?>
+					   <input type=image src='../../Libs/_images/btn_modify1.gif'>
+					  <?php } ?>
+				</td>
+			</tr>
+			</form>
+		</table>
+	</td>
+</tr>
+</table>
+</body>
+</html>

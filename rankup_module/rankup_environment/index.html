@@ -1,0 +1,391 @@
+<?php
+include '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+$rankup_control->print_admin_head('기본환경설정');
+?>
+<body>
+<div class="bar"><script> titleBar("기본환경설정") </script></div>
+<script type="text/javascript" src="../rankup_builder/attachment.class.js"></script>
+
+<style type="text/css">
+#address_frame ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+#address_frame li {
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+div.preview {
+	width: auto;
+	width:600px;
+	height: 350px;
+	overflow: auto;
+	padding: 0;
+	border: 1px #cdcdcd solid;
+	background-color: #eee;
+}
+#nhn_map {
+	width: auto;
+	height: 350px;
+	border: 2px solid #00cc00;
+}
+</style>
+<script type="text/javascript">
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true; //
+	switch(el.value) {
+		case 'yes': mode = ['show', 'hide', 'hide']; break;
+		case 'no': mode = ['hide', 'hide', 'show']; break;
+	}
+	$w('map_frame map_help map_image_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+}
+</script>
+
+<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;text-align:left;margin-top:30px;">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+
+			<div id="sub_title">사이트 타이틀명 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 타이틀명</td>
+				<td>
+					<div style="float:left;width:90%;"><input type="text" name="subject" style="width:100%" required hname="타이틀명" value="<?=str_replace('"', '&quot;', $config_info['subject'])?>" class="simpleform"></div>
+					<div style="float:right;width:46px;"><a onClick="$('subject_help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></div>
+					<div id="subject_help" class="help_bg" style="display:none;clear:both;margin-top:2px">
+						<ul class="help_ul">
+							<li>사이트타이틀을 등록하시면 웹브라우저 상단에 출력됩니다.</li>
+							<li><img src="./img/help_img01.gif" class="help_img"></li>
+						</ul>
+					</div>
+				</td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">사이트명 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 사이트명</td>
+				<td>
+					<input type="text" name="site_name" style="width:100%" required hname="사이트명" value="<?=str_replace('"', '&quot;', $config_info['site_name'])?>" class="simpleform">
+					<div id="tip" style="margin:0;margin-top:8px;">* 사이트명은 메일발송시 발송자의 이름으로 출력되며 다용도로 사용됩니다.</div>
+				</td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">관리자이메일 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 관리자이메일</td>
+				<td><input type="text" name="email" style="width:100%" required hname="관리자 이메일" value="<?=$config_info['email']?>" class="simpleform"></td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">즐겨찾기 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 즐겨찾기명</td>
+				<td><input type="text" name="bookmark" style="width:100%" required hname="즐겨찾기명" value="<?=str_replace('"', '&quot;', $config_info['bookmark'])?>" class="simpleform"></td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">프레임셋 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 프레임셋</td>
+				<td>
+					<div style="float:left;width:90%;">
+						<input type="radio" name="frame_use" checked value="yes" id="frame_use_yes"><label for="frame_use_yes">사용함</label>
+						<input type="radio" name="frame_use"<? if($config_info['frame_use']=='no') echo ' checked' ?> value="no" id="frame_use_no"><label for="frame_use_no">사용안함</label>
+					</div>
+					<div style="float:right;width:46px;"><a onClick="$('frameset_help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></div>
+					<div id="frameset_help" class="help_bg" style="display:none;clear:both;margin-top:2px">
+						<ul class="help_ul">
+							<li>프레임셋 사용시 페이지를 이동하여도 주소창에 도메인주소만 보여지게 됩니다.</li>
+							<li>프레임셋 미사용시 페이지를 이동하면 주소창에 해당페이지의 주소가 보여지게 됩니다.</li>
+						</ul>
+					</div>
+				</td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">메타태그 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 메타태그입력</td>
+				<td>
+					<div style="float:left;width:90%;">
+						<textarea name="meta" style="width:100%;height:150px;margin-bottom:4px;padding:4px;" required hname="메타태그" class="simpleform"><?=$rankup_control->get_config_info("meta")?></textarea>
+					</div>
+					<div style="float:right;width:46px;"><a onClick="$('meta_help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a></div>
+					<div id="meta_help" class="help_bg" style="display:none;clear:both;margin-top:2px;">
+						<ul class="help_ul">
+							<li>홈페이지 검색엔진에서 검색을 할 때 특정한 단어를 치면 나오도록 키워드를 지정해두는것입니다.</li>
+							<li>인터넷 사이트상에서 눈에 보이지는 않지만 메타태그를 잘선정하여 넣어주시면 검색시에 더 많은 노출을 시키는 효과가 있습니다.</li>
+						</ul>
+					</div>
+				</td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+<?php
+/**
+ * 약도 설정
+ */
+$ms_rows = $rankup_control->get_config_info('map_settings');
+$ns_rows = $rankup_control->get_config_info('navermap_settings');
+
+$domain = parse_url($config_info['domain']);
+$map_url = str_replace('www.', '', $domain['host']).$domain['path'];
+$map_key = $rankup_control->get_mapkey();
+?>
+
+			<div id="sub_title">지도API / 약도 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 네이버지도 API</td>
+				<td height="40">
+					<div style="position:relative">
+						<a onclick="rankup_mapkey.open()" onFocus="blur()"><img src="../../Libs/_images/btn_mapkey.gif" align="absmiddle" alt="지도키관리"></a>
+						<span id="tip" style="clear:both;margin:0;margin-top:5px">+ 지도키를 등록해야만 네이버 지도 API 를 사용할 수 있습니다.</span>
+						<div style="position:absolute;top:0;right:7px;width:46px;"><a onClick="$('map_help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle" /></a></div>
+					</div>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 주소 설정</td>
+				<td id="address_frame">
+					<ul>
+						<li><input type="text" id="zipcode" name="zipcode" required hname="우편번호" value="<?=$ms_rows['zipcode']?>" size="10" maxlength="10" class="simpleform" /></li>
+						<li style="margin-left:5px"><a onClick="rankup_post.open_post('zipcode_frame', 'post_spot', 'nmap.get_geocode(undefined, true)')"><img src="../rankup_member/img/btn_post.gif" align="absmiddle" vspace="2" alt="우편번호찾기" /></a></li>
+						<li style="margin-left:5px" id="post_spot"></li>
+					</ul>
+					<div style="clear:both;padding-top:2px"><input type="text" id="addrs1" name="addrs1" required hname="주소" value="<?=$ms_rows['addrs1']?>" size="62" maxlength="100" class="simpleform"></div>
+					<div style="margin-top:4px"><input type="text" id="addrs2" name="addrs2" onChange="nmap.get_geocode()" hname="나머지주소" value="<?=$ms_rows['addrs2']?>" size="40" maxlength="100" class="simpleform"><span id="tip">+ 나머지주소</span></div>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> 약도 설정</td>
+				<td>
+					<div style="margin-bottom:6px">
+						<input type="radio" name="use_nhn_map" checked value="yes" id="use_nhn_map_yes" onClick="change_frame(this)"><label for="use_nhn_map_yes">지도API사용</label>
+						<input type="radio" name="use_nhn_map"<? if($ms_rows['use_nhn_map']=='no') echo ' checked' ?> value="no" id="use_nhn_map_no" onClick="change_frame(this)"><label for="use_nhn_map_no">파일업로드</label>
+					</div>
+
+					<!-- 네이버지도 2.0 -->
+					<script type="text/javascript" src="http://openapi.map.naver.com/openapi/naverMap.naver?ver=2.0&key=<?=$map_key?>"></script>
+					<script type="text/javascript" src="../rankup_post/nhn_map2.js"></script>
+					<div id="map_frame" align="right">
+						<div id="nhn_map"><img src="http://static.naver.com/maps2/icons/pin_spot2.png"></div>
+						<div style="text-align:right;margin-top:1px"><a href="http://dev.naver.com/openapi" target="_blank"><img src="http://openapi.naver.com/logo/logo07_1.gif" alt="NAVER OpenAPI" /></a></div>
+						<input type="hidden" id="mapx" name="mapx" value="<?=$ms_rows['mapx']?>" />
+						<input type="hidden" id="mapy" name="mapy" value="<?=$ms_rows['mapy']?>" />
+					</div>
+					<!-- 네이버지도 2.0 -->
+
+					<div id="map_help" class="help_bg" style="display:none;clear:both;margin-top:5px;">
+						<div><img src="./img/detail_map_capture.jpg" class="help_img" align="absmiddle" /></div>
+						<div style="line-height:1.7em;">
+							지도API는 웹사이트에 지도를 표시할 수 있도록 네이버에서 제공하는 무료서비스입니다.<br />
+							네이버지도를 활용한 기능들을 사용하시려면 네이버에서 지도키값을 발급받아 솔루션 관리자에 등록해 주셔야 합니다. 다음의 안내1)을 참고하시면서 설정하시기 바랍니다.<br /><br />
+
+							<font color="#ff6600"><b>안내1)</b></font><span id="tip">+ 실제서비스 페이지와 안내사항이 다를 수도 있습니다.</span>
+							<div style="border:2px orange solid;padding:10px;background-color:#F9EBE6;line-height:2.0em;">
+								<b>1</b>. 네이버 홈페이지에 로그인한 후 <a href="http://dev.naver.com/openapi/register" target="_blank"><img src="../../Libs/_images/btn_naverkey.gif" border="0" align="absmiddle" alt="네이버키값 발급받기" /></a> 버튼 클릭하여 열리는 페이지에서<br /> &nbsp; &nbsp; <b>지도API</b> 항목 우측의 <font color="#0099FF"><b>키 추가</b></font> 버튼을 클릭하여 지도키 발급페이지로 이동합니다.<br />
+								<b>2</b>. 다음으로 <b>사용환경</b>을 <font color="#0099FF"><b>웹</b></font> 으로 선택하고 <b>URL</b> 입력란에 다음과 같이 입력합니다.<br />
+								&nbsp; &nbsp; <b>URL</b> : <font color="#0099FF"><b><? echo $map_url ?></b></font><br />
+								<b>3</b>. 다음으로 <b>이용약관</b>에 동의 후 <b style="color:#ff6600">키 발급</b> 버튼을 클릭하여 지도키를 발급 받습니다.<br />
+								<b>4</b>. 발급받은 키값을 복사하여 <a onclick="rankup_mapkey.open_mapkey_manager()" onFocus="blur()"><img src="../../Libs/_images/btn_mapkey_manager.gif" align="absmiddle"></a><span id="tip" style="margin:0px">◀Click</span> 툴에 추가합니다.<br />
+								<div style="color:red;margin-top:8px"><b>[주의]</b> 지도key는 도메인 마다 한개씩만 설정하셔야 합니다.</div>
+							</div>
+							<br />
+
+							<font color="#ff6600"><b>안내2)</b></font><br />
+							네이버지도 API의 경우 <b><u>일일 100,000 페이지</u></b> 요청까지 지원하고 있으며 초과시 서비스가 중단될 수도 있습니다. 일일 제한량을 초과하는 활용을 위해서는 <a href="http://dev.naver.com/openapi/cooperation" target="_blank"><b style="color:#0099FF">네이버 오픈API 제휴</b></a> 페이지를 통해 제휴신청을 하시기 바랍니다.<br /><br />
+
+							<font color="#ff6600"><b>안내3)</b></font><br />
+							네이버에서 지도 API의 서비스환경을 변경할 경우 지도 이용에 불편이 생길 수 있습니다.<br />
+							네이버지도 이용에 문제가 발생했을 경우 랭크업 기술지원센터에 문의해주세요.
+						</div>
+					</div>
+
+					<div id="map_image_frame" style="display:none">
+						<?php
+						include_once '../rankup_builder/attachment.class.php';
+						$attach = new attachment('map');
+						?>
+						<span><input type="file" name="_attach_" onChange="map_attach.post(this, 'attach', '../rankup_builder/proc.ajax.php')" /></span>
+						<span id="tip">+ 약도 파일을 등록하세요. ( swf, jpg, gif, png ) ( 제한크기 : <b style="letter-spacing:0"><?=$attach->configs['limit_size']?></b> )</span>
+						<div id="map_attach_preview" class="preview" style="margin-top: 5px;">
+							<?php
+							if($ms_rows['map_attach']) {
+								echo $attach->preview($ms_rows['map_attach'], array(
+									'image' => '<img src="{:folder:}{:name:}" align="absmiddle" />',
+									'flash' => '<embed src="{:folder:}{:name:}" width="{:width:}" height="{:height:}"></embed>'
+								));
+							}
+							?>
+						</div>
+						<input type="hidden" id="on_map_attach" name="on_map_attach" />
+						<input type="hidden" face="attach" name="mode" value="post_attach" disabled />
+						<input type="hidden" face="attach" name="kind" value="map" disabled />
+						<input type="hidden" face="attach" name="handler" value="map_attach.draw" disabled />
+					</div>
+
+				</td>
+			</tr>
+			</table>
+
+		</form>
+	</div>
+	<div style="text-align:center;margin-top:10px">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script style="text/javascript">
+	// 네이버 지도 초기화
+	nmap.initialize('nhn_map', '<?=$map_key?>');
+	</script>
+
+	<script style="text/javascript">
+	change_frame($('use_nhn_map_<?=$ms_rows['use_nhn_map']?>'));
+
+	// 약도파일 정의
+	var map_attach = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_map_attach').value = name;
+				var html = '';
+				if(type.match(/image\//i)) html = '<img src="'+ domain + folder + name +'" align="absmiddle" />';
+				else if(type.match(/flash/i)) html = '<embed src="'+ domain + folder + name +'" width="'+ width +'" height="'+ height +'"></embed>';
+				$('map_attach_preview').update(html);
+			}
+		}
+	}
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_siteconfig', kind: 'siteconfig'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			$('on_map_attach').value = '';
+			alert('저장되었습니다.');
+		}
+	}
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript" src="rankup_mapkey.js"></script>
+<style type="text/css"> @import url('./rankup_mapkey.css'); </style>
+
+<table id="mapkey_frame" style="position:absolute;left:0;z-index:10;display:none" width="100%" cellpadding="5" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:500px;border:#000 1px solid;padding:10px;text-align:left;background-color:white">
+			<div id="sub_title">네이버 지도키 관리</div>
+			<table width="100%" cellpadding="5" cellspacing="1" border="0" bgcolor="#dedede" style="margin-top:4px">
+			<tbody bgcolor="white">
+			<tr>
+				<td>
+					<form id="mapkey_form" name="mapkey_form" onSubmit="return false">
+						<input type="hidden" id="url" name="url" /><!수정Key>
+						<table width="100%" cellpadding="1" cellspacing="0">
+						<tr>
+							<td width="70"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> <b>URL</b></td>
+							<td><input type="text" name="mapurl" required hname="URL" value="<? echo $map_url ?>" tabindex="1" class="simpleform" style="width:100%" maxlength="40"></td>
+							<td width="65" rowspan="2" align="right" valign="bottom"><a onClick="rankup_mapkey.save()"><img src="../../Libs/_images/btn_mapkey_save.gif" tabindex="3"></a></td>
+						</tr>
+						<tr>
+							<td><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle" /> <b>지도키</b></td>
+							<td><input type="text" name="mapkey" required hname="지도키" tabindex="2" class="simpleform" style="width:100%" maxlength="40"></td>
+						</tr>
+						</table>
+					</form>
+				</td>
+			</tr>
+			<tr height="200">
+				<td style="padding:0" valign="top">
+					<ul id="mapkey_items">
+						<?php
+						if(is_array($ns_rows['map_keys'])) {
+							foreach($ns_rows['map_keys'] as $mapurl=>$mapkey) {
+								echo sprintf('<li class="attachNormalItem"><div>URL : %s</div><div>지도키 : %s</div></li>', $mapurl, $mapkey);
+							}
+						}
+						?>
+					</ul>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td>
+							<img src="../../Libs/_images/btn_select_delete.gif" style="cursor:pointer;" onClick="rankup_mapkey.del()" align="absmiddle">
+						</td>
+						<td align="right" width="250">
+							<a href="http://dev.naver.com/openapi/register" target="_blank"><img src="../../Libs/_images/btn_naverkey.gif" border="0" align="absmiddle" alt="네이버키값 발급받기"></a>
+							<img src="../../Libs/_images/btn_close.gif" style="cursor:pointer;" onClick="rankup_mapkey.close()" align="absmiddle">
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</td>
+</tr>
+</table>
+<script type="text/javascript"> rankup_mapkey.initialize('mapkey_frame', 'mapkey_items') </script>
+<!-- 지도키 관리 -->
+
+<?php
+// 우편번호 검색 폼 로드
+include_once $base_dir.'rankup_module/rankup_post/rankup_post.inc.html';
+?>
+
+</body>
+</html>

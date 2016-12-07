@@ -1,0 +1,33 @@
+<?php
+/**
+ * 접속통계
+ */
+
+switch(basename($_SERVER['PHP_SELF'])) {
+	case 'rankuplog_main.html': $_key = 0; break;
+	case 'rankuplog_time.html': $_key = 1; break;
+	case 'rankuplog_week.html': $_key = 2; break;
+	case 'rankuplog_date.html': $_key = 3; break;
+	case 'rankuplog_month.html': $_key = 4; break;
+	case 'rankuplog_domain.html': case 'rankuplog_domain_detail.html': $_key = 5; break;
+	case 'rankuplog_ip.html': case 'rankuplog_ip_detail.html': $_key = 6; break;
+}
+$_sub_style[$_key] = ' style="font-weight:bold"';
+$_title_texts = array('', ' - 시간별', ' - 요일별', ' - 일별',' - 월별',' - 접속전도메인',' - 접속전아이피');
+
+$rankup_control->print_admin_head('접속통계'.$_title_texts[$_key]);
+?>
+<body>
+	<div class="bar"><script> titleBar('접속통계<?=$_title_texts[$_key]?>') </script></div>
+	<div id="topmenu" style="margin-bottom:30px">
+		<ul>
+		<li><a href="rankuplog_main.html" class="sub_menu" <?=$_sub_style[0]?> >접속통계홈</a></li>
+		<li><a href="rankuplog_time.html" class="sub_menu" <?=$_sub_style[1]?>>시간별</a></li>
+		<li><a href="rankuplog_week.html" class="sub_menu" <?=$_sub_style[2]?>>요일별</a></li>
+		<li><a href="rankuplog_date.html" class="sub_menu" <?=$_sub_style[3]?>>일별</a></li>
+		<li><a href="rankuplog_month.html" class="sub_menu" <?=$_sub_style[4]?>>월별</a></li>
+		<li><a href="rankuplog_domain.html" class="sub_menu" <?=$_sub_style[5]?>>접속전도메인</a></li>
+		<li><a href="rankuplog_ip.html" class="sub_menu" <?=$_sub_style[6]?>>접속전아이피</a></li>
+		<li><a href="regist.php?mode=org" onclick="return confirm('모든 로그데이터가 삭제됩니다. 초기화 하시겠습니까?')" class="sub_menu">로그데이터 초기화</a></li>
+		</ul>
+	</div>

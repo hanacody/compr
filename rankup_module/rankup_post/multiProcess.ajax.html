@@ -1,0 +1,28 @@
+<?PHP
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "../../Libs/_php/rankup_post.class.php";
+
+$rankup_post = new rankup_post;
+$rankup_control->change_encoding($_GET, "IN");
+ini_set("memory_limit", "80M"); // 메모리 제한을 여유 있게 설정
+
+switch($_GET['mode']) {
+	// 지도API 검색
+	case "search_map":
+		$message = $rankup_post->get_geocode($_GET, $rankup_work->get_api_key('naver_map'));
+		break;
+
+	// 우편번호 검색
+	case "search_post":
+		$message = $rankup_post->get_zipcode($_GET, !isset($_GET['off_map']) && $rankup_work->is_usable_api('naver_map'));
+		break;
+}
+
+
+$rankup_control->change_encoding($message, "OUT");
+$result = !empty($message) ? "success" : "failure";
+
+header("Content-type: text/xml; charset=utf-8");
+echo "<?xml version='1.0' encoding='utf-8'?>\n";
+echo "<resultData result='$result'>$message</resultData>";
+?>

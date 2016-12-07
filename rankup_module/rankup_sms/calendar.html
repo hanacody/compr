@@ -1,0 +1,202 @@
+<script language="JScript"> 
+this.title="달력"; 
+//var gdCtrl = new Object(); 
+var gcGray = "#BCBCBC"; 
+var gcToggle = "#f7f7f7"; 
+var gcBG = "#ffffff"; 
+
+var now = new Date(); 
+
+var giYear = now.getYear(); 
+var giMonth = now.getMonth()+1; 
+var giDay = now.getDate(); 
+
+
+
+function onstart() { 
+    fSetYearMon(giYear, giMonth); 
+} 
+
+function fSetDate(iYear, iMonth, iDay){ 
+  iMonth = gn_lpad(iMonth,0,2); 
+  iDay = gn_lpad(iDay,0,2); 
+  
+  window.returnValue=iYear+"-"+iMonth+"-"+iDay; 
+  window.close(); 
+} 
+
+function gn_lpad(Rstring,pad_str,base_len){ 
+     var Rstring = Rstring.toString(); 
+     var str_len = Rstring.length; 
+     
+    for(  var i=str_len ; i<= base_len; i++){ 
+     
+          if (str_len != base_len)  { 
+        Rstring = pad_str + Rstring; 
+                    str_len = Rstring.length; 
+     
+          } 
+    } 
+     
+    return Rstring; 
+} 
+
+function fSetSelected(aCell){ 
+  var iOffset = 0; 
+  var iYear = parseInt(tbSelYear.value); 
+  var iMonth = parseInt(tbSelMonth.value); 
+
+  aCell.bgColor = gcBG; 
+  with (aCell.children["cellText"]){ 
+          var iDay = parseInt(innerText); 
+        if (color==gcGray){ 
+        return; 
+        //iOffset = (Victor<10)?-1:1; 
+        
+        //iMonth += iOffset; 
+        } 
+        
+        if (iMonth<1) { 
+            iYear--; 
+            iMonth = 12; 
+        }else if (iMonth>12){ 
+                iYear++; 
+                iMonth = 1; 
+        } 
+  } 
+  fSetDate(iYear, iMonth, iDay); 
+} 
+
+
+//날짜 format 만들기 
+function fBuildCal(iYear, iMonth) { 
+  var aMonth=new Array(); 
+  for(i=1;i<7;i++) 
+          aMonth[i]=new Array(i); 
+
+  var dCalDate=new Date(iYear, iMonth-1, 1); 
+  var iDayOfFirst=dCalDate.getDay(); 
+  var iDaysInMonth=new Date(iYear, iMonth, 0).getDate(); 
+  var iOffsetLast=new Date(iYear, iMonth-1, 0).getDate()-iDayOfFirst+1; 
+  var iDate = 1; 
+  var iNext = 1; 
+
+  for (d = 0; d < 7; d++) 
+        aMonth[1][d] = (d<iDayOfFirst)?-(iOffsetLast+d):iDate++; 
+  for (w = 2; w < 7; w++) 
+          for (d = 0; d < 7; d++) 
+                aMonth[w][d] = (iDate<=iDaysInMonth)?iDate++:-(iNext++); 
+  return aMonth; 
+} 
+
+
+// 달력 Drawing 
+function fDrawCal(iYear, iMonth, iCellWidth, iDateTextSize) { 
+  var WeekDay = new Array("일","월","화","수","목","금","토"); 
+  var styleTD = " bgcolor='"+gcBG+"' width='"+iCellWidth+"' bordercolor='"+gcBG+"' valign='middle' align='center' style='font:bold font-size:8pt font-family:Tahoma "+iDateTextSize+" Courier;";          
+
+  with (document) { 
+        write("<tr>"); 
+        for(i=0; i<7; i++) 
+                write("<td font color:#888888 bgcolor=eeeeee align=center>" + WeekDay[i] + "</td>"); 
+        write("</tr>"); 
+
+          for (w = 1; w < 7; w++) { 
+                write("<tr>"); 
+                for (d = 0; d < 7; d++) { 
+                        write("<td id=calCell "+styleTD+"cursor:hand;' onMouseOver='this.bgColor=gcToggle' onMouseOut='this.bgColor=gcBG' onclick='fSetSelected(this)'>"); 
+                        write("<font id=cellText> </font>"); 
+                        write("</td>") 
+                } 
+                write("</tr>"); 
+        } 
+  } 
+} 
+
+// 날짜 setting 
+function fUpdateCal(iYear, iMonth) { 
+  myMonth = fBuildCal(iYear, iMonth); 
+  var i = 0; 
+  for (w = 0; w < 6; w++) 
+        for (d = 0; d < 7; d++) 
+                with (cellText[(7*w)+d]) { 
+                        Victor = i++; 
+                        if (myMonth[w+1][d]<0) { 
+                                color = gcGray; 
+                                innerText = -myMonth[w+1][d]; 
+                        }else{ 
+                                color = ((d==0)||(d==6))?"ff6600":"black"; 
+                                innerText = myMonth[w+1][d]; 
+                        } 
+                } 
+} 
+
+// 년,월 select  setting 
+function fSetYearMon(iYear, iMon){ 
+  tbSelMonth.options[iMon-1].selected = true; 
+  for (i = 0; i < tbSelYear.length; i++) 
+        if (tbSelYear.options[i].value == iYear) 
+                tbSelYear.options[i].selected = true; 
+  fUpdateCal(iYear, iMon); 
+} 
+
+function fPrevMonth(){ 
+  var iMon = tbSelMonth.value; 
+  var iYear = tbSelYear.value; 
+
+  if (--iMon<1) { 
+          iMon = 12; 
+          iYear--; 
+  } 
+
+  fSetYearMon(iYear, iMon); 
+} 
+
+function fNextMonth(){ 
+  var iMon = tbSelMonth.value; 
+  var iYear = tbSelYear.value; 
+
+  if (++iMon>12) { 
+          iMon = 1; 
+          iYear++; 
+  } 
+
+  fSetYearMon(iYear, iMon); 
+} 
+
+
+var gMonths = new Array("1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"); 
+
+with(document){ 
+write("<html>"); 
+write("<head>"); 
+write("<title>날짜 선택</title>"); 
+write("</head><style>BODY,TD,SELECT,DIV,TEXTAREA,center {color:696969;font-size:8pt;font-family:돋움,Tahoma;}</style>"); 
+write("<body onload='onstart()' topmargin=0 leftmargin=0>"); 
+write("<table id='popTable' border='0' bgcolor='#ffffff' cellpadding='0' cellspacing=0 align=center width=100%>"); 
+write("<TR style='font-size:9pt'>"); 
+write("<td valign='middle' align='center' height=30><input type='image' src='./img/date_icon_before.gif'  align=absmiddle name='PrevMonth' value='<' onClick='fPrevMonth()'>"); 
+
+write(" <SELECT name='tbSelYear' style='font-size:9pt' onChange='fUpdateCal(tbSelYear.value, tbSelMonth.value)' Victor='Won'>"); 
+for(i= now.getYear();i>=1995;i--) 
+        write("<OPTION value='"+i+"'>"+i+"년</OPTION>"); 
+write("</SELECT>"); 
+write(" <select name='tbSelMonth' style='font-size:9pt' onChange='fUpdateCal(tbSelYear.value, tbSelMonth.value)' Victor='Won'>"); 
+for (i=0; i<12; i++) 
+        write("<option value='"+(i+1)+"'>"+gMonths[i]+"</option>"); 
+write("</SELECT>"); 
+write(" <input type='image' src='./img/date_icon_next.gif' name='PrevMonth' align=absmiddle  value='' onclick='fNextMonth()'>"); 
+write("</td>"); 
+write("</TR><tr><td height='5'></td></tr>"); 
+write("<td align='center'>"); 
+write("<DIV style='background-color:#ffffff;'><table width='93%' border='0' align=center cellspacing='1' cellpadding='3' bgcolor='dddddd'>"); 
+fDrawCal(giYear, giMonth, 20, 12); 
+write("</table></DIV>"); 
+write("</td>"); 
+write("</TR>"); 
+write("</TD></TR>"); 
+write("</TABLE>"); 
+write("</body>"); 
+write("</html>"); 
+} 
+</script> 

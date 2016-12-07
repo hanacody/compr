@@ -1,0 +1,238 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'top_menu.inc.php';
+
+include_once '../rankup_authentic/rankup_authentic.class.php';
+$auth = new rankup_authentic('join');
+?>
+
+<center>
+<div class="content_wrap">
+
+	<form id="save_form" name="save_form" method="POST" onSubmit="return false">
+
+	<table width="750" cellpadding="0" cellspacing="0">
+	<tr>
+		<td>
+			<div style="float:right"><a onclick="$('help1').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle"></a></div>
+			<div id="sub_title">회원제 설정</div>
+			<div id="help1" class="help_bg" style="display:none;margin-bottom:5px">
+				<ul class="help_ul">
+					<li>회원제를 사용할 경우 회원가입항목이 활성화 되며 각 모듈별로 회원등급제를 운영하실 수 있습니다.</li>
+					<li>반대로 미사용시 모듈별 회원등급별 제안 항목들이 모두 적용되지 않습니다.</li>
+					<li style="margin-top:10px">가입자 유형에 따라 회원가입신청서의 입력 형태가 변경될 수 있습니다.</li>
+					<li>가입자 연령제한 설정으로 사이트 운영 목적에 맞게 가입자의 연령을 제한 할 수 있습니다.</li>
+					<li>기본인증, 실명인증, 아이핀(I-Pin)인증을 통해 회원관리의 효율성을 높일 수 있습니다.</li>
+					<li style="margin-top:10px">가입자 연령제한 설정에 따라 실명인증 모듈이 알맞게 반응(실명인증 또는 성인인증)합니다.</li>
+					<li>해외외국인회원이 가입할 경우 가입인증 설정은 '기본인증' 모듈만 반응합니다.</li>
+					<li>가입자 유형 설정시 '만14세미만회원' 에 체크하더라도 가입자 연령제한이 '만14세이상' 인 경우에는 무시됩니다.</li>
+				</ul>
+			</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<tr>
+				<td width="120" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;회원제 사용여부</td>
+				<td>
+					<input type="radio" name="membership_use" checked value="yes" id="membership_use_yes"><label for="membership_use_yes">사용</label>
+					<input type="radio" name="membership_use"<? if($config_info['membership_use']=='no') echo ' checked' ?> value="no" id="membership_use_no"><label for="membership_use_no">미사용</label>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;가입자 연령 제한</td>
+				<td>
+					<input type="radio" name="membership_age" checked value="nolimit" id="membership_age_nolimit"><label for="membership_age_nolimit">연령제한 없음</label>
+					<input type="radio" name="membership_age"<? if($config_info['membership_age']=='14over') echo ' checked' ?> value="14over" id="membership_age_14over"><label for="membership_age_14over">만14세 이상</label>
+					<input type="radio" name="membership_age"<? if($config_info['membership_age']=='19over') echo ' checked' ?> value="19over" id="membership_age_19over"><label for="membership_age_19over">만19세 이상<span class="tip">(성인)</span></label>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;가입자 유형 설정</td>
+				<td>
+					<?php
+					foreach($rankup_member->member_types as $type=>$text) {
+						$checked = (strpos($config_info['membership_types'], $type)!==false) ? ' checked' : '';
+						$type_text = str_replace(array(' ', '(', ')'), array('', '<span class="tip">(', ')</span>'), $text);
+						echo sprintf(' <input type="checkbox" name="membership_types[]"%s value="%s" id="membership_kind_%s"><label for="membership_kind_%s">%s</label>', $checked, $type, $type, $type, $type_text);
+					}
+					?>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;가입 인증 설정</td>
+				<td>
+					<input type="hidden" name="pin_kind" value="join" />
+					<input type="checkbox" name="use_basic" checked value="yes" onClick="this.checked=true" id="use_basic"><label for="use_basic">기본인증<span class="tip">(생일+성별)</span></label>
+					<input type="checkbox" name="use_jumin"<? if($auth->pin_settings['use_jumin']=='yes') echo ' checked' ?> value="yes" id="use_jumin"><label for="use_jumin">실명인증</label>
+					<input type="checkbox" name="use_ipin"<? if($auth->pin_settings['use_ipin']=='yes') echo ' checked' ?> value="yes" id="use_ipin"><label for="use_ipin">아이핀(I-Pin) 인증</label>
+					<span id="tip">+ 사용하실 실명인증 모듈을 선택하십시오.</span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr><td height="30"></td></tr>
+	<tr>
+		<td>
+			<div style="float:right"><a onclick="$('help3').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle"></a></div>
+			<div id="sub_title">회원가입 항목 설정</div>
+			<div id="help3" class="help_bg" style="display:none;margin-bottom:5px">
+				<ul class="help_ul">
+					<li>필수사항이 체크되어있는 항목은 가입시 필수 입력값으로 적용됩니다.</li>
+				</ul>
+			</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<col width="120" />
+			<col width="108" />
+			<col width="108" />
+			<col width="120" />
+			<col width="108" />
+			<col />
+			<tr class="gray_bg" align="center">
+				<td>항목</td>
+				<td>사용</td>
+				<td>필수</td>
+				<td>항목</td>
+				<td>사용</td>
+				<td>필수</td>
+			</tr>
+			<tbody align="center">
+			<?php
+			$rc_rows = $rankup_member->queryFetch("select value from rankup_configs where item='member_form_options'");
+			if($rc_rows['value']) $rc_rows['value'] = unserialize($rc_rows['value']);
+			echo $rankup_member->print_form_options(array(
+				'times' => 2,
+				'values' => $rc_rows['value'],
+				'entry_wrap' => array('<tr>', '</tr>'),
+				'entry' => array(
+					0 => '<td class="gray_bg"></td><td></td><td></td>',
+					1 => array(
+						'<td class="gray_bg" align="left"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;{:name:}</td>',
+						'<td><input type="checkbox" name="use_{:key:}"{:on_used:}></td>',
+						'<td><input type="checkbox" name="req_{:key:}"{:on_required:}></td>'
+					)
+				),
+				'on_used' => ' checked',
+				'on_required' => ' checked',
+				'on_vsms' => '<td><a href="./member_vsms_log.html" class="tip2"><b>[전송내역관리]</b></a></td>'
+			));
+			?>
+			</tbody>
+			</table>
+		</td>
+	</tr>
+	<tr><td height="30"></td></tr>
+	<tr>
+		<td>
+			<?php
+			// 회원등급
+			$smlevels = $config_info['smlevel'];
+			?>
+			<div style="float:right"><a onclick="$('help4').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle"></a></div>
+			<div id="sub_title">회원 등급 설정 <span id="tip" style="letter-spacing:0;font-weight:normal">+ <b class="orange_b">1레벨</b>이 <b>최고등급</b>이며, <b class="orange_b">7레벨</b>이 <b>최하등급</b>입니다.</span></div>
+			<div id="help4" class="help_bg" style="display:none;margin-bottom:5px">
+				<ul class="help_ul">
+					<li>총 <?=$rankup_member->lowest_level-1?>등급까지 설정이 가능하며, 7등급은 비회원으로 수정하실 수 없습니다.</li>
+					<li>회원 등급은 초기설정 이후 변경하지 않는 것을 권장합니다.</li>
+				</ul>
+			</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<col width="120" />
+			<col />
+			<tr class="gray_bg" align="center">
+				<td>등급</td>
+				<td>등급명</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.1</td>
+				<td>
+					<input type="text" name="level1" required hname="회원등급 Lv.1 의 별칭" value="<?=$smlevels['1']?>" class="simpleform" size="17" maxlength="10">
+					<span id="tip">+ 관리자페이지 로그인시와 동일한 모든권한 부여　* 가장 높은 등급 </span>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.2</td>
+				<td><input type="text" name="level2" required hname="회원등급 Lv.2 의 별칭" value="<?=$smlevels['2']?>" class="simpleform" size="17" maxlength="10"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.3</td>
+				<td><input type="text" name="level3" required hname="회원등급 Lv.3 의 별칭" value="<?=$smlevels['3']?>" class="simpleform" size="17" maxlength="10"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.4</td>
+				<td><input type="text" name="level4" required hname="회원등급 Lv.4 의 별칭" value="<?=$smlevels['4']?>" class="simpleform" size="17" maxlength="10"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.5</td>
+				<td><input type="text" name="level5" required hname="회원등급 Lv.5 의 별칭" value="<?=$smlevels['5']?>" class="simpleform" size="17" maxlength="10"></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.6</td>
+				<td><input type="text" name="level6" required hname="회원등급 Lv.6 의 별칭" value="<?=$smlevels['6']?>" class="simpleform" size="17" maxlength="10">
+				<span id="tip">+ 초기회원가입시 자동으로 설정되는 등급입니다.</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;Lv.7</td>
+				<td>
+					<input type="text" name="level7" required hname="회원등급 Lv.7 의 별칭" value="비회원" readOnly class="simpleform" size="17" maxlength="10" style="border:0;background-color:white">
+					<span id="tip">+ 비회원 및 로그인을 하지 않은 상태이며 수정할 수 없습니다.　* 가장 낮은 등급 </span>
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	<tr><td height="30"></td></tr>
+	<tr>
+		<td>
+			<div style="float:right"><a onclick="$('help5').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle"></a></div>
+			<div id="sub_title">비밀번호변경 설정</div>
+			<div id="help5" class="help_bg" style="display:none;margin-bottom:5px">
+				<ul class="help_ul">
+					<li>비밀번호를 변경한지 O개월 지난 경우 회원로그인시 비밀번호 변경안내 페이지를 띄웁니다.</li>
+				</ul>
+			</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+			<tr>
+				<td width="120" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;사용여부</td>
+				<td>
+					<input type="radio" name="change_pwd_use" checked value="yes" id="change_pwd_use_yes"><label for="change_pwd_use_yes">사용함</label>
+					<input type="radio" name="change_pwd_use"<? if($config_info['change_pwd_use']=='no') echo ' checked' ?> value="no" id="change_pwd_use_no"><label for="change_pwd_use_no">사용안함</label>
+				</td>
+			</tr>
+			<tr>
+				<td width="100" height="38" class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;변경기간</td>
+				<td>
+					<input type=text name="change_pwd_terms" required hname="비밀번호 변경 기간" option="number" value="<?=$config_info['change_pwd_terms']?>" maxlength="2" style="width:30px" class='simpleform'> 개월
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>
+	</table>
+
+	</form>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<script type="text/javascript">
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_member'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			alert('저장되었습니다.');
+		}
+	}
+	</script>
+
+</div>
+</center>
+<br>
+<br>
+
+</body>
+</html>

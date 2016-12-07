@@ -1,0 +1,234 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+// 총 접속자 수
+$total_sum = $rankup_control->queryR("select sum(num) from rankuplog_total");
+
+// 1주일간 접속자 수
+foreach(range(0,6) as $day) $week_sum[$day] = $rankup_control->queryR("select sum(num) from rankuplog_total where wdate=date_sub(curdate(), interval $day day)");
+// 접속자수
+$today = date("Y-m-d");
+$edate = date("Y-m-d", mktime(0,0,0,date("n"), date("j")-7, date("Y")) );
+
+$addWhere = " where wdate between '$edate' and '$today' ";
+$totalCount['con'] = $rankup_control->queryR("select sum(num) from rankuplog_total $addWhere");
+
+// 오늘과 어제 접속한 도메인 / 아이피 TOP 10
+$yearmon = date("Y-m");
+foreach(range(0, 1) as $day) {
+	$domainsel[$day] = $rankup_control->query("select content, sum(num) as num from rankuplog_shortdomain where wdate=date_sub(curdate(), interval $day day) group by content order by num desc limit 10");
+	$ipsel[$day] = $rankup_control->query("select content, sum(num) as num from rankuplog_ip where wdate=date_sub(curdate(), interval $day day) group by content order by num desc limit 10");
+}
+
+// 이달의 도메인/아이피 TOP 10
+$domainselect = $rankup_control->query("select content, sum(num) as num from rankuplog_shortdomain where date_format(wdate, '%Y-%m')='$yearmon' group by content order by num desc limit 10");
+$ipselect = $rankup_control->query("select content,sum(num) as num from rankuplog_ip where date_format(wdate, '%Y-%m')='$yearmon' group by content order by num desc limit 10");
+
+// 이달에 가장 많이 접속한 날짜
+$datefatch = mysql_fetch_row($rankup_control->query("select sum(date1),sum(date2),sum(date3),sum(date4),sum(date5),sum(date6),sum(date7),sum(date8),sum(date9),sum(date10),sum(date11),sum(date12),sum(date13),sum(date14),sum(date15),sum(date16),sum(date17),sum(date18),sum(date19),sum(date20),sum(date21),sum(date22),sum(date23),sum(date24),sum(date25),sum(date26),sum(date27),sum(date28),sum(date29),sum(date30),sum(date31) from rankuplog_date where date_format(wdate, '%Y-%m')='$yearmon'"));
+if(is_array($datefatch) && count($datefatch)) {
+	foreach($datefatch as $key=>$val) $datearray[$key] = $val;
+	$date_key = array_pop(array_keys($datearray, max($datearray)));
+}
+$todaymany['day'] = ($date_key+1)."일";
+$todaymany['count'] = number_format($datearray[$date_key]);
+
+// 이달에 가장 많이 접속한 요일
+$week_text = array('일', '월', '화', '수', '목', '금', '토');
+$weekfatch = mysql_fetch_row($rankup_control->query("select sum(date0),sum(date1),sum(date2),sum(date3),sum(date4),sum(date5),sum(date6) from rankuplog_week where date_format(wdate, '%Y-%m')='$yearmon'"));
+if(is_array($weekfatch) && count($weekfatch)) {
+	foreach($weekfatch as $key=>$val) $weekarray[$key] = $val;
+	$week_key = array_pop(array_keys($weekarray, max($weekarray)));
+}
+$weekmany['day'] = $week_text[$week_key]."요일";
+$weekmany['count'] = number_format($weekarray[$week_key]);
+
+include_once "./rankup_toplink.html";
+?>
+<script type="text/javascript" src="../rankup_chart/js/swfobject.js"></script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<tbody align="center">
+					<tr height="30">
+						<td width="140" class="gray_bg">총 접속자 수</td>
+						<td width="200"><font color=EF6A11><B><?php echo number_format($total_sum)?></B> 명</font></td>
+						<td width="140" class="gray_bg">가장 많이 접속한 날짜</td>
+						<td><font color=EF6A11><B><?=$todaymany['day']?>(<?=$todaymany['count']?>명)</B></font></td>
+					</tr>
+					<tr height="30">
+						<td class="gray_bg">오늘 접속자 수</td>
+						<td><font color=EF6A11><B><?php echo number_format($week_sum[0])?></B> 명</font></td>
+						<td class="gray_bg">가장 많이 접속한 요일</td>
+						<td><font color=EF6A11><B><?=$weekmany['day']?>(<?=$weekmany['count']?>명)</B></font></td>
+					</tr>
+					</tbody>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="30"></td></tr>
+			<!--tr><td height="25"><div id="sub_title">주간 접속자 수</div></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+					<tr class="blue_bg" align="center">
+						<td>1 일전</td>
+						<td>2 일전</td>
+						<td>3 일전</td>
+						<td>4 일전</td>
+						<td>5 일전</td>
+						<td>6 일전</td>
+					</tr>
+					<tr align="center">
+						<td><font color=2279A2><?php echo number_format($week_sum[1])?> 명</font></td>
+						<td><font color=2279A2><?php echo number_format($week_sum[2])?> 명</font></td>
+						<td><font color=2279A2><?php echo number_format($week_sum[3])?> 명</font></td>
+						<td><font color=2279A2><?php echo number_format($week_sum[4])?> 명</font></td>
+						<td><font color=2279A2><?php echo number_format($week_sum[5])?> 명</font></td>
+						<td><font color=2279A2><?php echo number_format($week_sum[6])?> 명</font></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="30"></td></tr-->
+			<tr>
+				<td height="25">
+					<div id="sub_title" style="float:left">최근 일주일 방문자통계</div>
+					<div style="float:right">총 접속자 : <b style="color:#ff6633;font-family:verdana;"><? echo number_format($totalCount['con']) ?>명</b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<tr>
+							<td align="center">
+<?
+$data_file = urlencode("./chart_data/set_chart_recent_week.php");
+?>
+					<div  style="width:730px;overflow:hidden">
+							<div id="my_chart"></div>
+							<script type="text/javascript">
+							swfobject.embedSWF(
+							"../rankup_chart/open-flash-chart.swf", "my_chart", "730", "170",
+							"9.0.0", "expressInstall.swf",
+							{"data-file":"<?=$data_file?>"} );
+							</script>
+					</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="30"></td></tr>
+
+			<tr><td height="25"><div id="sub_title">도메인 TOP10</div></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+					<tr class="blue_bg" align="center">
+						<td width="33%">오늘 접속한 도메인 TOP10</td>
+						<td width="33%">어제 접속한 도메인 TOP10</td>
+						<td width="34%">이달에 접속한 도메인 TOP10</td>
+					</tr>
+					<tr align="center" valign="top">
+						<td style="padding:10 10 20 10;">
+							<table border=0 cellpadding=1 cellspacing=0 width=100%>
+	<? while($domainfatch = mysql_fetch_row($domainsel[0])){ ?>
+							<tr onMouseOver=this.style.backgroundColor='#f7f7f7' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td width=180 height=22><a href="<?php echo $domainfatch[0]?>"<? if(!eregi("http",$domainfatch[0])) echo " onClick='return false'"?> target=_blank><?php echo $domainfatch[0]?></a></tD>
+							<td align="right"><?php echo $domainfatch[1]?> &nbsp;</td>
+							</tr>
+							<tr><td colspan=2 height=1 background=../../Libs/_images/dotline_gray.gif></td></tr>
+	<? } ?>
+							</table>
+						</td>
+						<td style="padding:10 10 20 10;">
+							<table border=0 cellpadding=1 cellspacing=0 width=100%>
+	<? while($domainfatch = mysql_fetch_row($domainsel[1])) { ?>
+							<tr onMouseOver=this.style.backgroundColor='#f7f7f7' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td width=180 height=22><a href="<?php echo $domainfatch[0]?>"<? if(!eregi("http",$domainfatch[0])) echo " onClick='return false'"?> target=_blank><?php echo $domainfatch[0]?></a></tD>
+							<td align="right"><?php echo $domainfatch[1]?> &nbsp;</td>
+							</tr>
+							<tr><td colspan=2 height=1 background=../../Libs/_images/dotline_gray.gif></td></tr>
+	<? } ?>
+							</table>
+						</td>
+						<td style="padding:10 10 20 10;">
+							<table border=0 cellpadding=1 cellspacing=0 width=100%>
+	<? while($domainfatch = mysql_fetch_row($domainselect)) { ?>
+							<tr onMouseOver=this.style.backgroundColor='#f7f7f7' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td width=180 height=22><a href="<?php echo $domainfatch[0]?>" <? if(!eregi("http",$domainfatch[0])) echo " onClick='return false'"?> target=_blank><?php echo $domainfatch[0]?></a></tD>
+							<td align="right"><?php echo $domainfatch[1]?> &nbsp;</td>
+							</tr>
+							<tr><td colspan=2 height=1 background=../../Libs/_images/dotline_gray.gif></td></tr>
+	<? } ?>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="30"></td></tr>
+			<tr><td height="25"><div id="sub_title">아이피 TOP10</div></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+					<tr class="blue_bg" align="center">
+						<td width="33%">오늘 접속한 아이피 TOP10</td>
+						<td width="33%">어제 접속한 아이피 TOP10</td>
+						<td width="34%">이달에 접속한 아이피 TOP10</td>
+					</tr>
+					<tr align="center" valign="top">
+						<td style="padding:10 10 20 10;">
+							<table border=0 cellpadding=1 cellspacing=0 width=100%>
+	<? while($ipfatch = mysql_fetch_row($ipsel[0])) { ?>
+							<tr onMouseOver=this.style.backgroundColor='#f7f7f7' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td width=170 height=22> <?php echo $ipfatch[0]?></tD>
+							<td align="right"><?php echo $ipfatch[1]?> 명 &nbsp;</td>
+							</tr>
+							<tr><td colspan=2 height=1 background=../../Libs/_images/dotline_gray.gif></td></tr>
+	<? } ?>
+							</table>
+						</td>
+						<td style="padding:10 10 20 10;">
+							<table border=0 cellpadding=1 cellspacing=0 width=100%>
+	<? while($ipfatch = mysql_fetch_row($ipsel[1])) { ?>
+							<tr onMouseOver=this.style.backgroundColor='#f7f7f7' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td width=170 height=22> <?php echo $ipfatch[0]?></tD>
+							<td align="right"><?php echo $ipfatch[1]?> 명 &nbsp;</td>
+							</tr>
+							<tr><td colspan=2 height=1 background=../../Libs/_images/dotline_gray.gif></td></tr>
+	<? } ?>
+							</table>
+						</td>
+						<td style="padding:10 10 20 10;">
+							<table border=0 cellpadding=1 cellspacing=0 width=100%>
+	<? while($ipfatch = mysql_fetch_row($ipselect)) { ?>
+							<tr onMouseOver=this.style.backgroundColor='#f7f7f7' onMouseOut=this.style.backgroundColor='#ffffff'>
+							<td width=170 height=22> <?php echo $ipfatch[0]?></tD>
+							<td align="right"><?php echo $ipfatch[1]?> 명 &nbsp;</td>
+							</tr>
+							<tr><td colspan=2 height=1 background=../../Libs/_images/dotline_gray.gif></td></tr>
+	<? } ?>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+
+
+</body>
+</html>

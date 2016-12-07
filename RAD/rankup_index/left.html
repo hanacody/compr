@@ -1,0 +1,814 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+$rankup_control->print_admin_head("솔루션 관리자 메뉴");
+?>
+<link rel="stylesheet" type="text/css" href="<?= $base_url;?>Libs/_style/rankup_admin.css">
+<body background="../../Libs/_images/left_admin_bg_re.gif">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td style="padding:20px 0 10px 0">
+		<table border="0" cellpadding="0" cellspacing="0" width="180" align="center">
+		<tr>
+			<td><img src="../../Libs/_images/left_admin.gif" alt='관리자모드'></td>
+			<td align="right" valign="bottom" class="prb"><a class="gray_s" href="../../rankup_module/rankup_admin/logout.php" target="_parent"><img src="../../Libs/_images/bt_logout.png" class="png24"></a></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor="#373f56" height="1"></td>
+</tr>
+<tr>
+	<td bgcolor="#454c65" height="1"></td>
+</tr>
+<tr>
+	<td style="padding:10px 0 10px 0">
+		<table width="180" border="0" cellpadding="0" cellspacing="0" width="" align="center">
+		<tr>
+			<td><a href='../../' class='white_s' target='_blank'><img src="../../Libs/_images/bt_site.gif" alt="사이트보기"></a></td>
+			<td><a href='/RAD/rankup_index/main.html' target='_parent'><img src="../../Libs/_images/bt_home.gif" alt="관리자홈"></a></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<?php
+/*
+?>
+<tr>
+	<td style="padding:0px 0 10px 0">
+		<table width="180" border="0" cellpadding="0" cellspacing="0" width="" align="center">
+		<tr>
+			<td><a href='javascript:solution_manual()'><img src="../../Libs/_images/bt_manual.gif" alt="매뉴얼보기"></a></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<?php
+*/
+?>
+<tr>
+	<td bgcolor="#373f56" height="1"></td>
+</tr>
+<tr>
+	<td bgcolor="#454c65" height="1"></td>
+</tr>
+</table>
+<!-- 20061127, DIV UP -->
+<input type="hidden" style="border:none;width:100%" value="" name="n_layoutname" >
+<?php
+$t_conte[0] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>기본환경설정</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0;'>
+				<ul id='left_menu'>
+					<li><a href='../../rankup_module/rankup_admin/change_idpw.html' target='right'>관리자 비밀번호변경</a></li>
+					<li><a href='../../rankup_module/rankup_environment/index.html' target='right'>기본환경설정</a></li>
+					<li><a href='../../rankup_module/rankup_builder/index.html' target='right'><b>메뉴 및 페이지설정</b></a></li>
+					<li><a href='../../rankup_module/rankup_builder/site_design.html' target='right'><b>디자인설정</b></a></li>
+					<li><a href='../../rankup_module/rankup_banner/index.html' target='right'>배너관리</a></li>
+					<li><a href='../../rankup_module/rankup_popup/index.html' target='right'>팝업관리</a></li>
+					<li class='left_menu1'>멀티게시판관리</li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_board/make.html' target='right'>게시판 생성/관리</a></li>
+					<!--<li class='left_menu2'><a href='../../rankup_module/rankup_board/main.html' target='right'>게시판 메인설정</a></li>-->
+					<li class='left_menu2'><a href='../../rankup_module/rankup_builder/main_board.html' target='right'>게시판 메인설정</a></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_board/common.html?cmode=board' target='right'>게시판 환경설정</a></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_board/index.html' target='right'>게시물관리</a></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_board/comment.html' target='right'>댓글관리</a></li>
+
+					<li style='margin-top:5px'><a href='../../rankup_module/rankup_lconsult/index.html' target=right class='left_menu'>고객문자상담관리</a></li>
+					<li><a href='../../rankup_module/rankup_sms/sms_config.html' target='right'>SMS연동/환경설정</a></li>
+					";
+
+// 모바일웹 설정
+if(isset($mobile)) {
+	if(rankup_basic::is_demo()) $icon_mobile = "<img src='".$mobile->m_url."images/icon_Rmobile.gif' align='absmiddle' hspace='2' style='margin-bottom:3px' />";
+	$t_conte[0] .= "<li><a href='".$mobile->m_url."builder/index.html' target='right'><b>모바일웹설정</b>".$icon_mobile."</a></li>";
+}
+
+$t_conte[0] .= "
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+// 달력로드
+include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+$category = new rankup_category;
+
+include_once '../../schedule/class/calendar.class.php';
+$calendar = new calendar;
+$calendars = $calendar->print_calendars(array(
+	'entry' => array(
+		0 => '<li class="left_menu2"><a href="../../schedule/admin/calendar_regist.html" target="right" style="color:#999"> 달력을 등록하세요</a></li>',
+		1 => '<li class="left_menu2"><a href="../../schedule/admin/schedules.html?no={:no:}" target="right">{:subject:}</a></li>'
+	)
+));
+
+$t_conte[1] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>일정관리</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='../../schedule/admin/calendars.html' target='right'>달력관리</a></li>
+					<li class='left_menu1'><b>일정관리</b></li>
+					".$calendars."
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+$t_conte[2] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>제품관리</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='../../product/admin/setting.html' target='right'>제품관리 환경설정</a></li>
+					<li class='left_menu1'><b>제품관리</b></li>
+					<li class='left_menu2'><a href='../../product/admin/products.html' target='right'>전체제품</a></li>
+					<li class='left_menu2'><a href='../../product/admin/main_products.html' target='right'>메인출력제품</a></li>
+					<li style='margin-top:5px'><a href='../../product/admin/regist.html'' target='right'>제품등록</a></li>
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+
+// 폼빌더 로드
+include_once '../../rankup_module/rankup_fbuilder/rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+$forms = $fbuilder->print_forms(array(
+	'mode' => 'left',
+	'entry' => array(
+		0 => '<li class="left_menu2"><a href="../../rankup_module/rankup_fbuilder/form_builder.html" target="right" style="color:#999"> 폼을 등록하세요</a></li>',
+		1 => '<li class="left_menu2"><a href="../../rankup_module/rankup_fbuilder/forms.html?no={:no:}" target="right">{:form_name:}</a>{:on_new:}</li>'
+	),
+	'on_new' => ' <img src="../../rankup_module/rankup_board/icon/icon_new.gif" align="absmiddle" />'
+));
+$t_conte[3] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>폼(FORM)관리</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='../../rankup_module/rankup_fbuilder/form_list.html' target='right'>폼(FORM)관리</a></li>
+					<li class='left_menu1'><b>등록폼관리</b></li>
+					".$forms."
+					<li style='margin-top:5px'><a href='../../rankup_module/rankup_fbuilder/mail_forms.html' target='right'>메일폼관리</a></li>
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+$t_conte[4] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>갤러리관리</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='../../gallery/admin/gallery.html' target='right'>갤러리관리</a></li>
+					<li><a href='../../gallery/admin/gallery_regist.html' target='right'>갤러리등록</a></li>
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+$t_conte[5] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>회원관리</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='../../rankup_module/rankup_member/index.html' target='right'>회원관리 환경설정</a></li>
+					<li class='left_menu1'><b>회원관리</b></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_member/member_list.html' target='right'>전체회원관리</a></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_member/member_list.html?pkind=secession' target='right'>탈퇴신청회원관리</a></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_member/member_log.html' target='right'>회원로그인기록</a></li>
+					<li class='left_menu2'><a href='../../rankup_module/rankup_member/member_vsms_log.html' target='right'>인증번호발송기록</a></li>
+					<li style='margin-top:5px'><a href='../../rankup_module/rankup_mailing/mailing_send.html' target='right'>뉴스레터발송관리</a></li>
+					<li><a href='../../rankup_module/rankup_sms/sms_list.html' target='right'>회원SMS발송</a></li>
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+$t_conte[6] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>통계 및 백업관리</td>
+		<td align='right'><span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='../../rankup_module/rankup_statistics/today_statistic.html' target='right'>오늘사이트통계</a></li>
+					<li><a href='../../rankup_module/rankup_statistics/total_statistic.html' target='right'>종합사이트통계</a></li>
+					<li><a href='../../rankup_module/rankup_analytics/dimensions.html' target='right'>구글로그분석관리</a></li>
+					<li><a href='../../rankup_module/rankup_log/rankuplog_main.html' target='right'>접속통계</a></li>
+					<li><a href='../../rankup_module/rankup_dbback/index.html' target='right'>DB백업관리</a></li>
+					<li><a href='../../rankup_module/rankup_post/index.html' target='right'>우편번호관리</a></li>
+					<li><a href='../../rankup_module/rankup_description/index.html' target='right'>기술메뉴얼</a></li>
+				</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>";
+
+$t_conte[7] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr><td class='left_title'>랭크업 부가서비스 안내</td>
+		<td align='right'><!--<span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span>--></td></tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<ul id='left_menu'>
+					<li><a href='http://rankup.co.kr/mobile/index.php' target='right'>모바일웹</a></li>
+					<li><a href='http://rankup.co.kr/etc/hosting.html' target='right'>호스팅서비스</a></li>
+					<li><a href='http://rankup.co.kr/server/server_guide.html' target='right'>서버호스팅</a></li>
+					<li><a href='http://rankup.co.kr/pay/paygate.html' target='right'>전자지불서비스</a></li>
+					<li><a href='http://rankup.co.kr/etc/real.html' target='right'>실명인증서비스</a></li>
+					<li><a href='http://rankup.co.kr/sms/index.html' target='right'>SMS서비스</a></li>
+					<li><a href='http://rankup.co.kr/etc/chat_service.html' target='right'>임대형채팅</a></li>
+					<li><a href='http://rankup.co.kr/etc/pay_option.html' target='right'>재설치/계정이전</a></li>
+					<li><a href='http://rankup.co.kr/etc/pay_option.html' target='right'>UTF-8변환</a></li>
+					<li><a href='http://rankup.co.kr/etc/secure_ssl.html' target='right'>보안서버인증서</a></li>
+					<li><a href='http://rankup.co.kr/ad/ot01.html' target='right'>키워드광고</a></li>
+					</ul>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr><td bgcolor='#32384e' height='1'></td></tr><tr><td bgcolor='#545b72' height='1'></td></tr>
+</table>";
+
+$t_conte[8] = "
+<table align='center' border='0' cellpadding='0' cellspacing='0' width='100%'>
+<tr>
+	<td>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td class='left_title'>솔루션 기술문의</td>
+			<td align='right'><!--<span class='icon_up' title='이동하기'><img src='../../Libs/_images/left_btn_up.png' class='png24' align='absmiddle' alt='이동하기'></span>--></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#5c6379' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#373f56' height='1'></td>
+</tr>
+<tr>
+	<td background='../../Libs/_images/left_sub_bg.gif'>
+		<table align='center' border='0' cellpadding='0' cellspacing='0' width='180'>
+		<tr>
+			<td style='padding:10px 0 10px 0'>
+				<table align='center' cellpadding='0' cellspacing='0' width='180'>
+				<tr>
+					<td><img border='0' src='../../Libs/_images/rankup_logo.png' class='png24'></td>
+					<td align='right'>
+						<table cellpadding='0' cellspacing='0'>
+						<tr><td><a href='http://www.rankup.co.kr/freeboard/freeboard.html' target='right'><img border='0' src='../../Libs/_images/rankup_button01.gif' vspace='2' alt='기술지원센터'></a></td></tr>
+						<tr><td><a href='http://rankup.co.kr' target='_blank'><img border='0' src='../../Libs/_images/rankup_button02.gif' alt='랭크업가기'></a></td></tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td bgcolor='#32384e' height='1'></td>
+</tr>
+<tr>
+	<td bgcolor='#545b72' height='1'></td>
+</tr>
+</table>
+<table border='0' cellpadding='0' cellspacing='0' width='180' height='100' align='center'>
+<tr valign='top'>
+	<td align='center' style='padding-top:10px'><img src='../../Libs/_images/sub_copy.png' class='png24'></td>
+</tr>
+</table>";
+
+if(!$_COOKIE["n_layout"]) $_COOKIE["n_layout"] = "PART1,PART2,PART3,PART4,PART5,PART6,PART7,PART8,PART9";
+$part = explode(",",$_COOKIE['n_layout']);
+for($i=0;$i<count($part);$i++) {
+	switch($part[$i]) {
+		case "PART1" : $conte['PART1'] = $t_conte[0]; break;
+		case "PART2" : $conte['PART2'] = $t_conte[1]; break;
+		case "PART3" : $conte['PART3'] = $t_conte[2]; break;
+		case "PART4" : $conte['PART4'] = $t_conte[3]; break;
+		case "PART5" : $conte['PART5'] = $t_conte[4]; break;
+		case "PART6" : $conte['PART6'] = $t_conte[5]; break;
+		case "PART7" : $conte['PART7'] = $t_conte[6]; break;
+		case "PART8" : $conte['PART8'] = $t_conte[7]; break;
+		case "PART9" : $conte['PART9'] = $t_conte[8]; break;
+	}
+}
+?>
+	<div id="<?=$part[0]?>" style="position:relative;" align='center'><?=$conte[$part[0]]?></div>
+	<div id="<?=$part[1]?>" style="position:relative;" align='center'><?=$conte[$part[1]]?></div>
+	<div id="<?=$part[2]?>" style="position:relative;" align='center'><?=$conte[$part[2]]?></div>
+	<div id="<?=$part[3]?>" style="position:relative;" align='center'><?=$conte[$part[3]]?></div>
+	<div id="<?=$part[4]?>" style="position:relative;" align='center'><?=$conte[$part[4]]?></div>
+	<div id="<?=$part[5]?>" style="position:relative;" align='center'><?=$conte[$part[5]]?></div>
+	<div id="<?=$part[6]?>" style="position:relative;" align='center'><?=$conte[$part[6]]?></div>
+	<div id="<?=$part[7]?>" style="position:relative;" align='center'><?=$conte[$part[7]]?></div>
+	<div id="<?=$part[8]?>" style="position:relative;" align='center'><?=$conte[$part[8]]?></div>
+	<div id="<?=$part[9]?>" style="position:relative;" align='center'><?=$conte[$part[9]]?></div>
+	<div id="<?=$part[10]?>" style="position:relative;" align='center'><?=$conte[$part[10]]?></div>
+</body>
+<script type="text/javascript">
+//document.domain="<?=$_SERVER['SERVER_NAME'];?>";
+var n_layout = skm_getCookie('n_layout');
+if (!n_layout) n_layout = "PART1,PART2,PART3,PART4,PART5,PART6,PART7,PART8,PART9";
+document.all.n_layoutname.value = n_layout
+
+//################################# 쿠키에서 값가져오기
+function skm_getCookie( name ){
+	var nameOfCookie = name + "=";
+	var x = 0;
+	while ( x <= document.cookie.length ) {
+		var y = (x+nameOfCookie.length);
+		if ( document.cookie.substring( x, y ) == nameOfCookie ) {
+			if ( (endOfCookie=document.cookie.indexOf( ";", y )) == -1 )
+				endOfCookie = document.cookie.length;
+			return unescape( document.cookie.substring( y, endOfCookie ) );
+		}
+		x = document.cookie.indexOf( " ", x ) + 1;
+		if ( x == 0 ) break;
+	}
+	return "";
+}
+//################################# 쿠키에서 값가져오기
+//################################# 쿠키저장
+function set_cookie(c,s)    {
+	var expireDate = new Date();
+	expireDate.setMonth(expireDate.getMonth()+1);
+	document.cookie = c+'='+s+';expires='+expireDate.toGMTString()+';path=/;domain='+window.location.hostname+';';
+}
+//################################# 쿠키저장
+
+function Movescrip() {
+	var Scroller = new skm_moveScroller(n_layout.split(','));
+	Scroller.init();
+}
+
+//#################################
+var TimeIterator = function (obj) {
+	this.objTimeout = null;
+	this.bStop = false;
+	this._waitingTime = 0;
+	this.id = TimeIterator.list.length;
+	TimeIterator.list[this.id] = obj;
+}
+
+TimeIterator.list = new Array();
+TimeIterator.prototype.start = function() {
+	if (this.objTimeout) clearTimeout(this.objTimeout);
+	this.bStop = false;
+	this.objTimeout = setTimeout('TimeIterator.list["' + this.id + '"]._iterate();', this.getWaitingTime());
+}
+TimeIterator.prototype.stop = function() {
+	if (this.objTimeout) clearTimeout(this.objTimeout);
+	this.bStop = true;
+}
+
+TimeIterator.prototype._iterate = function() {
+	this.iterate();
+	if(this.bStop) return;
+	this.objTimeout = setTimeout('TimeIterator.list["' + this.id + '"]._iterate();', this.getWaitingTime());
+}
+TimeIterator.prototype.setWaitingTime = function(msec) {
+	this._waitingTime = msec
+}
+TimeIterator.prototype.getWaitingTime = function() {
+	return this._waitingTime;
+}
+TimeIterator.prototype.inheritTo = function(obj) {
+	for (var p in this) {
+		obj[p] = this[p];
+	}
+}
+
+// 이용방법 보기
+var solution_manual = function() {
+	var modal = window.open("http://rankup.co.kr/rankup_manual/compr/index.html", 'modal', 'width=1070,height=800,left=0,top=0');
+	modal.focus();
+}
+//#################################
+
+var skm_moveScroller = function (pIdList) {
+	//alert('99')
+	var ti = new TimeIterator(this);
+	ti.inheritTo(this);
+
+	this.objParent = null;
+	this.pIdList = pIdList;
+	this.objParagraphList = null;
+	this.objCloneList = null;
+	this.clickedId = '';
+
+	this.bWorking = false;
+	this.bCloneCreated = false;
+
+	//const
+	this.SHOW_CLONE = true;
+	this.SHOW_ORIGNAL = false;
+	this.SCROLL_ENABLE = true;
+	this.SCROLL_DISABLE = false;
+
+	//이동설정
+	this.hSpace = 0;    //행여백
+	this.scrollStep = 30; //무빙수치
+	this.scrollCount = 0;
+	this.scrollInfoList = null;
+	this.objTimeIteratorList = new Array();
+	this.setWaitingTime(0);
+}
+
+skm_moveScroller.prototype.iterate = function() {
+	this.scroll();
+}
+
+skm_moveScroller.prototype.stopSubTimeIterator = function () {
+	for(var i = 0; i < this.objTimeIteratorList.length; i++) {
+		this.objTimeIteratorList[i].stop();
+	}
+}
+
+skm_moveScroller.prototype.startSubTimeIterator = function () {
+	for(var i = 0; i < this.objTimeIteratorList.length; i++) {
+		this.objTimeIteratorList[i].start();
+	}
+}
+
+skm_moveScroller.prototype.reArrange = function () {
+	var objBr = document.getElementById('ClearBr');
+	if(objBr) this.objParent.removeChild(objBr);
+
+	var len = this.objParagraphList.length;
+	for (var i = 0; i < len; i++) {
+		this.objParent.removeChild(this.objParagraphList[i]);
+	}
+	for (var i = 0; i < len; i++) {
+		this.objParent.appendChild(this.objParagraphList[i]);
+		this.pIdList[i] = this.objParagraphList[i].id;
+	}
+	set_cookie('n_layout', this.pIdList.join());
+	this.bWorking = false;
+}
+
+skm_moveScroller.prototype.displayChange = function (bShowClone) {
+	for ( var i = 0; i < this.objParagraphList.length; i++ ) {
+		var objParagraph = this.objParagraphList[i];
+		var objClone = this.objCloneList[objParagraph.id];
+		if (bShowClone) {
+			objClone.style.display = 'block';
+			objParagraph.style.display = 'none';
+		} else {
+			objParagraph.style.display = 'block';
+			objClone.childNodes[0].innerHTML = '';
+			objClone.style.display = 'none';
+		}
+	}
+}
+
+skm_moveScroller.prototype.scroll = function () {
+	var len = this.scrollInfoList.length;
+	if(this.scrollCount  >= this.scrollStep) {
+		for (var i=0; i < len; i++) {
+			var scrollInfo = this.scrollInfoList[i];
+			scrollInfo.obj.style.top = scrollInfo.to + "px";
+		}
+		this.reArrange();
+		this.displayChange(this.SHOW_ORIGINAL);
+		this.startSubTimeIterator();
+		this.stop();
+		return;
+	} else {
+		for (var i=0; i < len; i++) {
+			var scrollInfo = this.scrollInfoList[i];
+			var displacement = Math.round(Math.sin(this.scrollCount/this.scrollStep * Math.PI / 2)  * scrollInfo.dist);
+			var curPos = scrollInfo.from + displacement;
+			scrollInfo.obj.style.top = curPos + "px";
+		}
+	}
+	this.scrollCount++;
+}
+
+skm_moveScroller.prototype.createClone = function() {
+	this.objCloneList = new Array();
+	for ( var i = this.objParagraphList.length - 1; i >= 0; i-- ) {
+		var objParagraph = this.objParagraphList[i];
+		var objClone = objParagraph.cloneNode(true);
+		var objCroneWrap = document.createElement('div');
+		objCroneWrap.style.display = '';
+		this.objParent.appendChild(objCroneWrap);
+		this.objCloneList[objParagraph.id] = objCroneWrap;
+		objCroneWrap.appendChild(objClone);
+		objClone.style.margin = "0px";
+		objCroneWrap.style.zIndex = '2';
+		objCroneWrap.style.width = objParagraph.offsetWidth + "px"; // for firefox (fix width)
+			objCroneWrap.style.position = "absolute";
+	}
+	this.bCloneCreated = true;
+}
+
+skm_moveScroller.prototype.copyClone = function() {
+	for ( var i = this.objParagraphList.length - 1; i >= 0; i-- ) {
+		var objParagraph = this.objParagraphList[i];
+		var objClone = this.objCloneList[objParagraph.id];
+		objClone.childNodes[0].innerHTML = objParagraph.innerHTML;
+		objClone.style.zIndex = '2';
+	}
+}
+
+skm_moveScroller.prototype.initScroll = function () {
+	this.stopSubTimeIterator();
+	if (!this.bCloneCreated) {
+		this.createClone();
+	} else {
+		this.copyClone();
+	}
+	var top = this.posTop;
+	this.scrollInfoList = new Array(); //--;
+	var idx = 0;
+	for ( var i = 0; i < this.objParagraphList.length; i++ ) {
+		var objParagraph = this.objParagraphList[i];
+		var objClone = this.objCloneList[objParagraph.id];
+		var to = top;
+		var from = objParagraph.offsetTop;
+		objClone.style.top = objParagraph.offsetTop + "px";
+
+		if (from != to) {
+			var scrollInfo = new Object();
+			scrollInfo.obj = objClone;
+			scrollInfo.from = from;
+			scrollInfo.to = to;
+			scrollInfo.dist = to - from;
+			this.scrollCount = 0;
+			this.scrollInfoList[idx++] = scrollInfo;
+		}
+		top = top + objParagraph.offsetHeight + this.hSpace;
+	}
+	this.objCloneList[this.clickedId].style.zIndex = '3';
+	this.displayChange(this.SHOW_CLONE);
+}
+
+skm_moveScroller.prototype.move = function( bUseScroll ) {
+	if ( bUseScroll ) {
+		this.initScroll();
+		this.start();
+	} else {
+		this.reArrange();
+	}
+}
+
+skm_moveScroller.prototype.clickUp = function( id ) {
+	this.clickedId = id;
+	var objList = this.objParagraphList;
+	var idx;
+
+	for (idx = objList.length - 1; idx >= 0 && objList[idx].id != id; idx--);
+	if(idx == 0) {
+		var first = objList[0];
+		var len = objList.length - 1;
+		for (var i = 0; i < len; i++) {
+			objList[i] = objList[i+1];
+		}
+		objList[i] = first;
+	} else {
+		var tmp = objList[idx];
+		objList[idx] = objList[idx - 1];
+		objList[idx - 1] = tmp;
+	}
+	this.move(this.SCROLL_ENABLE);
+}
+
+skm_moveScroller.prototype.handlerClickUp = function() {
+	var objScroller = this.pScroller;
+	if( objScroller.bWorking ) return;
+	objScroller.bWorking = true;
+	objScroller.clickUp.call(objScroller, this.paragraphId);
+}
+
+skm_moveScroller.prototype.init = function () {
+	this.objParagraphList = new Array();
+	for ( var i = this.pIdList.length - 1; i >= 0; i-- ) {
+		var objParagraph = document.getElementById(this.pIdList[i]);
+		if(objParagraph==null) continue; // 2010.11.25 fixed
+		this.objParagraphList[i] = objParagraph;
+		var objList = objParagraph.getElementsByTagName("span");
+		for (var j=0; j < objList.length; j++) {
+			if(objList[j].className == "icon_up") {
+				objList[j].onclick = this.handlerClickUp;
+				objList[j].pScroller = this;
+				objList[j].paragraphId = this.pIdList[i];
+				try {
+					objList[j].style.cursor = 'pointer';
+				}
+				catch (e) {
+					objList[j].style.cursor = 'hand';
+				}
+			}
+		}
+	}
+	this.objParent = this.objParagraphList[0].parentNode;
+	this.posTop = document.getElementById(this.pIdList[0]).offsetTop;
+}
+Movescrip();
+</script>
+</html>

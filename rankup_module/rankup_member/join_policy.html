@@ -1,0 +1,131 @@
+<?php
+/**
+ * 회원가입 - 약관동의
+ *@note: 2 단계
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+
+if($config_info['membership_use']=='no' || $rankup_member->is_member()) {
+	scripts('location.replace("'.$base_url.'main/index.html")');
+	exit;
+}
+
+if(!$_SESSION['member_type']) {
+	scripts('alert("비정상적인 접근입니다."); location.replace("join_intro.html");');
+	exit;
+}
+
+// 페이지 제너레이터 - 필수
+include_once '../../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../../include/top.html';
+
+// 실명인증
+include_once '../rankup_authentic/rankup_authentic.class.php';
+$auth = new authentic('join');
+?>
+<style type="text/css">
+#agree {
+	height:250px;overflow-y:scroll;padding:10px;background-color:#f0f0f0;border:1px solid #f0f0f0;
+	color:#9a9a9a;
+	scrollbar-face-color: #f0f0f0;
+	scrollbar-shadow-color: #d2d2d2;
+	scrollbar-highlight-color: #d2d2d2;
+	scrollbar-3dlight-color: #f0f0f0;
+	scrollbar-darkshadow-color: #f0f0f0;
+	scrollbar-track-color: #f0f0f0;
+	scrollbar-arrow-color: #d2d2d2;
+}
+</style>
+
+<?php
+// join step
+include_once 'join_step.inc.php';
+?>
+
+<form id="join_form" name="join_form">
+	<table width="900" cellpadding="0" cellspacing="0" border="0" align="center">
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td align="left"><img src="./img/join2.png" width="400" height="50" /></td>
+					</tr>
+					<tr>
+						<td align="left">
+							<div id="agree">
+								<?php echo $rankup_control->get_config_info("agreement") ?>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td height="35" align="center">
+							<input type="checkbox" name="agree1" required id="agree1" class="input_box" value="yes" message="서비스 이용약관에 동의하셔야 합니다." /><label for="agree1"><font color="#666666" style="font-size:8pt">위의 <b>'서비스 이용약관'</b>에 동의</b>합니다.</font></label>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td height="20"></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+					<tr>
+						<td align="left"><img src="./img/join3.png" width="400" height="50" /></td>
+					</tr>
+					<tr>
+						<td align="left">
+							<div id="agree">
+								<?php echo $rankup_control->get_config_info("mem_privacy") ?>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td height="35" align="center">
+							<input type="checkbox" name="agree2" required id="agree2" class="input_box" value="yes" message="개인정보 수집 및 이용방침에 동의하셔야 합니다." /><label for="agree2"><font color="#666666" style="font-size:8pt">위의 <b>'개인정보 수집 및 이용'</b>에 동의합니다.</font></label>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td height="20"><!--여백--></td>
+		</tr>
+		<tr>
+			<td align="center">
+				<a onClick="joint.go()"><img src="./img/btn_ok.gif" border="0" align="absmiddle" alt="확인" /></a>	<a onClick="location.replace('join_intro.html')"><img src="./img/btn_cancel.gif" border="0" align="absmiddle" alt="취소" /></a>
+			</td>
+		</tr>
+	</table>
+</form>
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+var joint = {
+	go: function() {
+		if(!validate(Form.getElements('join_form'))) return false;
+		proc.parameters({mode:'verify_join', step: 2}, 'join_form');
+		proc.process(function(trans) { proc.response(trans) });
+	}
+}
+//]]>
+</script>
+<?php
+include_once '../../include/bottom.html';
+
+// 가입된 정보가 있는지 확인
+if($auth->infos['di_code']) {
+	if($rankup_member->check_di_code($auth->infos['di_code'])) {
+		scripts('blind.draw(); alert("죄송합니다. 회원님은 이미 가입된 상태입니다.\n\n아이디/비밀번호 찾기를 이용해 주시기 바랍니다."); location.replace("find_login_info.html");');
+		exit;
+	}
+}
+?>

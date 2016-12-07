@@ -1,0 +1,17 @@
+body, td { 
+	margin:0px; 
+	font-family:dotum; 
+	letter-spacing:0px; 
+	font-size:9pt; 
+	color:#555555; 
+}
+
+a:link, a:visited, a:active { color:#333333; text-decoration:none; }
+a:hover { text-decoration:underline; }
+
+
+
+
+
+.left_menu_title { font-family:dotum; font-size:9pt; color:#333333; font-weight:bold; letter-spacing:-1px; padding-left:5px}
+.left_submenu_title { font-family:dotum; font-size:9pt; color:#333333; font-weight:bold; letter-spacing:-1px;}

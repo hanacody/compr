@@ -1,0 +1,22 @@
+#board_frame ul.tab_wrap li.tab1 {
+	background-color: ;
+	color: #CCCCCC;
+}
+#board_frame ul.tab_wrap li.tab1:hover, #board_frame ul.tab_wrap li.tab1.selected {
+	background-color: ;
+	color: #FFFFFF;
+}#board_frame ul.tab_wrap li.tab2 {
+	background-color: ;
+	color: #CCCCCC;
+}
+#board_frame ul.tab_wrap li.tab2:hover, #board_frame ul.tab_wrap li.tab2.selected {
+	background-color: ;
+	color: #FFFFFF;
+}#board_frame ul.tab_wrap li.tab3 {
+	background-color: ;
+	color: #CCCCCC;
+}
+#board_frame ul.tab_wrap li.tab3:hover, #board_frame ul.tab_wrap li.tab3.selected {
+	background-color: ;
+	color: #FFFFFF;
+}

@@ -1,0 +1,7 @@
+/* second-menu */
+.lmenu p.secon_m{border:5px solid #FFFFFF;background-color:#FFFFFF}
+.lmenu p.hover{font-weight:bold;border:5px solid #296CCC;background-color:#FFFFFF;color:#296CCC}
+/* third-menu */
+.third_m {background-color:#F5F5F5}
+.third_m dd{border:2px solid #F5F5F5;font-size:11px}
+dd.hover{background:#296CCC;color:#FFFFFF;border:2px solid #296CCC}

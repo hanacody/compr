@@ -1,0 +1,152 @@
+<?
+include_once "../../Libs/_php/rankup_basic.class.php";
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+$db = new db_class;
+$often = new often_class;
+
+$que = "create table rankuplog_date (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "date1 int(11),";
+$que .= "date2 int(11),";
+$que .= "date3 int(11),";
+$que .= "date4 int(11),";
+$que .= "date5 int(11),";
+$que .= "date6 int(11),";
+$que .= "date7 int(11),";
+$que .= "date8 int(11),";
+$que .= "date9 int(11),";
+$que .= "date10 int(11),";
+$que .= "date11 int(11),";
+$que .= "date12 int(11),";
+$que .= "date13 int(11),";
+$que .= "date14 int(11),";
+$que .= "date15 int(11),";
+$que .= "date16 int(11),";
+$que .= "date17 int(11),";
+$que .= "date18 int(11),";
+$que .= "date19 int(11),";
+$que .= "date20 int(11),";
+$que .= "date21 int(11),";
+$que .= "date22 int(11),";
+$que .= "date23 int(11),";
+$que .= "date24 int(11),";
+$que .= "date25 int(11),";
+$que .= "date26 int(11),";
+$que .= "date27 int(11),";
+$que .= "date28 int(11),";
+$que .= "date29 int(11),";
+$que .= "date30 int(11),";
+$que .= "date31 int(11),";
+$que .= "primary key  (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_domain (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "content tinytext,";
+$que .= "num int(11),";
+$que .= "primary key  (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_ip (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "content varchar(50),";
+$que .= "num int(11),";
+$que .= "primary key (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_month (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "month01 int(11),";
+$que .= "month02 int(11),";
+$que .= "month03 int(11),";
+$que .= "month04 int(11),";
+$que .= "month05 int(11),";
+$que .= "month06 int(11),";
+$que .= "month07 int(11),";
+$que .= "month08 int(11),";
+$que .= "month09 int(11),";
+$que .= "month10 int(11),";
+$que .= "month11 int(11),";
+$que .= "month12 int(11),";
+$que .= "primary key  (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_shortdomain (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "content tinytext,";
+$que .= "num int(11),";
+$que .= "primary key  (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_time (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "time1 int(11),";
+$que .= "time2 int(11),";
+$que .= "time3 int(11),";
+$que .= "time4 int(11),";
+$que .= "time5 int(11),";
+$que .= "time6 int(11),";
+$que .= "time7 int(11),";
+$que .= "time8 int(11),";
+$que .= "time9 int(11),";
+$que .= "time10 int(11),";
+$que .= "time11 int(11),";
+$que .= "time12 int(11),";
+$que .= "time13 int(11),";
+$que .= "time14 int(11),";
+$que .= "time15 int(11),";
+$que .= "time16 int(11),";
+$que .= "time17 int(11),";
+$que .= "time18 int(11),";
+$que .= "time19 int(11),";
+$que .= "time20 int(11),";
+$que .= "time21 int(11),";
+$que .= "time22 int(11),";
+$que .= "time23 int(11),";
+$que .= "time0 int(11),";
+$que .= "primary key (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_totaltoday (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "todaydate date,";
+$que .= "primary key  (no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_week (";
+$que .= "no int(11) not null auto_increment,";
+$que .= "wdate date,";
+$que .= "date0 int(11),";
+$que .= "date1 int(11),";
+$que .= "date2 int(11),";
+$que .= "date3 int(11),";
+$que .= "date4 int(11),";
+$que .= "date5 int(11),";
+$que .= "date6 int(11),";
+$que .= " primary key(no));";
+$select = mysql_query($que);
+
+$que = "create table rankuplog_admin(";
+$que .= "uid varchar(30),";
+$que .= "upasswd varchar(50));";
+$select = mysql_query($que);
+
+$arr = array(uid=>$_POST['adminid'], upasswd=>$_POST['adminpw']);
+$que = $db->ins("rankuplog_admin",$arr);
+$select = $que['result'];
+
+$que = "create table rankuplog_total(";
+$que .= "no int not null auto_increment,";
+$que .= "wdate date,";
+$que .= "num int,";
+$que .= "primary key(no));";
+$select = mysql_query($que);
+?>
+<meta http-equiv='Refresh' content='0; URL=./index.html'>

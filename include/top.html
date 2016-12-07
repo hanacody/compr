@@ -1,0 +1,23 @@
+<?php
+// 디자인 설정
+include_once $base_dir.'rankup_module/rankup_builder/rankup_design.class.php';
+if(!isset($design)) $design = new rankup_design;
+
+/**
+ * 인트로 인증페이지 사용시 확인사항 처리
+ */
+if($config_info['intro_use']=='yes' && !$member_info['uid']) {
+	$intro = $design->get_settings('intro_design');
+	if($intro['intro_type']=='pin') {
+		include_once $base_dir.'rankup_module/rankup_authentic/rankup_authentic.class.php';
+		$auth = new authentic('intro');
+		if(!$auth->pin_check()) {
+			scripts('location.replace("'.$base_url.'intro.html")');
+			exit;
+		}
+	}
+	unset($intro);
+}
+
+include_once $base_dir.SKIN.'top.inc.php';
+?>

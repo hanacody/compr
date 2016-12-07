@@ -1,0 +1,253 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './top_menu.inc.php';
+?>
+
+<link type="text/css" rel="stylesheet" href="../rankup_category/category.css">
+<script type="text/javascript" src="../rankup_category/category.class.js"></script>
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="attachment.class.js"></script>
+<script type="text/javascript" src="page_design.class.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true; //
+	switch(el.value) {
+		case 'html': mode = ['hide']; break;
+		case 'image': mode = ['show']; break;
+	}
+	$w('page_title_image_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+}
+</script>
+<style type="text/css">
+div.preview {
+	width: 712px;
+	*width: 734px;
+	height: 250px;
+	overflow: auto;
+	padding: 10px;
+	border: 1px #dedede solid;
+	background-color: #f7f7f7;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+</style>
+<center>
+<div class="content_wrap">
+
+	<div style="width:750px;text-align:left">
+
+		<div id="category_frame">
+			<?php
+			// 스탭정의
+			$steps = array(
+				array('step' => 1, 'title' => '1차메뉴', 'item_name' => '메뉴명'),
+				array('step' => 2, 'title' => '2차메뉴', 'item_name' => '메뉴명'),
+				array('step' => 3, 'title' => '3차메뉴', 'item_name' => '메뉴명')
+			);
+			echo fetch_contents($steps, $entry = array(
+				'times' => count($steps),
+				'entry_wrap' => array('<table><tr align="center">', '</tr></table>'),
+				'entry' => array(
+					1 => '
+						<td id="step{:step:}">
+							<h2>{:title:}</h2>
+							<ul>
+								<li class="head">
+									<dl>
+										<dt>{:item_name:}</dt>
+										<dd class="child">하위</dd>
+									</dl>
+								</li>
+								<li class="body">
+									<!--<![CDATA[ nodes ]]>-->
+								</li>
+							</ul>
+						</td>',
+					3 => '<td class="next">▷</td>'
+				)
+			));
+			?>
+		</div>
+		<br />
+		<br />
+
+		<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+		<form id="save_form" name="save_form" onSubmit="return false">
+			<input type="hidden" id="no" name="no" />
+			<div id="sub_title">페이지 상단 이미지 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+				<col width="134" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 선택</td>
+					<td>
+						<a onClick="image_box.open()"><img src="./img/btn_img_choice.gif" align="absmiddle" /></a>
+						<input type="hidden" id="page_top_img" name="page_top_img" />
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" align="center">
+						<div id="page_top_preview" class="preview"><!--preview--></div>
+						<div id="parent_path_hint" style="display:none;margin-top:8px;">
+							<span id="tip" style="margin-left:0">미 선택시 상위 메뉴 <b class="orange_b">[<span id="parent_path_text"></span>]</b> 의 이미지가 적용됩니다.</span>
+						</div>
+					</td>
+				</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">페이지 제목 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+				<col width="134" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;페이지 제목 설정</td>
+					<td>
+						<input type="radio" name="page_title_type" checked value="html" id="page_title_type_html" onClick="change_frame(this)"><label for="page_title_type_html">일반TEXT</label>
+						<input type="radio" name="page_title_type" value="image" id="page_title_type_image" onClick="change_frame(this)"><label for="page_title_type_image">이미지</label>
+					</td>
+				</tr>
+				<tbody id="page_title_image_frame" style="display:none">
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 업로드</td>
+						<td>
+							<span><input type="file" name="_attach_" onChange="page_title.post(this, 'attach')"></span>
+							<input type="hidden" id="on_page_title_img" name="on_page_title_img">
+							<input type="hidden" face="attach" name="mode" value="post_attach" disabled>
+							<input type="hidden" face="attach" name="kind" value="page_title" disabled>
+							<input type="hidden" face="attach" name="handler" value="page_title.draw" disabled>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" align="center">
+							<div id="page_title_preview" class="preview"><!--preview--></div>
+							<div style="margin-top:8px;">
+								<span id="tip" style="margin-left:0"><b class="orange_b">[<span id="step_path_text"></span>]</b> 의 페이지 제목 이미지를 업로드하여 주십시오.</span>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">컨텐츠 상단 디자인설정</div>
+			<div>
+				<textarea type="editor" id="page_top_content" name="page_top_content" style="width:100%;height:150px;" nofocus></textarea>
+			</div>
+			<br />
+			<br />
+
+			<div id="sub_title">컨텐츠 하단 디자인설정</div>
+			<div>
+				<textarea type="editor" id="page_bottom_content" name="page_bottom_content" style="width:100%;height:150px;" nofocus></textarea>
+			</div>
+		</form>
+
+	</div>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+	<!-- IMAGE·BOX -->
+	<script type="text/javascript" src="image_box.class.js"></script>
+	<link type="text/css" rel="stylesheet" href="image_box.css">
+	<div id="image_box_frame" style="display:none">
+		<form id="post_form" name="post_form" onSubmit="return false">
+			<input type="hidden" name="mode" value="post_attach">
+			<input type="hidden" name="kind" value="page_top">
+			<input type="hidden" name="handler" value="image_box.draw">
+			<div class="close"><a onClick="image_box.close()">×</a></div>
+			<h2>+ IMAGE·BOX +</h2>
+			<dl>
+				<dt>
+				<?php
+				include_once 'attachment.class.php';
+				$attach = new attachment('page_top');
+				echo $attach->print_attachments('top', array(
+					'entry' => '<div name="{:name:}" onClick="image_box.selector(this)" onDblClick="image_box.apply()" onMouseOver="$(this).addClassName(\'hover\')" onMouseOut="$(this).removeClassName(\'hover\')">{:content:}</div>',
+					// content
+					'image' => '<img src="'.$base_url.'{:folder:}{:name:}" align="absmiddle" />',
+					'flash' => '<embed src="'.$base_url.'{:folder:}{:name:}"></embed>',
+					'etc' => '<div class="content">{:name:}</div>'
+				));
+				?>
+				</dt>
+				<dd style="background-color:#f7f7f7">
+					<img src="../../Libs/_images/ic_dot1.gif"> <b>업로드</b>
+					<span><input type="file" name="_attach_" onChange="image_box.post(this)"></span>
+					<span id="tip">(jpg, gif, png 파일 / 최대 <b><span style="letter-spacing:0"><?=$attach->configs['limit_size']?></span></b>까지 업로드 가능)</span>
+				</dd>
+				<dd style="padding:0;padding-top:6px;">
+					<a onClick="image_box.apply()"><img src="./img/btn_choice.gif" align="absmiddle" /></a>
+					<a onClick="image_box.del('다른 페이지에서도 해당 이미지를 사용하고 있을 경우 삭제 후 부터는 이미지가 출력되지 않으니 참고하시기 바랍니다.\n\n')"><img src="./img/btn_del.gif" align="absmiddle" /></a>
+					<a onClick="image_box.close()"><img src="./img/btn_close.gif" align="absmiddle" /></a>
+				</dd>
+			</dl>
+		</form>
+	</div>
+	<!-- IMAGE·BOX -->
+
+	<script type="text/javascript">
+	Wysiwyg.createELM();
+
+	// IMAGE·BOX 초기화
+	image_box.initialize('image_box_frame', function(box, fix) { // 핸들러 - 선택하기
+		var name = '', content = '';
+		if(box.selected!=null) {
+			name = box.selected.getAttribute('name');
+			content = box.selected.innerHTML;
+			box._default = box.selected;
+		}
+		$('page_top_img').value = name;
+		$('page_top_preview').update(content);
+		if(fix!=true) box.close();
+	});
+
+	// 페이지 디자인 설정 초기화
+	page_design.template = new Template('<span><dl class="#{class}" no="#{no}" depth="#{depth}" onClick="page_design.select(event)"><dt>#{name}</dt><dd class="child">#{has_child}</dd></dl></span>');
+	page_design.initialize('category_frame', true);
+
+	// 페이지 제목 설정 정의
+	var page_title = {
+		post: attachment.post,
+		post_reset: attachment.reset,
+		draw: function(infos) {
+			with(infos) {
+				$('on_page_title_img').value = name;
+				$('page_title_preview').update('<img src="'+ domain + folder + name +'" align="absmiddle" />');
+			}
+		}
+	}
+
+	// $form submit setting
+	$form.debug = false;
+	$form.hashes = {mode: 'save_design', kind: 'page'};
+	$form.handler = function(trans) {
+		if(!trans.responseText.blank()) proc.response(trans);
+		else {
+			$('on_page_title_img').value = '';
+			page_design.update($F('no'));
+			alert('저장되었습니다.');
+		}
+	}
+	</script>
+
+</div>
+</center>
+<br />
+<br />
+
+</body>
+</html>

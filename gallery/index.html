@@ -1,0 +1,138 @@
+<?php
+/**
+ * 펜션 갤러리
+ *@seperator: no (int)
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../rankup_module/rankup_builder/attachment.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+include_once './class/gallery.class.php';
+$gallery = new gallery;
+$gs_rows = $gallery->get_gallery($_GET['no']);
+?>
+
+	<div id="con_body">
+
+<?php
+/**
+ * 갤러리형 출력
+ */
+if($gs_rows['type']=='gallery') {
+?>
+	<div class="Form_box">
+		<?php
+		// 고정값
+		$gs_settings = array(
+			'container_width' => 726,
+			'container_height' => 500
+		);
+		scripts(sprintf(
+			"flashDraw('%s','%s','%s','%s','%s','%s')",
+				'product',
+				'../design/gallery.swf',
+				$gs_settings['container_width'],
+				$gs_settings['container_height'],
+				'transparent',
+				'xmlPath=../design/xml/gallery_'.$_GET['no'].'.xml?dummy='.rand()
+			)
+		);
+		?>
+	</div>
+<?php
+}
+
+/**
+ * 웹진형 출력
+ */
+else {
+	// A & B 형
+	if(in_array($gs_rows['skin_type'], array('A', 'B'))) {
+		echo $gallery->print_contents($gs_rows['no'], array(
+			'entry' => array(
+				0 => '',
+				1 => '
+				<div class="photo_frame">
+					<dl class="{:odd_even:}">
+						<dt class="gall_pic"><span class="photo_bg pic_bgc">{:on_attach:}</span></dt>
+						<dd class="busi_info">
+							<span class="info_title"><img src="./img/bullet_s_tit.png" class="bullet_img" />&nbsp;{:subject:}</span>
+							<span class="info_txt">
+							{:content:}
+							</span>
+						</dd>
+					</dl>
+					<div class="clear"></div>
+				</div>'
+			),
+			'on_attach' => '<img src="{:attach:}" />',
+			'non_attach' => '<img src="./img/frame_no_img.gif" />',
+			'odd_even' => ($gs_rows['skin_type']=='A') ? array('photo_a', 'photo_a') : array('photo_b', 'photo_a')
+		));
+	}
+	// C 형
+	else if($gs_rows['skin_type']=='C') {
+		echo $gallery->print_contents($gs_rows['no'], array(
+			'times' => 2,
+			'entry_wrap' => array('', '<div class="clear h20"></div>'),
+			'entry' => array(
+				0 => '',
+				1 => '
+				<div class="photo_frame2">
+					<dl class="photo_c">
+						<dt><span class="photo_bg2 pic_bgc">{:on_attach:}</span></dt>
+						<dd class="busi_info2">
+							<span class="info_title"><img src="./img/bullet_s_tit.png" class="bullet_img" />&nbsp;{:subject:}</span>
+							<span class="info_txt">
+							{:content:}
+							</span>
+						</dd>
+						<dd class="clear"></dd>
+					</dl>
+					<div class="clear"></div>
+				</div>'
+			),
+			'on_attach' => '<img src="{:attach:}" />',
+			'non_attach' => '<img src="./img/frame_no_img.gif" />'
+		));
+	}
+	// D 형
+	else {
+		echo $gallery->print_contents($gs_rows['no'], array(
+			'times' => 3,
+			'entry_wrap' => array('', '<div class="clear h20"></div>'),
+			'entry' => array(
+				0 => '',
+				1 => '
+				<div class="photo_frame3{:on_end:}">
+					<dl class="photo_d">
+						<dt><span class="photo_bg3 pic_bgc">{:on_attach:}</span></dt>
+						<dd class="busi_info3">
+							<span class="info_title"><img src="./img/bullet_s_tit.png" class="bullet_img" />&nbsp;{:subject:}</span>
+							<span class="info_txt">
+							{:content:}
+							</span>
+						</dd>
+					</dl>
+				</div>'
+			),
+			'on_end' => '_end',
+			'on_attach' => '<img src="{:attach:}" />',
+			'non_attach' => '<img src="./img/frame_no_img.gif" />'
+		));
+	}
+}
+?>
+
+	</div>
+
+<?php
+include_once '../include/bottom.html';
+?>

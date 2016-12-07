@@ -1,0 +1,782 @@
+<?php
+#####################################################################
+# 프로그램 : Rankup Multi-Board Part. II
+# 개발버전 : V2.1.090909
+# 개발자명 : Kurokisi
+# 라이센스 : 랭크업
+# 업데이트 : 2009-09-09
+#####################################################################
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "./rankup_board.class.php";
+include_once "./rankup_board_admin.class.php";
+$rankup_control->check_admin();
+$rankup_board = new rankup_board_admin;
+// 회원등급설정 로드
+$level_options = $rankup_board->get_member_level_points(true);
+// 게시판스킨 목록
+$board_skin_options = $rankup_board->get_board_skins("board");
+
+$rankup_control->print_admin_head("멀티게시판관리 - 게시판 생성/관리");
+?>
+<body style="overflow-y:scroll">
+<?php
+if($rankup_board->include_js_class) rankup_basic::include_js_class(); // 2009.10.08 fixed
+?>
+<div class="bar" style="margin-bottom: 20px"><script> titleBar('멀티게시판관리 - 게시판 생성/관리', 300) </script></div>
+<script type="text/javascript"> direct_board = true </script>
+<script type="text/javascript" src="<?=$rankup_board->wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="./rankup_board.class.js"></script>
+<link rel="stylesheet" type="text/css" href="./rankup_board.css">
+
+<div id="screenBlindDiv"></div>
+
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+
+<!-- 게시판 등록/수정폼 -->
+<table id="boardRegistTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:750px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<form id="boardRegistFrm" name="boardRegistFrm" action="./multiProcess.ajax.html" target="multiProcessFrame" method="POST" onSubmit="return (Wysiwyg.submit_start()&&validate(this)&&confirm('설정사항을 게시판에 반영하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="regist_board">
+		<input type="hidden" name="cno">
+		<input type="hidden" name="pcno">
+		<input type="hidden" name="rank">
+		<input type="hidden" name="no">
+		<tbody bgcolor="white">
+		<tr>
+			<td><img src="./img/ic_bullet1.gif"><strong class="sub_title">기본환경 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<thead bgcolor="white">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">게시판 아이디</td>
+					<td>
+						<table width="100%" cellspacing="0" cellpadding="0" border="0">
+						<tr>
+							<td width="130"><input type="text" name="boardId" id="boardId" required hname="게시판 아이디" onKeyDown="this.value=this.value.toLowerCase();" onChange="$('board_id').value=''" option="userid" size="15" maxlength="20" class="require" style="ime-mode:inactive">
+							<input type="hidden" name="board_id" id="board_id" required message="게시판을 등록하시려면 게시판 아이디 중복체크를 하셔야 합니다." option="userid" nofocus setfocus="boardId"></td>
+							<td id="verifyButtonDiv"><a style="float:right;" onClick="rankup_board.verify_board($('boardId'))"><img src="./img/btn_repeat_check.gif" align="absmiddle"></a></td>
+							<td style="padding-top:2px;"><span id="tip" style="margin-left:0px;"><span id="ex_head">참고</span><span id="ex">&lt;a href="../board/index.html?id=<b style="color:#FF6633;">notice</b>"&gt;공지사항&lt;/a&gt;</span></span></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시판 이름</td>
+					<td><input type="text" name="board_name" required hname="게시판 이름"  size="35" maxlength="40" class="require" style="ime-mode:active"><span id="tip">+ 게시판 상단에 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시판 스킨</td>
+					<td>
+						<select name="board_skin">
+						<?=$board_skin_options?>
+						</select>
+						<a onClick="rankup_board.preview_setting('boardRegistFrm')"><img src="./img/btn_preview.gif" align="absmiddle"></a>
+						<span id="tip">+ 게시판 기본 테마</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시판 형태</td>
+					<td>
+						<input type="radio" name="board_style" checked value="normal" id="board_style_normal" onClick="rankup_board.change_board_style(this)"><label for="board_style_normal">리스트 형태</label>
+						<input type="radio" name="board_style" value="gallery" id="board_style_gallery" onClick="rankup_board.change_board_style(this)"><label for="board_style_gallery">갤러리 형태</label>
+						<input type="radio" name="board_style" value="webzin" id="board_style_webzin" onClick="rankup_board.change_board_style(this)"><label for="board_style_webzin">웹진 형태</label>
+						<input type="radio" name="board_style" value="mantoman" id="board_style_mantoman" onClick="rankup_board.change_board_style(this)"><label for="board_style_mantoman">1:1 형태</label>
+						<a onClick="rankup_board.preview_setting('boardRegistFrm')"><img src="./img/btn_preview.gif" align="absmiddle"></a>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시판 가로크기</td>
+					<td><input type="text" name="board_width" hname="게시판 가로사이즈" value="700" size="4" option="number" maxlength="4" minval="500" maxval="1024" class="enable"> 픽셀</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">목록 제목글자 제한</td>
+					<td><input type="text" name="subject_length" hname="목록 제목글자 제한" option="number" value="40" size="4" maxlength="3" maxval="100" class="enable"> Byte, <input type="checkbox" name="use_condense" checked id="use_condense"><label for="use_condense">글 줄임기호(...) 사용</label><span id="tip">+ 한글 2Byte, 영문 1Byte 처리</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">페이지당 게시물 수</td>
+					<td><input type="text" name="article_rows" hname="페이지당 게시물수" option="number" value="15" size="4" maxlength="2" class="enable"> 개/페이지<span id="tip">+ 한 페이지당 출력될 게시물 갯수</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시판 사용</td>
+					<td>
+						<input type="checkbox" name="board_use" id="board_use"><label for="board_use">사용</label><span id="tip" style="color:#ff6633">+ 체크해제시 사이트에 해당 게시판/게시글들이 더이상 출력되지 않음</span>
+					</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">기능사용 및 출력 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">분류기능 사용</td>
+					<td><input type="checkbox" name="use_category" id="use_category"><label for="use_category">사용</label><span id="tip">+ 기능 사용시 '분류설정'에서 게시판 분류를 설정</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">중복조회 사용</td>
+					<td><input type="checkbox" name="use_duplicate_hit" id="use_duplicate_hit"><label for="use_duplicate_hit">사용</label><span id="tip">+ 게시물을 읽을때 마다 조회수가 증가,　* 미사용시 게시물당 1회만 증가 ( 관리자/글작성자 제외 )</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">댓글기능 사용</td>
+					<td><input type="checkbox" name="use_comment" checked id="use_comment"><label for="use_comment">사용</label></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">답글기능 사용</td>
+					<td><input type="checkbox" name="use_reply" checked id="use_reply"><label for="use_reply">사용</label></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">추천/반대기능 사용</td>
+					<td><input type="checkbox" name="use_vote" id="use_vote"><label for="use_vote">사용</label>, <input type="checkbox" name="use_only_good" id="use_only_good"><label for="use_only_good">반대기능 사용안함</label></td>
+				</tr>
+<? if($rankup_board->board_extension) { ?>
+				<tr>
+					<td bgcolor="f7f7f7">신고기능 사용</td>
+					<td><input type="checkbox" name="use_report" id="use_report"><label for="use_report">사용</label><span id="tip">+ 회원이 불건전한 게시물을 신고할 수 있는 기능</span></td>
+				</tr>
+<? } ?>
+				<tr>
+					<td bgcolor="f7f7f7">비밀글 기능 사용</td>
+					<td><input type="checkbox" name="use_secret" id="use_secret" onClick="rankup_board.check_mantoman_style(this)"><label for="use_secret">사용</label><span id="tip">+ 권한 있는 사람과 작성자만 열람가능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">인쇄기능 사용</td>
+					<td><input type="checkbox" name="use_print" id="use_print"><label for="use_print">사용</label><span id="tip">+ 회원이 해당 게시물을 인쇄 할수 있는 기능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">작성자이름 출력</td>
+					<td>
+						<input type="radio" name="use_writer" id="use_writer_nickname" value="nickname" checked><label for="use_writer_nickname"> 실명</label><input type="radio" name="use_writer" id="use_writer_uid" value="uid"><label for="use_writer_uid"> 아이디</label><span id="tip">+ 게시물 작성자에 닉네임 또는 아이디를 출력</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">SNS 글보내기 사용</td>
+					<td><input type="checkbox" name="use_snssend" id="use_snssend"><label for="use_snssend">사용</label><span id="tip">+ 게시물 상세페이지에 SNS 글보내기 버튼 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시글 삭제기능</td>
+					<td><input type="radio" name="use_articledel" id="use_articledel_now" value="now"><label for="use_articledel_now">바로삭제</label><input type="radio" name="use_articledel" id="use_articledel_wait" value="wait" checked><label for="use_articledel_wait">삭제된 게시물로 표시</label><span id="tip">+ 삭제된 게시물을 삭제하면 최종 삭제처리</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">워터마크 사용</td>
+					<td><input type="checkbox" name="use_watermark" id="use_watermark_now"><label for="use_watermark_now">사용</label><span id="tip">+ 워터마크 사용여부 설정</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">조회수 BEST 출력</td>
+					<td>
+						<input type="checkbox" name="use_hit_best" id="use_hit_best"><label for="use_hit_best">사용</label>
+						<select name="hit_best_num">
+						<option value="5">5개</option>
+						<option value="10">10개</option>
+						<option value="15">15개</option>
+						<option value="20">20개</option>
+						</select>
+						<span id="tip">+ 게시물 목록/상세페이지에 조회수 BEST 출력</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">NEW 아이콘 출력</td>
+					<td>
+						<input type="checkbox" name="use_new_icon" checked id="use_new_icon"><label for="use_new_icon">사용</label> &nbsp;<input type="text" name="recent_time" value="24" hname="NEW 아이콘의 출력 시간" option="number" size="2" maxval="72" maxlength="2" class="enable"> 시간 이내<span id="tip">+ 목록에서 최근 게시물에 new 아이콘 출력, 최대 <b style="color:#FF6633">72시간</b> 까지 설정</span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 아이콘 출력</td>
+					<td><input type="checkbox" name="use_attach_icon" checked id="use_attach_icon"><label for="use_attach_icon">사용</label><span id="tip">+ 목록에 첨부파일 아이콘 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">답글 아이콘 출력</td>
+					<td><input type="checkbox" name="use_reply_icon" checked id="use_reply_icon"><label for="use_reply_icon">사용</label><span id="tip">+ 목록에 답글 아이콘 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">이전글/다음글 출력</td>
+					<td><input type="checkbox" name="use_near_article" checked id="use_near_article"><label for="use_near_article">사용</label><span id="tip">+ 게시물 상세페이지 하단에 이전글, 다음글 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">상세페이지 목록 출력</td>
+					<td><input type="checkbox" name="use_detail_list" checked id="use_detail_list"><label for="use_detail_list">사용</label><span id="tip">+ 게시물 상세페이지 하단에 목록 출력</span></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">첨부파일 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">첨부파일 사용</td>
+					<td><input type="checkbox" name="use_attach" checked id="use_attach" onClick="rankup_board.check_gallery_style(this)"><label for="use_attach">사용</label><span id="tip">+ 자료실/갤러리 기능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 출력</td>
+					<td><input type="checkbox" name="use_detail_attach" checked id="use_detail_attach"><label for="use_detail_attach">사용</label><span id="tip">+ 게시물 상세페이지에 첨부파일 목록 / 다운로드 현황 출력</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 갯수</td>
+					<td><input type="text" name="attach_nums" value="4" hname="첨부파일 갯수" option="number" size="4" maxlength="1" maxval="9" class="enable"> 개<span id="tip">+ <b style="color:#FF6633">최대 9개</b>까지 설정 가능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 최대크기</td>
+					<td><input type="text" name="attach_size" value="2048" hname="첨부파일 최대크기" size="4" maxlength="5" option="number" maxval="<?=intval(ini_get("post_max_size"))*1024;?>" class="enable"> KB/파일<span id="tip">+ PHP 설정상 <b style="color:#FF6633">최대 <?=intval(ini_get("post_max_size"))*1024;?>KB</b>까지 설정가능</span></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">이미지 최대 가로크기</td>
+					<td><input type="text" name="picture_width" value="675" hname="이미지 최대 가로크기" option="number" size="4" maxlength="4" minval="300" maxval="900" class="enable"> 픽셀<span id="tip">+ 상세페이지에 출력될 이미지의 최대 가로크기, 게시판 가로크기와 <b style="color:#FF6633">25픽셀</b> 유지</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">첨부파일 확장자</td>
+					<td><input type="text" name="attach_extension" value="gif,png,jpg,bmp,swf,hwp,doc,pdf,ppt,xls,gul,zip,alz" hname="첨부파일 확장자" size="39" maxlength="250" class="enable" antifilter="php,php3,html,htm"><span id="tip">+ 쉼표<span style="font-family:verdana">(,)</span>로 구분 (단, php, php3, html, html 제외)</span></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		</thead>
+		<tbody bgcolor="white" id="gallerySettingForm" style="display:none">
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">갤러리 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">목록 최대 가로크기</td>
+					<td><input type="text" name="thumb_width" value="120" hname="목록 최대 가로크기" option="number" size="4" maxlength="3" minval="30" maxval="300" class="enable"> 픽셀<span id="tip">+ 가로크기가 지정된 크기를 초과할 경우 지정된 사이즈로 축소되며, 세로크기도 같은 비율로 축소 됨</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">목록 최대 세로크기</td>
+					<td><input type="text" name="thumb_height" value="120" hname="목록 최대 세로크기" option="number" size="4" maxlength="3" minval="30" maxval="300" class="enable"> 픽셀<span id="tip">+ 세로크기가 지정된 크기를 초과할 경우 지정된 사이즈로 축소되며, 가로크기도 같은 비율로 축소 됨</td>
+				</tr>
+				<tr id="thumb_nums_frame">
+					<td bgcolor="f7f7f7">줄당 이미지 수</td>
+					<td><input type="text" name="thumb_nums" value="5" hname="한줄에 표실할 이미지 갯수" option="number" size="4" maxlength="1" class="enable"> 개/줄<span id="tip">+ 한줄에 표시할 이미지 갯수</span></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+		<tfoot bgcolor="white">
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">게시판 상단/하단 파일 설정</strong><span id="tip">+ 게시판 상단/하단에 출력할 파일을 설정</span></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dddddd" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">상단에 로드할 파일명</td>
+					<td>
+						<input type="text" name="board_header_file" value="" size="50" class="simpleform"><span id="tip">+ 파일 업로드 위치 : <b style="font-family:verdana">board/include/</b></span>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7" width="120">하단에 로드할 파일명</td>
+					<td>
+						<input type="text" name="board_footer_file" value="" size="50" class="simpleform"><span id="tip">+ 파일 업로드 위치 : <b style="font-family:verdana">board/include/</b></span>
+					</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">본문 설정</strong><span id="tip">+ 게시글 내용에 출력할 기본 텍스트를 설정</span></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">기본 텍스트</td>
+					<td><textarea type="editor" name="board_content" class="enable" style="width:100%;height:150px;"></textarea></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td style="padding-top:10px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">사용제한</strong><span id="tip">+ 입력시 쉼표<span style="font-family:verdana">(,)</span>로 구분</span></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">금지 단어 설정</td>
+					<td><textarea name="board_filter" class="enable" style="width:100%;height:100px;"></textarea></td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">아이피 차단 설정</td>
+					<td><textarea name="ip_block" class="enable" style="width:100%;height:100px;"></textarea></td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><a onClick="rankup_board.preview_setting('boardRegistFrm')"><img src="./img/btn_preview.gif" align="absmiddle"></a> <input type="image" src="./img/btn_input.gif" align="absmiddle"> <img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('boardRegistTable', false)" style="cursor:pointer;"></td>
+		</tr>
+		</tfoot>
+		</form>
+		</table>
+		</div>
+	</td>
+</tr>
+</table>
+<script type="text/javascript"> Wysiwyg.createELM() </script>
+<!-- 등록/수정폼 -->
+
+<!-- 분류설정폼 -->
+<table id="setCategoryTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:400px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<form name="setCategoryFrm" action="javascript:void(0);" onSubmit="if(validate(this)) rankup_board.regist_board_category(this)" autocomplete="off">
+		<input type="hidden" name="mode" value="update_board">
+		<input type="hidden" name="cmd" value="set_category">
+		<input type="hidden" name="modify">
+		<input type="hidden" name="bno">
+		<input type="hidden" name="cno">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="padding-top:5px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">게시판('<span id="board_name"></span>') 분류 설정</strong></td>
+		</tr>
+		<tr>
+			<td align="center">
+				<div id="setCategoryItemDiv">
+				<li id="setCategoryInputDiv" style="float:left;height:39px;cursor:default;background-color:#F2FAFD;padding-top:4px;"><div class="colA">분류명 입력</div><div class="colB"><input type="text" name="cname" style="width:100%" maxlength="30" class="enable" required hname="분류명"></div><div class="colC"><input type="image" src="./img/btn_input.gif" align="absmiddle" style="cursor:pointer"></div></li>
+				</div>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding:5px;padding-top:6px;">
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td>☞ 선택한 분류의 게시물을</td>
+					<td style="padding-left:4px"><select id="change_category" name="change_category" style="width:130px;"></select></td>
+					<td style="padding-left:4px"><img src="./img/btn_move.gif" onClick="rankup_board.change_board_category($('change_category'))" style="cursor:pointer"></td>
+					<td width="45" align="right"><img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('setCategoryTable', false)" style="cursor:pointer;"></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</tbody>
+		</form>
+		</table>
+		</div>
+	</td>
+</tr>
+</table>
+<!-- 분류설정폼 -->
+
+<!-- 권한설정폼 -->
+<table id="setPermissionTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:400px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<form name="setPermissionFrm" action="./multiProcess.ajax.html" target="multiProcessFrame" method="POST" onSubmit="return (validate(this)&&confirm('설정사항을 게시판에 반영하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="update_board">
+		<input type="hidden" name="cmd" value="set_permission">
+		<input type="hidden" name="bno">
+		<input type="hidden" name="cno">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="padding-top:5px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">게시판('<span id="board_name"></span>') 권한 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="120">리스트 접근 권한</td>
+					<td><select name="list_level"><?=$level_options?></select> 이상 접근 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시물 읽기 권한</td>
+					<td><select name="read_level"><?=$level_options?></select> 이상 읽기 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시물 쓰기 권한</td>
+					<td><select name="write_level"><?=$level_options?></select> 이상 쓰기 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">댓글 쓰기 권한</td>
+					<td><select name="comment_level"><?=$level_options?></select> 이상 쓰기 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">답변글 쓰기 권한</td>
+					<td><select name="reply_level"><?=$level_options?></select> 이상 쓰기 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">게시물 삭제 권한</td>
+					<td><select name="delete_level"><?=$level_options?></select> 이상 삭제 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">공지글 쓰기 권한</td>
+					<td><select name="notice_level"><?=$level_options?></select> 이상 쓰기 가능</td>
+				</tr>
+				<tr>
+					<td bgcolor="f7f7f7">비밀글 읽기 권한</td>
+					<td><select name="secret_level"><?=$level_options?></select> 이상 읽기 가능</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><input type="image" src="./img/btn_input.gif" align="absmiddle"> <img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('setPermissionTable', false)" style="cursor:pointer;"></td>
+		</tr>
+		</tbody>
+		</form>
+		</table>
+		</div>
+	</td>
+</tr>
+</table>
+<!-- 권한설정폼 -->
+
+<!-- 포인트설정폼 -->
+<table id="setPointTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:400px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<form name="setPointFrm" action="./multiProcess.ajax.html" target="multiProcessFrame" method="POST" onSubmit="return (validate(this)&&confirm('설정사항을 게시판에 반영하시겠습니까?'+SPACE))">
+		<input type="hidden" name="mode" value="update_board">
+		<input type="hidden" name="cmd" value="set_point">
+		<input type="hidden" name="bno">
+		<input type="hidden" name="cno">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="padding-top:5px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">게시판('<span id="board_name"></span>') 포인트 설정</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<colgroup bgcolor="white"><col align="center"><col><col></colgroup>
+				<tr bgcolor="f7f7f7" align="center">
+					<td width="30">사용</td>
+					<td width="130">이벤트</td>
+					<td>적용 포인트</td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="write" onClick="classObj.check_point(this)"></td>
+					<td>게시물 쓰기</td>
+					<td><input type="text" name="write_point" value="10" required ignore0 hname="게시물 쓰기 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[write]" id="mode_write"><label for="mode_write">차감하기</label></span></td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="read" onClick="classObj.check_point(this)"></td>
+					<td>게시물 읽기</td>
+					<td><input type="text" name="read_point" value="1" required ignore0 hname="게시물 읽기 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[read]" checked id="mode_view"><label for="mode_view">차감하기</label></span></td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="comment" onClick="classObj.check_point(this)"></td>
+					<td>코멘트 쓰기</td>
+					<td><input type="text" name="comment_point" value="1" required ignore0 hname="코멘트 쓰기 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[comment]" id="mode_comment"><label for="mode_comment">차감하기</label></span></td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="reply" onClick="classObj.check_point(this)"></td>
+					<td>답변글 쓰기</td>
+					<td><input type="text" name="reply_point" value="10" required ignore0 hname="답변글 쓰기 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[reply]" id="mode_reply"><label for="mode_reply">차감하기</label></span></td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="vote" onClick="classObj.check_point(this)"></td>
+					<td>게시물 추천</td>
+					<td><input type="text" name="vote_point" value="1" required ignore0 hname="게시물 추천 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[vote]" checked id="mode_vote"><label for="mode_vote">차감하기</label></span></td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="upload" onClick="classObj.check_point(this)"></td>
+					<td>파일 업로드</td>
+					<td><input type="text" name="upload_point" value="2" required ignore0 hname="파일 업로드 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[upload]" id="mode_upload"><label for="mode_upload">차감하기</label></span></td>
+				</tr>
+				<tr onMouseOver="this.className='hoverRow'" onMouseOut="this.className='normalRow'">
+					<td><input type="checkbox" name="event[]" checked value="download" onClick="classObj.check_point(this)"></td>
+					<td>파일 다운로드</td>
+					<td><input type="text" name="download_point" value="1" required ignore0 hname="파일 다운로드 시에 적용할 포인트" option="number" size="7" maxlength="6" class="enable"> Point 　<span id="mini_form"><input type="checkbox" name="minus[download]" checked id="mode_download"><label for="mode_download">차감하기</label></span></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><input type="image" src="./img/btn_input.gif" align="absmiddle"> <img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('setPointTable', false)" style="cursor:pointer;"></td>
+		</tr>
+		</tbody>
+		</form>
+		</table>
+	</td>
+</tr>
+</table>
+<!-- 포인트설정폼 -->
+
+<!-- 등록/수정 폼 -->
+<table id="menuRegistTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:400px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<form name="registFrm" target="multiProcess" action="javascript:void(0)" method="POST" onSubmit="if(validate(this)) rankup_board.redraw_item(this);">
+		<input type="hidden" name="step">
+		<input type="hidden" name="no">
+		<input type="hidden" name="pno">
+		<input type="hidden" name="cval">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="padding-top:5px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">메뉴입력</strong></td>
+		</tr>
+		<tr>
+			<td>
+				<table id="registTable" width="100%" cellpadding="4" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center">
+				<tbody bgcolor="#ffffff">
+				<tr>
+					<td bgcolor="f7f7f7" width="100">메뉴명</td>
+					<td><input type="text" name="content" maxlength="20" required hname="메뉴명" class="enable"></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><input type="image" src="./img/btn_input.gif" align="absmiddle"> <img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('menuRegistTable', false)" style="cursor:pointer;"></td>
+		</tr>
+		</tbody>
+		</form>
+		</table>
+	</td>
+</tr>
+</table>
+<!-- 등록/수정 폼 -->
+
+
+<!-- 메뉴 및 게시판 관리 BODY -->
+<div style="display:<? if($rankup_board->use_board_menu!=true) echo 'none' ?>">
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center" style="margin-bottom:20px;">
+<tr>
+	<td align="right" height="25"><a onClick="board_help.style.display= board_help.style.display=='none' ? 'block' : 'none';"><img src="./img/btn_help.gif" border="0" align="absmiddle"></a></td>
+</tr>
+<!--도움말-->
+<tr id="board_help" style="display:none;">
+	<td>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+		<tr>
+			<td style="border:1px solid #eccbb1;background-color:#faf3ee;padding:10px;">
+				<table cellpadding="0" cellspacing="5" border="0" width="100%">
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 먼저 사이트 상단에 출력될 각 메뉴명을 설정하세요.(include/top.html 소스 수정 필요)</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 메뉴(상위메뉴)명을 클릭하시면 해당메뉴의 하위메뉴를 설정하실 수 있습니다.</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 게시판은 상위메뉴에서 바로 생성시킬 수도 있으며 하위메뉴에서 생성시킬 수도 있습니다.</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 하위메뉴가 있는 상위메뉴에서는 게시판을 생성시킬 수 없으니 이점 유의하세요.</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<!--도움말-->
+<tr>
+	<td>
+		<iframe name="multiProcess" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+		<table id="category" width="480" cellpadding="0" cellspacing="4" border="0" align="center">
+		<tbody align="center">
+		<tr>
+			<th>
+				상위 메뉴<br />
+				<div id="title">
+				<table id="title1" width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr><td height="20"><span class="view" title="사용여부">v</span><span class="cate">메뉴명</span>하위</td></tr>
+				</table>
+				</div>
+				<form name="step1Frm" target="multiProcess" action="./multiProcess.ajax.html" style="margin:0px" method="POST">
+				<input type="hidden" name="mode" value="reset_category">
+				<div id="step">
+				<table id="step1" width="100%" cellpadding="1" cellspacing="0" border="0">
+				<tbody bgcolor="white">
+				<!--메뉴아이템-->
+				</tbody>
+				</table>
+				</div>
+				<table id="step1Tools" cellpadding="1" cellspacing="0" border="0">
+				<tr>
+					<td><img src="./img/btn_up.gif" align="absmiddle" border="0" alt="위" onClick="rankup_board.set_direction('step1','up')"></td>
+					<td><img src="./img/btn_down.gif" align="absmiddle" border="0" alt="아래" onClick="rankup_board.set_direction('step1','down')"></td>
+					<td width="4"></td>
+					<td><img src="./img/btn_add.gif" align="absmiddle" border="0" alt="추가" onClick="rankup_board.regist_item('step1')"></td>
+					<td><img src="./img/btn_modify.gif" align="absmiddle" border="0" alt="수정" onClick="rankup_board.regist_item('step1',true)"></td>
+				</tr>
+				<tr>
+					<td><img src="./img/btn_first.gif" align="absmiddle" border="0" alt="처음" onClick="rankup_board.set_direction('step1','top')"></td>
+					<td><img src="./img/btn_last.gif" align="absmiddle" border="0" alt="마지막" onClick="rankup_board.set_direction('step1','bottom')"></td>
+					<td></td>
+					<td><img src="./img/btn_delete.gif" align="absmiddle" border="0" alt="삭제" onClick="rankup_board.delete_item('step1')"></td>
+					<td><img src="./img/btn_save.gif" align="absmiddle" alt="저장" onClick="document.step1Frm.submit()"></td>
+				</tr>
+				</table>
+				</form>
+			</th>
+			<td>▷</td>
+			<th>
+				하위 메뉴<br />
+				<div id="title">
+				<table id="title2" width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr><td height="20"><span class="view" title="사용여부">v</span><span class="cate">메뉴명</span>하위</td></tr>
+				</table>
+				</div>
+				<form name="step2Frm" target="multiProcess" action="./multiProcess.ajax.html" style="margin:0px" method="POST">
+				<input type="hidden" name="mode" value="reset_category">
+				<div id="step">
+				<table id="step2" width="100%" cellpadding="2" cellspacing="0" border="0">
+				<tbody bgcolor="white">
+				<!--메뉴아이템-->
+				</tbody>
+				</table>
+				</div>
+				<table id="step2Tools" cellpadding="1" cellspacing="0" border="0">
+				<tr>
+					<td><img src="./img/btn_up.gif" align="absmiddle" border="0" alt="위" onClick="rankup_board.set_direction('step2','up')"></td>
+					<td><img src="./img/btn_down.gif" align="absmiddle" border="0" alt="아래" onClick="rankup_board.set_direction('step2','down')"></td>
+					<td width="4"></td>
+					<td><img src="./img/btn_add.gif" align="absmiddle" border="0" alt="추가" onClick="rankup_board.regist_item('step2')"></td>
+					<td><img src="./img/btn_modify.gif" align="absmiddle" border="0" alt="수정" onClick="rankup_board.regist_item('step2',true)"></td>
+				</tr>
+				<tr>
+					<td><img src="./img/btn_first.gif" align="absmiddle" border="0" alt="처음" onClick="rankup_board.set_direction('step2','top')"></td>
+					<td><img src="./img/btn_last.gif" align="absmiddle" border="0" alt="마지막" onClick="rankup_board.set_direction('step2','bottom')"></td>
+					<td></td>
+					<td><img src="./img/btn_delete.gif" align="absmiddle" border="0" alt="삭제" onClick="rankup_board.delete_item('step2')"></td>
+					<td><img src="./img/btn_save.gif" align="absmiddle" alt="저장" onClick="document.step2Frm.submit()"></td>
+				</tr>
+				</table>
+				</form>
+			</th>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+</table>
+</div>
+
+<!-- 도움말 레이어 -->
+<div id="noticePopupDiv"></div>
+<!-- 도움말 레이어 -->
+
+<table id="boardItemBoxDiv" width="700" cellpadding="0" cellspacing="0" style="margin-bottom:20px;" align="center">
+<tr>
+	<td>
+		<table width="700" align="center" cellpadding="4" cellspacing="0" border="0">
+		<tr>
+			<td>
+				<div id="sub_title">게시판 생성 및 관리</div>
+				<div style="display:none">
+					<img src="./img/ic_bullet1.gif"><span id="boardPositionDiv" class="sub_title">선택된 메뉴가 없습니다.</span>
+				</div>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td>
+		<table id="boardItemBox" cellpadding="0" cellspacing="0" border="0" align="center" style="border-top:2px solid #6699cc">
+		<form name="boardSettingFrm" action="./multiProcess.ajax.html" target="multiProcessFrame" method="POST">
+		<input type="hidden" name="mode" value="update_board">
+		<input type="hidden" name="cmd" value="set_direction">
+		<tr bgcolor="#f7f7f7">
+			<td>
+				<div class="col1"><input type="checkbox" style="cursor:pointer" id="checkAll_id1" onClick="rankup_board.checkAll(this.checked)" onFocus="this.blur()"></div>
+				<div class="col3" style="padding-top:7px;">순서</div>
+				<div class="<?=$rankup_board->board_extension ? "col4" : "colC" ?>">게시판명</div>
+				<div class="col5">등록수</div>
+				<div class="col6">분류</div>
+				<div class="col7">권한</div>
+<? if($rankup_board->board_extension) { ?>
+				<div class="col8">포인트</div>
+<? } ?>
+				<div class="col9">미리보기</div>
+				<div class="col2">사용</div>
+				<div class="colA">수정</div>
+				<div class="colB">삭제</div>
+			</td>
+		</tr>
+		<tbody id="boardItemList" bgcolor="white" align="center">
+		<tr disabled>
+			<td>
+				<div class="col1"><input type="checkbox" disabled></div>
+				<div class="colZ">메뉴를 선택하여 주십시오.</div>
+				<div class="colB">삭제</div>
+			</td>
+		</tr>
+		</tbody>
+		<tr height="1"><td style="font-size:1px;">&nbsp;</td></tr>
+		</form>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td>
+		<table width="700" border="0" cellpadding="2" cellspacing="0" align="center">
+		<tr>
+			<td style="padding-top:8px;">
+				<div id="checkToolBar" style="float:left;display:<? if($rankup_board->use_board_menu!=true) echo 'none' ?>">
+					<table cellpadding="2" cellspacing="0">
+					<tr>
+						<td>☞ 선택한 게시판을</td>
+						<td>
+							<select name="move_pcate" id="move_pcate" required hname="상위 메뉴" onChange="rankup_board.change_category(this, $('move_cate'))">
+							<option value="">상위메뉴</option>
+							</select>
+						</td>
+						<td>
+							<select name="move_cate" id="move_cate" required hname="하위 메뉴">
+							<option value="">하위메뉴</option>
+							</select>
+						</td>
+						<td><img src="./img/btn_move.gif" onClick="rankup_board.move_board($('move_pcate'), $('move_cate'))" style="cursor:pointer" alt="이동"></td>
+					</tr>
+					</table>
+				</div>
+				<div style="float:right;"><img src="./img/btn_plusboard.gif" id="registBoardBtn" onClick="rankup_board.regist_board()" disabled style="cursor:pointer" class="tool_disabled" alt="게시판추가"></div>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</table><br />
+</div>
+<script type="text/javascript">
+<!--
+// 카테고리 변수 생성
+var rankup_board = new RANKUP_BOARD;
+var classObj = rankup_board;
+rankup_board.boardRegistFrm = document.boardRegistFrm;
+rankup_board.boardSettingFrm = document.boardSettingFrm;
+rankup_board.boardExtension = "<?=$rankup_board->board_extension?>";
+rankup_board.index_url = "<?=$rankup_board->index_url?>";
+rankup_board.get_items("step0", 0, true); // 메뉴1단계 세팅
+//-->
+</script>
+<!-- 메뉴 및 게시판 관리 BODY -->
+</body>
+</html>

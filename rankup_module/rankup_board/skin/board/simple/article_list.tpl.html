@@ -1,0 +1,241 @@
+<!-- 게시물 목록 -->
+<script type="text/javascript" src="<?=$this->board_url?>rankup_board.js"></script>
+<script type="text/javascript">
+<!--
+rankup_board.board_id = "<?=$this->board_id?>";
+rankup_board.index_url = "<?=$this->index_url?>";
+//-->
+</script>
+<link rel="stylesheet" type="text/css" href="<?=$this->skin_url?>skin_style.css">
+<table border="0" cellpadding="0" cellspacing="0" align="right" style="width:<?=$this->slayout['board_width']?>px;overflow:hidden;">
+<?php
+//게시판 상단 파일
+if($this->sfunction['sheader_file'] && is_file($this->etc_file_dir.$this->sfunction['sheader_file'])) { ?>
+	<tr>
+		<td style="padding:0px">
+			<?php
+			ob_start();
+			include_once $this->etc_file_dir.$this->sfunction['sheader_file'];
+			echo ob_get_clean();
+			?>
+		</td>
+	</tr>
+<? } if($this->soption['use_hit_best']=="on") { ?>
+	<tr>
+		<td>
+			<!-- 조회수 베스트 -->
+			<table border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td style="padding-left:3px" height="25"><b>조회수 <span class="best">BEST</span></td>
+				</tr>
+			</table>
+			<table border="0" cellpadding="2" cellspacing="0" width="100%" class="best_bg">
+			<tr><td>
+					<table border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="white">
+						<tr>
+							<td style="padding:5 10 5 10px">
+								<table width="100%" cellpadding="3" cellspacing="0" border="0">
+								<?=$this->get_best_articles("hit_best")?>
+								</table>
+							</td>
+						</tr>
+					</table>
+			</td></tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td height="20"></td>
+	</tr>
+<? } if($this->simple_mode==false && $this->is_administrator()) { ?>
+	<tr>
+		<td>
+			<div style="border:1px #FF0000 solid;font-weight:bold;background-color:#FDF8EA;color:#FF0000;padding:10px;margin-bottom:15px;text-align:center">
+				현재 관리자로 로그인 중이며, 게시판 사용권한과 상관없이 게시글/댓글을 수정/삭제할 수 있습니다.
+			</div>
+		</td>
+	</tr>
+<? } ?>
+	<tr>
+		<td>
+			<!-- 리스트 -->
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td>
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<tr>
+<? if($this->display_subject==true) { ?>
+								<td class="title" style="padding-left:3px"><?=$this->board_name?></td>
+<? } ?>
+								<td align="right">
+									<table border="0" cellpadding="2" cellspacing="0">
+										<tr>
+											<td class="rank"><a href="./index.html?<?=$sort_button_link?>&asort=recent" class="rank">등록순</a> l
+											<a href="./index.html?<?=$sort_button_link?>&asort=hit" class="rank">조회순</a>
+<? if($this->sfunction['use_comment']=="on") { ?>
+											 l <a href="./index.html?<?=$sort_button_link?>&asort=hot" class="rank">댓글순</a>
+<? } if($this->sfunction['use_vote']=="on") { ?>
+											 l <a href="./index.html?<?=$sort_button_link?>&asort=good" class="rank">추천순</a>
+<? if($this->sfunction['use_only_good']!="on") { ?>
+											 l <a href="./index.html?<?=$sort_button_link?>&asort=bad" class="rank">반대순</a>
+<? }} ?>
+											</td>
+<? if($this->sfunction['use_category']=="on" && $this->board_configs['style']=="gallery") { ?>
+											<td style="padding-left:6px;"><select name="scategory" onChange="rankup_board.search_category(this)" style="margin-top:-2px;"><?=$scategories?></select></td>
+<? } ?>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td height="5"></td>
+				</tr>
+				<tr>
+					<td>
+<? if($this->board_configs['style']=="gallery") { ?>
+						<style type="text/css">
+						#div_article_contents th {width:<?=$gallery_cell_width?>%;}
+						#article_board_category {display:<?=$board_category_view?>}
+						</style>
+<? } ?>
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<thead id="div_article_column" align="center">
+<?php
+// 일반형, 일대일형
+if(in_array($this->board_configs['style'], array("normal", "mantoman"))) {
+?>
+							<tr align="center" height="31">
+								<td width="3"><img src="<?=$this->skin_url?>titlebar01.gif"></td>
+<? if($this->check_granted("delete_level")) { ?>
+								<td class="board_title" width="50" background="<?=$this->skin_url?>title_bg.gif"><input onFocus="blur()" type="checkbox" onClick="rankup_board.check_all(this.checked, $('sAllButton'))" class="scheckbox"></td>
+<? } else { ?>
+								<td class="board_title" width="50" background="<?=$this->skin_url?>title_bg.gif">번호</td>
+<? } ?>
+								<?=$article_column?>
+								<td class="board_title" background="<?=$this->skin_url?>title_bg.gif">제목</td>
+								<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">작성자</td>
+<? if($this->sfunction['use_vote']=="on") { ?>
+								<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">추천</td>
+<? if($this->sfunction['use_only_good']!="on") { ?>
+								<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">반대</td>
+<? }} ?>
+								<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">조회</td>
+								<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">등록일</td>
+								<td width="3"><img src="<?=$this->skin_url?>titlebar03.gif"></td>
+							</tr>
+							<tr><td height="1"></td></tr>
+<?php
+}
+// 웹진형
+if($this->board_configs['style']=="webzin") {
+?>
+							<tr align="center" height="31">
+								<td width="3"><img src="<?=$this->skin_url?>titlebar01.gif"></td>
+<? if($this->check_granted("delete_level")) { ?>
+								<td class="board_title" width="50" background="<?=$this->skin_url?>title_bg.gif"><input onFocus="blur()" type="checkbox" onClick="rankup_board.check_all(this.checked, $('sAllButton'))" class="scheckbox"></td>
+<? } else { ?>
+								<td class="board_title" width="50" background="<?=$this->skin_url?>title_bg.gif">번호</td>
+<? } ?>
+								<td class="board_title">
+									<table width="100%" cellpadding="0" cellspacing="0" border="0">
+									<tr height="31" align="center">
+										<td class="board_title" width="1%" background="<?=$this->skin_url?>title_bg.gif"><?=$article_column?></td>
+										<td class="board_title" background="<?=$this->skin_url?>title_bg.gif">제목</td>
+										<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">작성자</td>
+										<td class="board_title" width="60" background="<?=$this->skin_url?>title_bg.gif">조회</td>
+										<td class="board_title" width="80" background="<?=$this->skin_url?>title_bg.gif">등록일</td>
+									</tr>
+									</table>
+								</td>
+								<td width="3"><img src="<?=$this->skin_url?>titlebar03.gif"></td>
+							</tr>
+							<tr><td height="1"></td></tr>
+<? } ?>
+							</thead>
+							<tbody id="div_article_contents">
+							<?=$article_contents?>
+							</tbody>
+						</table>
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+							<tr><td height="1" colspan="3" bgcolor="#D3D3D3"></td></tr>
+							<tr height="30">
+								<td width="125" align="right"><?=$sdelete_button?></td>
+								<td align="center">
+									<div id="paging">
+									<?=$paging_button?>
+									</div>
+								</td>
+								<td width="125"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+<? if($this->is_registable()) { ?>
+				<tr>
+					<td align="right" height="30"><a href="./index.html?<?=$board_links?>&mode=write"><img border="0" src="<?=$this->skin_url?>bt_write.gif"></a></td>
+				</tr>
+<? } ?>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td height="15"></td>
+	</tr>
+	<tr>
+		<td>
+			<!-- 검색 -->
+			<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr>
+					<td align="center" bgcolor="F9F9F9" height="40">
+						<table border="0" cellpadding="0" cellspacing="0">
+							<form name="article_searchFrm" method="GET" action="./index.html" autocomplete="off">
+							<input type="hidden" name="id" value="<?=$this->board_id?>">
+							<input type="hidden" name="asort" value="<?=$datas['asort']?>">
+							<tr>
+								<td>
+									<input checked="CHECKED" id="smode_both" name="smode" type="radio" value="both"><label for="smode_both">제목+본문</label>
+									<input id="smode_subject" name="smode" type="radio" value="subject"><label for="smode_subject">제목</label>
+									<input id="smode_author" name="smode" type="radio" value="author"><label for="smode_author">작성자</label>
+									<img align="absmiddle" src="<?=$this->skin_url?>search01.gif" style="margin-left:15px">
+									<input class="enable" name="skey" type="text" value="<?=$_GET['skey']?>">
+									<input type="image" align="absmiddle" src="<?=$this->skin_url?>search02.gif" value="검색">
+								</td>
+							</tr>
+							</form>
+						</table>
+						<script type="text/javascript">
+						<!--
+						var smodes =document.getElementsByName('smode');
+						for(var i=0; i<smodes.length; i++) {
+							if(smodes[i].value!="<?=$_GET['smode']?>") continue;
+							smodes[i].checked = true;
+							break;
+						}
+						//-->
+						</script>
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+<?
+//게시판 하단 파일
+if($this->sfunction['sfooter_file'] && is_file($this->etc_file_dir.$this->sfunction['sfooter_file'])) {
+?>
+	<tr>
+		<td height="15"></td>
+	</tr>
+	<tr>
+		<td>
+			<?php
+			ob_start();
+			include_once $this->etc_file_dir.$this->sfunction['sfooter_file'];
+			echo ob_get_clean();
+			?>
+		</td>
+	</tr>
+<? } ?>
+</table>

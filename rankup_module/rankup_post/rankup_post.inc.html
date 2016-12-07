@@ -1,0 +1,86 @@
+<?php
+/**
+ * 우편번호검색
+ */
+?>
+<script type="text/javascript" src="<?=$base_url?>rankup_module/rankup_post/rankup_post.js"></script>
+<style type="text/css">
+#postList {
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #CCCCCC;
+	scrollbar-face-color: #FFFFFF;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+.pd_t_15 {padding-top:15px;}
+#dong {font-family:verdana;font-size:9pt;letter-spacing:-1px;font-weight:bolder;}
+#zipcode_frame {position:absolute;z-index:2;width:550px;background:#FFFFFF;}
+#zipcode_frame td {font-size:9pt;font-family:verdana;}
+#zipcode_frame a {cursor:pointer;color:#898989;font-size:9pt;text-decoration:none;font-family:verdana;letter-spacing:-1px;}
+#zipcode_frame .selDongmyun {color:black;font-weight:bolder;font-size:9pt;text-decoration:underline;font-family:verdana;letter-spacing:-2px;}
+#zipcode_frame .selPost {color:black;font-weight:bolder;font-size:9pt;text-decoration:underline;font-family:verdana;letter-spacing:-2px;}
+#postList {background:#F8F8F8;height:335px;overflow-x:hidden;overflow-y:auto;margin-top:15px;padding:5px;padding-bottom:0px;border:#DDDDDD 1px solid;}
+</style>
+
+<div id="zipcode_frame" style="display:none" class="Form_box">
+	<form action="javascript:rankup_post.search_post($F('dong'))" onSubmit="return validate(this)">
+		<table width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#ffffff">
+			<tr>
+				<td class="pd_t_15">
+					<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td style="padding-left:15px;"><img src="<?=$base_url?>Libs/_images/pop_post_title.png" alt="우편번호찾기" /></td>
+						<td align="right" style="padding-right:15px;">
+							<a onClick="rankup_post.close_post()"><img src="<?=$base_url?>rankup_module/rankup_member/img/btn_close.png" /></a>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td bgcolor="#ffffff" class="p10">
+					<table width="100%" cellpadding="0" cellspacing="0" border="0">
+						<tr valign="bottom">
+							<td height="40">
+								<table cellpadding="0" cellspacing="0" align="center" border="0">
+								<tr align="center">
+									<td width="70"><b>동이름</b></td>
+									<td align="left"><input type="text" id="dong" name="dong" required hname="동이름" size="40" maxlength="20" class="simpleform"></td><td width="5"></td><td align="left"><input type="image" src="<?=$base_url?>Libs/_images/btn_post_search.gif" alt="우편번호검색"></td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<table width="94%" cellpadding="0" cellspacing="0" align="center" style="table-layout:fixed;">
+								<tr>
+									<td>
+										<div id="postList"></div>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr align="center">
+							<td height="36" valign="bottom">
+								<table width="94%" cellpadding="0" cellspacing="0" align="center">
+								<tr align="center">
+									<td style="padding-top:13px">
+										<!--<a onClick="rankup_post.apply_post()"><img src="<?=$base_url?>Libs/_images/btn_apply1.gif" border="0" align="absmiddle" alt="적용"></a>-->
+										<a onClick="rankup_post.close_post()"><img src="<?=$base_url?>Libs/_images/btn_close2.gif" border="0" align="absmiddle" alt="닫기"></a>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td height="15"></td>
+			</tr>
+		</table>
+	</form>
+</div>

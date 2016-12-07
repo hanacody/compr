@@ -1,0 +1,239 @@
+<?php
+/**
+ * 일정관리
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+include_once '../../schedule/class/calendar.class.php';
+$calendar = new calendar;
+
+$rows = $calendar->get_settings($_GET['no']);
+
+include_once '../../schedule/class/schedule.class.php';
+$schedule = new schedule;
+
+if(!$_GET['date']) $_GET['date'] = date('Y-m');
+
+// 일정분류사용시 노출
+if($rows['use_cate']=='yes') {
+	include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+	$category = new rankup_category;
+	$cate_res = $category->get_bundles('calendar', $rows['no']);
+	$cates = fetch_contents($cate_res, '<li><dl class="c{:no:}"><dt></dt><dd>{:item:}</dd></dl></li>', array($calendar, '_c74'));
+	$cate_styles = fetch_contents($cate_res, 'dl.c{:no:} dt {background-color:{:bgcolor:}} dl.c{:no:} dd {color:{:color:}}', array($calendar, '_c74'));
+	if(in_array($rows['print_type'], array('cate', 'both'))) {
+		$cate_texts = array();
+		while($crows = $category->fetch($cate_res)) {
+			$cate_texts[$crows['no']] = $crows['item'];
+		}
+	}
+}
+// 열람 메쏘드 처리 - 2012.05.08 added
+$read_method = ($rows['read_level']>=($member_info['uid'] ? $member_info['level'] : $rankup_member->lowest_level)) ? 'open' : 'disallow';
+?>
+
+<style type="text/css">
+/* category styles */
+<?php
+// 일정분류 스타일
+echo $cate_styles;
+?>
+</style>
+
+<div id="container">
+
+	<div id="schedual_frame">
+		<div class="scd_view">
+			<!-- 일정표 상단 -->
+			<div class="monthly">
+				<a href="./index.html<?=params('date='.date('Y-m', strtotime("$_GET[date]-01 -1 month")))?>"><img src="<?=$m_domain?>schedule/img/btn_mon_pre.png" alt="이전달" /></a>
+				<?php
+				// 문자를 이미지로 치환
+				echo rankup_util::str2img(date('Y.m', strtotime("$_GET[date]-01")), array(
+					'.' => '<img src="'.$m_domain.'schedule/img/dot.png" alt="점" />',
+					'0' => '<img src="'.$m_domain.'schedule/img/num0.png" alt="0" />',
+					'1' => '<img src="'.$m_domain.'schedule/img/num1.png" alt="1" />',
+					'2' => '<img src="'.$m_domain.'schedule/img/num2.png" alt="2" />',
+					'3' => '<img src="'.$m_domain.'schedule/img/num3.png" alt="3" />',
+					'4' => '<img src="'.$m_domain.'schedule/img/num4.png" alt="4" />',
+					'5' => '<img src="'.$m_domain.'schedule/img/num5.png" alt="5" />',
+					'6' => '<img src="'.$m_domain.'schedule/img/num6.png" alt="6" />',
+					'7' => '<img src="'.$m_domain.'schedule/img/num7.png" alt="7" />',
+					'8' => '<img src="'.$m_domain.'schedule/img/num8.png" alt="8" />',
+					'9' => '<img src="'.$m_domain.'schedule/img/num9.png" alt="9" />'
+				));
+				?>
+				<a href="./index.html<?=params('date='.date('Y-m', strtotime("$_GET[date]-01 1 month")))?>"><img src="<?=$m_domain?>schedule/img/btn_mon_next.png" alt="다음달" /></a>
+			</div><!-- monthly End -->
+<?php
+// 분류사용시
+if($rows['use_cate']=='yes' && $cates) {
+?>
+			<div id="cate_frame">
+				<ul class="cate_ico">
+					<?=$cates?>
+				</ul>
+				<div class="clear"></div>
+			</div><!-- cate_frame End -->
+<?php
+}
+?>
+			<!-- 일정표 상단 끝-->
+
+			<table id="calendar_frame" cellspacing="0" summary="주요일정안내" class="calendar">
+				<colgroup>
+					<col width="10%" />
+					<col width="20%" />
+					<col width="*%" />
+				</colgroup>
+				<thead class="weekday_bg" bgcolor="#ababab">
+					<tr>
+						<th abbr="" scope="col" class="img_bgc">&nbsp;</th>
+						<th abbr="일자" scope="col" class="img_bgc"><span class="mon_txt"><img src="<?=$m_domain?>schedule/img/date.png" alt="일요일"/></span></th>
+						<th abbr="내용" scope="col" class="img_bgc"><span class="mon_txt"><img src="<?=$m_domain?>schedule/img/content.png" alt="월요일"/></span></th>
+				</thead>
+				<tbody class="mon_day">
+					<?php
+					echo $schedule->print_contents($_GET['no'], array(
+						'skin_type' => 'list', // 스킨형태
+						'entry' => array(
+							0 => '<tr><td class="space_bg"></td><td></td></tr>',
+							1 => '
+							<tr>
+								{:on_week_col:}
+								<td class="{:bgcolor:}">
+									{:on_date:}
+								</td>
+								<td class="{:bgcolor:}">
+									{:on_schedule:}
+								</td>
+							</tr>'
+						),
+						'on_week_col' => '<td class="week_img" rowspan="{:rowspan:}"><img src="'.$m_domain.'schedule/img/week{:week_row:}.png" alt="{:week_row:}주" /></td>',
+						'bgcolors' => array(
+							'on' => '',
+							'off' => ' space_bg', // 빈셀
+							'today' => ' today' // 오늘
+						),
+						'colors' => array(
+							'sat' => ' blue_font', // 토요일
+							'rest' => ' red_font', // 일요일 & 공휴일 색상
+						),
+						'on_day_text' => '{:day_text:}',
+						'on_date' => '
+							<span class="{:color:}">
+								{:day:} {:on_day_text:}
+							</div>',
+
+						// 일정 entry
+						'schedule_entry' => array(
+							'entry' => array(
+								1 => '
+								<div id="item" no="{:no:}" class="plan_box h15">
+									<dl class="c{:cate:}">
+										<dt></dt>
+										<dd><a onClick="schedule.'.$read_method.'(\'{:date:}\', \'{:no:}\')">{:on_cate:}{:subject:}</a></dd>
+									</dl>
+								</div>'
+							),
+							'on_cate' => '[{:cate_text:}] ', // 분류명
+							'print_type' => $rows['print_type'], // 일정출력사항
+							'cate_texts' => $cate_texts // 카테고리 이름
+						),
+						'view_holyday' => $rows['view_holyday'] // 국경일 출력여부
+					), true);
+					?>
+				</tbody>
+			</table>
+
+		</div><!-- scd_view End -->
+	</div><!-- schedual_frame End -->
+</div><!-- container End -->
+
+<div id="pop_wrap" style="position:absolute;z-index:2;display:none">
+	<div id="scd_frame" class="img_bgc">
+		<div class="sch_bg">
+			<h2><img src="<?=$m_domain?>schedule/img/s_detail_tit.png" alt="스케줄상세보기" /></h2>
+			<p class="close_btn"><a onClick="schedule.close()"><img src="<?=$m_domain?>schedule/img/btn_close.png" alt="닫기" /></a></p>
+			<div class="sch_view">
+				<table cellspacing="0" summary="스케줄상세보기" class="sch_tb">
+					<colgroup>
+						<col width="20%" />
+						<col width="*" />
+					</colgroup>
+					<tbody>
+						<tr>
+							<th class="img_bgc"><img src="<?=$m_domain?>schedule/img/subject.png" alt="주제" /></th>
+							<td id="sch_subject"></td>
+						</tr>
+						<tr>
+							<th class="img_bgc"><img src="<?=$m_domain?>schedule/img/period.png" alt="기간" /></th>
+							<td id="sch_date"></td>
+						</tr>
+						<tr class="h_limit">
+							<th class="img_bgc"><img src="<?=$m_domain?>schedule/img/content.png" alt="내용" /></th>
+							<td id="sch_comment"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<p class="bclose_btn"><a onClick="schedule.close()"><img src="<?=$m_domain?>schedule/img/btn_close2.gif" alt="닫기" /></a></p>
+		</div>
+	</div>
+</div><!-- pop_wrap End -->
+<script type="text/javascript">
+//<![CDATA[
+var schedule = {
+	initialize: function(frame) {
+		this.frame = $(frame);
+	},
+	disallow: function(date, no) {
+		alert('죄송합니다. 일정 열람권한이 없습니다.\n\n일정 열람은 <?=$config_info['smlevel'][$rows['read_level']]?> 부터 하실 수 있습니다.');
+		return false;
+	},
+	open: function(date, no) {
+		var self = this;
+		$esc.add('schedule.close()'); // escap 추가
+		proc.parameters({mode: 'load_schedule', no:no});
+		proc.process(function(trans) {
+			var json = trans.responseText.evalJSON();
+			$w('subject comment').each(function(field) { $('sch_'+ field).update(json[field].replace(/\t/g, '&nbsp;'.times(4)).replace(/\n/g, '<br />')) });
+			with(json) {
+				var date = (sdate==edate) ? sdate : sdate +' ~ '+ edate;
+				$('sch_date').update(date +'<div id="sch_xdays"></div>');
+				var xspot = $('sch_date');
+				if(xdays || xdates) {
+					if(xdays) {
+						var days = {mon:'월요일', tue:'화요일', wed:'수요일', thu:'목요일', fri:'금요일', sat:'토요일', sun:'일요일', rest:'국가공휴일'}
+						$H(days).each(function(day) { xdays = xdays.replace(day.key, day.value) });
+					}
+					if(xdates && xdays) xdates = ','+ xdates;
+					$('sch_xdays').update('(기간내 '+ (xdays + xdates).replace(/,/g, ', ') +' 제외)');
+				}
+			}
+			blind.draw();
+			self.frame.show();
+			position.center(self.frame);
+		}, false);
+	},
+	close: function() {
+		this.frame.hide();
+		blind.remove();
+		$esc.remove('schedule.close()');
+	}
+}
+schedule.initialize('pop_wrap');
+//]]>
+</script>
+
+<?php
+include_once '../include/bottom.html';
+?>

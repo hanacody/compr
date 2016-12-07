@@ -1,0 +1,100 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+
+$db = new db_class;
+$often = new often_class;
+
+$todayyear = date("Y");
+$todaydate = date("m");
+$todayday = date("d");
+$today = $todayyear."-".$todaydate."-".$todayday;
+
+if($_GET['mode'] == 'search') {
+	$searchday1 = $_GET['day1yy']."-".$_GET['day1mm']."-".$_GET['day1dd'];
+	$searchday2 = $_GET['day2yy']."-".$_GET['day2mm']."-".$_GET['day2dd'];
+	$connection = "and wdate >= '$searchday1' and wdate <= '$searchday2'";
+}
+else {
+	$connection = "and wdate >= '$today' and wdate <= '$today'";
+}
+
+$exis_select = $db->sel("rankuplog_time","where no $connection");
+$num = $exis_select['cnt'];
+
+if($num){
+	$select = $db->sel("rankuplog_time","where no $connection","sum(time0),sum(time1),sum(time2),sum(time3),sum(time4),sum(time5),sum(time6),sum(time7),sum(time8),sum(time9),sum(time10),sum(time11),sum(time12),sum(time13),sum(time14),sum(time15),sum(time16),sum(time17),sum(time18),sum(time19),sum(time20),sum(time21),sum(time22),sum(time23)");
+	$fatch = mysql_fetch_array($select['result']);
+
+	$maxnumsel = $db->sel("rankuplog_time","where no $connection","greatest(sum(time0),sum(time1),sum(time2),sum(time3),sum(time4),sum(time5),sum(time6),sum(time7),sum(time8),sum(time9),sum(time10),sum(time11),sum(time12),sum(time13),sum(time14),sum(time15),sum(time16),sum(time17),sum(time18),sum(time19),sum(time20),sum(time21),sum(time22),sum(time23))");
+	$maxnumfat = mysql_result($maxnumsel['result'],0,0);
+
+
+	$mannumber = 500; //최대값변수처리
+}
+
+include_once "./rankup_toplink.html";
+?>
+<script type="text/javascript" src="../rankup_chart/js/swfobject.js"></script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">2005년1월1일 하루 날짜를 알고 싶을때는 2005-1-1~2005-1-1 선택하시고 검색하시면 됩니다</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name=form method=get action=<?php echo $_GET['PHP_SELF']; ?>>
+					<input type=hidden name=mode value=search>
+					<tr>
+						<td class="gray_bg" align="center"><?php $often->calendar("form","day1"); echo"~"; $often->calendar("form","day2");?>&nbsp;&nbsp;<input type=image src=../../Libs/_images/btn_search.gif border=0 align=absmiddle alt='검색'></td>
+					</tr>
+					</form>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="20"></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="4" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+<?
+$data_file = urlencode("./chart_data/set_chart_time.php?mode=".$_GET['mode']."&day1yy=".$_GET['day1yy']."&day1mm=".$_GET['day1mm']."&day1dd=".$_GET['day1dd']."&day2yy=".$_GET['day2yy']."&day2mm=".$_GET['day2mm']."&day2dd=".$_GET['day2dd']);
+?>
+					<tr>
+						<td colspan="2">
+							<div id="my_chart"></div>
+							<script type="text/javascript">
+							swfobject.embedSWF("../rankup_chart/open-flash-chart.swf", "my_chart", "740", "500","9.0.0", "expressInstall.swf",{"data-file":"<?=$data_file?>"} );
+							</script>
+						</td>
+					</tr>
+						</table>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+
+</body>
+</html>

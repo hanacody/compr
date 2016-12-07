@@ -1,0 +1,423 @@
+<?php
+#####################################################################
+# 프로그램 : Rankup Multi-Board Part. II
+# 개발버전 : V1.1.090623
+# 개발자명 : C2tFiw( Kurokisi )
+# 라이센스 : 랭크업
+# 업데이트 : 2009-06-23
+#####################################################################
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "./rankup_board.class.php";
+include_once "./rankup_board_admin.class.php";
+$rankup_control->check_admin();
+$rankup_board = new rankup_board_admin;
+if(empty($_GET['category'])) $_GET['category'] = $rankup_board->get_main_category();
+$main_skin_options = $rankup_board->get_board_skins("main");
+if($_GET['category']!=="main") $left_skin_options = $rankup_board->get_board_skins("left");
+$rankup_control->print_admin_head("멀티게시판관리 - 게시판메인설정");
+?>
+<body style="overflow-y:scroll">
+<?php
+if($rankup_board->include_js_class) rankup_basic::include_js_class(); // 2009.10.08 fixed
+?>
+<div class="bar"><script> titleBar('멀티게시판관리 - 게시판메인설정', 300) </script></div>
+<link rel="stylesheet" type="text/css" href="./rankup_board.css">
+<script type="text/javascript" src="./rankup_board.class.js"></script>
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:30px;">
+<tr>
+	<td bgcolor='#eeeeee' height='50' align="center" style="padding:8px">
+		<table width="690" cellpadding="3" cellspacing="0" border="0">
+		<col width="16%"><col span="6" width="14%">
+		<tbody id="categoryDiv">
+		<?=$rankup_board->print_category()?>
+		</tbody>
+		</table>
+	</td>
+</tr>
+<tr><td height='1' bgcolor='#dddddd'></td></tr>
+</table>
+
+<!-- 블라인드 -->
+<div id="screenBlindDiv"></div>
+<!-- 블라인드 -->
+
+<!-- 프로세스 처리 프레임 -->
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+<!-- 프로세스 처리 프레임 -->
+
+<!-- 메인게시판 선택 폼 -->
+<table id="setMainBoardTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:694px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="padding-top:5px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">메인게시판으로 사용할 게시판 선택</strong></td>
+		</tr>
+		<tr>
+			<td align="center">
+				<table width="100%" border="0" cellspacing="2" cellpadding="1" bgcolor="#ededed">
+				<tr bgcolor="black">
+					<td style="padding-bottom:2px;padding-left:0px;">
+						<div id="setMainBoardItemDiv"></div>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><img src="./img/btn_input.gif" align="absmiddle" onClick="rankup_board.apply_settings('setMainBoardTable')" style="cursor:pointer;"> <img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('setMainBoardTable', false)" style="cursor:pointer;"></td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+</table>
+<!-- 메인게시판 선택 폼 -->
+
+<!-- 출력형태 설정폼 -->
+<table id="setMainStyleTable" cellpadding="0" cellspacing="0">
+<tr align="center">
+	<td>
+		<div style="width:400px;padding:6px;border:#777777 1px solid;background-color:white;">
+		<table width="100%" border="0" cellpadding="2" cellspacing="0">
+		<tbody bgcolor="white">
+		<tr>
+			<td style="padding-top:5px;"><img src="./img/ic_bullet1.gif"><strong class="sub_title">게시판('<span id="board_name"></span>') 출력형태 설정</strong></td>
+		</tr>
+		<tr>
+			<td align="center">
+				<div id="setMainStyleItemDiv">
+				<li>
+				<div class='col1'>
+					<div class='colA'><input type="radio" name="main_style" value="text"></div>
+					<div class='colB'>텍스트형</div>
+				</div>
+				<div class='col2'><img src="./img/type_text.gif"></div>
+				</li>
+				<li>
+				<div class='col1'>
+					<div class='colA'><input type="radio" name="main_style" value="both"></div>
+					<div class='colB'>혼합형 (이미지 + 텍스트)</div>
+				</div>
+				<div class='col2'><img src="./img/type_text_img.gif"></div>
+				</li>
+				<li>
+				<div class='col1'>
+					<div class='colA'><input type="radio" name="main_style" value="image"></div>
+					<div class='colB'>이미지형</div>
+				</div>
+				<div class='col2'><img src="./img/type_img.gif"></div>
+				</li>
+				</div>
+			</td>
+		</tr>
+		<tr align="center">
+			<td style="padding-top:6px;"><img src="./img/btn_input.gif" align="absmiddle" onClick="rankup_board.apply_settings('setMainStyleTable')" style="cursor:pointer;" alt="입력"> <img src="./img/btn_close.gif" align="absmiddle" onClick="rankup_board.change_display('setMainStyleTable', false)" style="cursor:pointer;" alt="닫기"></td>
+		</tr>
+		</tbody>
+		</table>
+		</div>
+	</td>
+</tr>
+</table>
+<!-- 출력형태 설정폼 -->
+
+<!-- 메인게시판 관리 BODY -->
+<table width="700" cellpadding="0" cellspacing="0" border="0" align="center">
+<tr>
+	<td align="right" style="padding:4px"><a onClick="board_help.style.display=board_help.style.display=='none' ? 'block' : 'none';"><img src="./img/btn_help.gif" border="0" align="absmiddle"></td>
+</tr>
+<!--도움말-->
+<tr id="board_help" style="display:none;">
+	<td>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+		<tr>
+			<td style="border:1px solid #eccbb1;background-color:#faf3ee;padding:10px;">
+				<table cellpadding="0" cellspacing="5" border="0" width="100%">
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 각 메뉴마다 메인페이지를 사용하실 수 있습니다.</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 메인페이지 및 각 메뉴의 메인페이지에 출력시킬 게시판을 선택하세요.</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 체크박스에 선택된 게시판만 출력되며 게시판 순서는 '게시판생성/관리'에서 설정하세요.</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 출력되는 게시물의 제목 글자수와 게시물의 갯수를 설정하실 수 있습니다.</td>
+				</tr>
+				<tr>
+					<td><img src="./img/ic_arrow2.gif"> 출력되는 게시판의 형태는 3가지형태중에 선택 하실 수 있습니다.</td>
+				</tr>
+				<tr>
+					<td>
+						<table width="100%" cellpadding="1" cellspacing="0" border="0">
+						<tr><td height="10"></td></tr>
+						<tr><td><b>1. 텍스트형</td></tr>
+						<tr><td style="padding-left:3px">최근 게시물이 텍스트형태로 출력됩니다.</td></tr>
+						<tr><td align="center"><img src="./img/help_type_text.gif"></td></tr>
+						<tr><td height="20"></td></tr>
+						<tr><td><b>2. 이미지+텍스트형</td></tr>
+						<tr><td style="padding-left:3px">최근 게시물이 이미지형태와 텍스트형태가 함께 출력됩니다.</td></tr>
+						<tr><td align="center"><img src="./img/help_type_text_img.gif"></td></tr>
+						<tr><td height="20"></td></tr>
+						<tr><td><b>3. 이미지형</td></tr>
+						<tr><td style="padding-left:3px">최근 게시물이 이미지형태로 출력됩니다.</td></tr>
+						<tr><td align="center"><img src="./img/help_type_img.gif"></td></tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<!--도움말-->
+</table>
+
+<!-- 세팅 폼 -->
+<form name="boardSettingFrm" action="./multiProcess.ajax.html" target="multiProcessFrame" method="POST" style="margin:0px;padding:0px" onSubmit="return (validate(this)&&confirm('설정사항을 저장하시겠습니까?'+SPACE))">
+<input type="hidden" name="mode" value="update_board">
+<input type="hidden" name="cmd" value="set_layout">
+<input type="hidden" name="category" value="<?=$_GET['category']?>">
+
+<?
+## 메인페이지 선택시에는 메인페이지 사용여부를 묻지 않는다 ##
+if($_GET['category']!=="main") {
+?>
+
+<table width="700" align="center" cellpadding="4" cellspacing="0" border="0">
+<tr>
+	<td><img src="./img/ic_bullet1.gif"><span id="boardPositionDiv" class="sub_title">메인페이지 사용여부 설정</span></td>
+</tr>
+<tr>
+	<td style="padding-top:1px">
+		<table width="100%" cellpadding="5" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center" style="border-top:2px solid #6699cc">
+		<thead bgcolor="white">
+		<tr>
+			<td bgcolor="#f7f7f7" width="30%"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;메인페이지 사용여부</td>
+			<td width="70%">
+				<input type="radio" name="pcmval" value="yes" checked onClick="rankup_board.check_main_layout(this)" id="pcmval_yes"><label for="pcmval_yes">사용함</label>
+				<input type="radio" name="pcmval" value="no" onClick="rankup_board.check_main_layout(this)" id="pcmval_no"><label for="pcmval_no">사용안함</label>
+			</td>
+		</tr>
+		<tr id="mainBoardDiv">
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;메인게시판 설정</td>
+			<td style="padding-top:4px;padding-bottom:4px">
+				<input type="hidden" name="mbno" required message="메인페이지로 사용할 게시판을 선택하여 주십시오." nofocus>
+				<div id="mainBoardItem">설정값 없음</div> <img src="./img/btn_set_mainboard.gif" id="mainBoardSettingButton" onClick="rankup_board.set_main_board()" style="cursor:pointer;float:left" align="absmiddle"><span id="tip" style="float:left;padding-top:4px;">+ 메인페이지로 사용할 게시판 설정</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;좌측 메뉴 스킨설정</td>
+			<td>
+				<select name="left_skin">
+				<?=$left_skin_options?>
+				</select><span id="tip">+ 좌측 메뉴에 적용할 테마</span>
+			</td>
+		</tr>
+		</thead>
+		<tbody bgcolor="white" id="boardMainSettingDiv" style="display:none">
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;메인페이지 스킨설정</td>
+			<td>
+				<select name="main_skin">
+				<?=$main_skin_options?>
+				</select><span id="tip">+ 메뉴 클릭시 적용할 메인페이지 테마</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;1줄에 출력할 게시판 수</td>
+			<td>
+				<input type="radio" name="mbnum" required hname="1줄에 출력할 게시판 수" checked value="1" id="mbnum_1"><label for="mbnum_1">1개씩 출력</label>
+				<input type="radio" name="mbnum" value="2" id="mbnum_2"><label for="mbnum_2">2개씩 출력</label>
+				<span id="tip">+ 1줄에 출력할 게시판의 갯수</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;이번주 BEST 출력</td>
+			<td>
+				<input type="radio" name="wbest" value="no" id="wbest_no"><label for="wbest_no">출력안함</label>
+				<input type="radio" name="wbest" value="yes" checked id="wbest_yes"><label for="wbest_yes">출력함</label>
+				<select id="wbest_num" name="wbest_num">
+				<option value="5">5개</option>
+				<option value="10">10개</option>
+				<option value="15">15개</option>
+				<option value="20">20개</option>
+				</select>
+				<span id="tip">+ 이번주 BEST 출력 여부 설정</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;조회수/댓글수 BEST 출력</td>
+			<td>
+				<input type="radio" name="hcbest" value="no" id="hcbest_no"><label for="hcbest_no">출력안함</label>
+				<input type="radio" name="hcbest" value="yes" checked id="hcbest_yes"><label for="hcbest_yes">출력함</label>
+				<select id="hcbest_num" name="hcbest_num">
+				<option value="5">5개</option>
+				<option value="10">10개</option>
+				<option value="15">15개</option>
+				<option value="20">20개</option>
+				</select>
+				<span id="tip">+ 조회수/댓글수 BEST 출력 여부 설정</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;새로 등록된 글 출력</td>
+			<td>
+				<input type="radio" name="narticle" value="no" id="narticle_no"><label for="narticle_no">출력안함</label>
+				<input type="radio" name="narticle" value="yes" checked id="narticle_yes"><label for="narticle_yes">출력함</label>
+				<select id="narticle_num" name="narticle_num">
+				<option value="5">5개</option>
+				<option value="10">10개</option>
+				<option value="15">15개</option>
+				<option value="20">20개</option>
+				</select>
+				<span id="tip">+ 새로 등록된 글 출력 여부 설정</span>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+<tr height="10">
+	<td></td>
+</tr>
+</table>
+
+<?
+} // @eo  if($_GET['category']!=="main")
+// 메인페이지 디자인 설정인 경우
+else {
+?>
+
+<table width="700" align="center" cellpadding="4" cellspacing="0" border="0">
+<tr>
+	<td><img src="./img/ic_bullet1.gif"><span id="boardPositionDiv" class="sub_title">메인페이지 사용여부 설정</span></td>
+</tr>
+<tr>
+	<td style="padding-top:1px">
+		<table width="100%" cellpadding="5" cellspacing="1" bgcolor="#d7d7d7" border="0" align="center" style="border-top:2px solid #6699cc">
+		<tbody bgcolor="white">
+		<tr>
+			<td bgcolor="#f7f7f7" width="30%"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;메인페이지 스킨설정</td>
+			<td width="70%">
+				<select name="main_skin">
+				<?=$main_skin_options?>
+				</select><span id="tip">+ 메뉴 클릭시 적용할 메인페이지 테마</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;1줄에 출력할 게시판 수</td>
+			<td>
+				<input type="radio" name="mbnum" required hname="1줄에 출력할 게시판 수" checked value="1" id="mbnum_1"><label for="mbnum_1">1개씩 출력</label>
+				<input type="radio" name="mbnum" value="2" id="mbnum_2"><label for="mbnum_2">2개씩 출력</label>
+				<span id="tip">+ 1줄에 출력할 게시판의 갯수</span>
+			</td>
+		</tr>
+		<tr>
+			<td bgcolor="#f7f7f7"><img src="./img/ic_dot1.gif" align='absmiddle'>&nbsp;새로 등록된 글 출력</td>
+			<td>
+				<input type="radio" name="narticle" value="no" id="narticle_no"><label for="narticle_no">출력안함</label>
+				<input type="radio" name="narticle" value="yes" checked id="narticle_yes"><label for="narticle_yes">출력함</label>
+				<select id="narticle_num" name="narticle_num">
+				<option value="5">5개</option>
+				<option value="10">10개</option>
+				<option value="15">15개</option>
+				<option value="20">20개</option>
+				</select>
+				<span id="tip">+ 새로 등록된 글 출력 여부 설정</span>
+			</td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+<tr height="10">
+	<td></td>
+</tr>
+</table>
+
+<?
+}
+?>
+
+<!-- 도움말 레이어 -->
+<div id="noticePopupDiv"></div>
+<!-- 도움말 레이어 -->
+
+<table id="settingBoardItemDiv" width="700" cellpadding="0" cellspacing="0" style="margin-bottom:20px;" align="center" style="display:<?echo ($_GET['category']!=="main") ? "none" : "block" ?>">
+<tr>
+	<td>
+		<table width="700" align="center" cellpadding="4" cellspacing="0" border="0">
+		<tr>
+			<td class="sub_title"><img src="./img/ic_bullet1.gif"><span id="boardPositionDiv"></span>메인페이지에 출력할 게시판 설정</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td>
+		<table id="boardSettingItemBox" cellpadding="0" cellspacing="0" border="0" align="center">
+		<tr height="3" bgcolor="#6699CC"><td></td></tr>
+		<tr bgcolor="#f7f7f7">
+			<td>
+				<? if($_GET['category']=="main") echo "<div class=\"colA\">메뉴명</div>" ?>
+				<div class="col1"><input type="checkbox" style="cursor:pointer" id="checkAll_id1" onClick="rankup_board.checkAll(this.checked)" onFocus="this.blur()"></div>
+				<div class="col<?=$_GET['category']=="main" ? "B" : "2"?>">게시판명</div>
+				<div class="col3" style="padding-top:7px;">제목길이</div>
+				<div class="col4" style="padding-top:7px;">게시물수</div>
+				<div class="col5" style="padding-top:7px;">이미지사이즈</div>
+				<div class="col6" style="color:black">출력형태</div>
+			</td>
+		</tr>
+		<tbody id="boardSettingItemList" bgcolor="white" align="center">
+		<tr disabled>
+			<td>
+				<div class="col1"><input type="checkbox" disabled></div>
+				<div class="colZ">등록된 게시판이 없습니다.</div>
+				<div class="col6">출력형태</div>
+			</td>
+		</tr>
+		</tbody>
+		<tr height="1"><td style="font-size:1px;">&nbsp;</td></tr>
+		</table>
+	</td>
+</tr>
+</table>
+
+<table width="700" border="0" cellpadding="2" cellspacing="0" align="center">
+<tr align="center">
+	<td><input type="image" src="./img/btn_save1.gif" align="absmiddle" alt="저장"> <img src="./img/btn_preview.gif" onClick="rankup_board.preview_main()" style="cursor:pointer;" align="absmiddle" alt="미리보기"></td>
+</tr>
+<tr height="20">
+	<td></td>
+</tr>
+</table>
+<!-- 메인게시판 관리 BODY -->
+
+</form>
+<!-- 세팅 폼 -->
+
+<script type="text/javascript">
+<!--
+// 카테고리 변수 생성
+var rankup_board = new RANKUP_BOARD;
+var classObj = rankup_board;
+rankup_board.setCategory = "<?=$_GET['category']?>";
+rankup_board.index_url = "<?=$rankup_board->index_url?>";
+rankup_board.get_board_settings();
+// 출력형태 설정폼 이벤트 할당
+$$("#setMainStyleItemDiv li").each(function(li) {
+	li.className = "normalRow";
+	Event.observe(li, "mouseover", classObj.toggle_className);
+	Event.observe(li, "mouseout", classObj.toggle_className);
+	Event.observe(li, "click", classObj.toggle_checkBox);
+});
+//-->
+</script>
+</body>
+</html>

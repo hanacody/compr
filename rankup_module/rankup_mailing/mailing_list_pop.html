@@ -1,0 +1,46 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+$rankup_control->print_admin_head('발송될 메일주소 보기');
+?>
+<body>
+<div class="bar"><script> titleBar('발송될 메일주소 보기') </script></div>
+
+<table width="100%" border="0" align="center" cellspacing="0" cellpadding="0">
+<tr>
+	<td>
+		<table border="0" cellpadding="0" cellspacing="0" align="center" width="90%">
+		<tr><td height="10"></td></tr>
+		<tr><td height="25"><div id="sub_title">발송될 이메일 리스트</div></td></tr>
+		<tr>
+			<td>
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1"  bordercolor="#d7d7d7" class="table1 list_top">
+				<tr align="center">
+					<td width="30" class="gray_bg">no</td>
+					<td width="100" class="gray_bg">대상자</td>
+					<td class="gray_bg">이메일주소</td>
+				</tr>
+				<?php
+				$rank = 1;
+				$lists = $rankup_control->queryFetchRows(base64_decode($_GET['query']));
+				foreach($lists as $rows) {
+					if(!$rows['uid']) $rows['uid'] = $rows['name'];
+					if(!$rows['uid']) $rows['uid'] = '비회원';
+					echo sprintf('<tr><td align="center">%d</td><td align="center">%s</td><td>%s</td></tr>', $rank++, $rows['uid'], $rows['email']);
+				}
+				?>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td height="40" align="center">
+		<a href="javascript:self.close();"><img src="../../Libs/_images/btn_close.gif" alt="닫기" align="absmiddle" /></a>
+	</td>
+</tr>
+</table>
+</body>
+</html>

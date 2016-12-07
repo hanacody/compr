@@ -1,0 +1,142 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "../../Libs/_php/rankup_popup.class.php";
+include_once '../../rankup_module/rankup_sms/rankup_sms_config.class.php';
+$rankup_sms_config = new rankup_sms_config();
+
+$rankup_popup = new rankup_popup;
+
+switch($_POST['mode']) {
+
+	#################################################################################
+	## 팝업 등록/수정 - iframe 에서 처리
+	case "insert":
+	case "update":
+	#################################################################################
+		$rankup_control->check_admin();
+		include_once $wysiwyg_dir."wysiwyg_Class.php";
+
+		$_POST['content'] = $Wysiwyg->wysiwyg_result_func(stripslashes($_POST['content']));
+
+		$result = $rankup_popup->regist_popup($_POST, $_POST['mode']);
+		if($_POST['mode']=="insert") $message = $result ? $_STRINGSET[202] : $_STRINGSET[402]; // 등록성공 | 실패
+		else $message = $result ? $_STRINGSET[203] : $_STRINGSET[403]; // 수정성공 | 실패
+
+		// 생성/수정한 팝업 정보를 생성해서 해당 노드에 innerHTML 시킨 후 rebuild_event() 시킴
+		$popup_datas = $rankup_popup->get_popup(array("no"=>$result), false);
+		$popup_item = $rankup_popup->get_html_formalize($popup_datas, true);
+		$popup_item = str_replace(array('"', "\r", "\n"), array('\"', "\\\r", "\\\n"), $popup_item);
+
+		echo "
+		<script type='text/javascript'>
+		<!--
+		alert('$message          ');
+		var popup_item = {'no': $result, 'item': \"$popup_item\"};
+		parent.popup.append_popup_item('$_POST[mode]', popup_item);
+		//-->
+		</script>";
+		exit;
+		break;
+
+	#################################################################################
+	## 팝업 순위 값 갱신(전체) - iframe 에서 처리
+	case "save_settings":
+	#################################################################################
+		$rankup_control->check_admin();
+		$result = $rankup_popup->set_popup();
+		exit;
+		break;
+
+
+	#################################################################################
+	# Ajax 처리 루틴 - GET 방식
+	default:
+	#################################################################################
+			// 인코딩 변환
+			$rankup_control->change_encoding($_GET, "IN");
+			switch($_GET['mode']) {
+				#######################################################################
+				## 팝업 삭제
+				case "delete":
+				#######################################################################
+					$result = $rankup_popup->delete_popup($_GET['data']);
+					$message = $result ? $_STRINGSET[205] : $_STRINGSET[405]; // 삭제성공 | 실패
+					break;
+
+				#######################################################################
+				## 팝업 사용여부 변경
+				case "view":
+				#######################################################################
+					$result = $rankup_popup->set_popup($_GET['mode']);
+					$message = $result ? $_STRINGSET[204] : $_STRINGSET[404]; // 적용성공 | 실패
+					break;
+
+				#######################################################################
+				## 팝업 순위 값 변경 - 건별
+				case "save_setting":
+				#######################################################################
+					$result = $rankup_popup->set_popup($_GET['kind']);
+					break;
+
+				#######################################################################
+				## 팝업 추출 - 사용자페이지
+				case "popup_list":
+				#######################################################################
+					$message = $rankup_popup->get_popup(array("view"=>"yes", "check_date"=>"yes"), true);
+					$result = $message ? true : false;
+					break;
+
+				#######################################################################
+				## 팝업 폼 - 메일
+				case "mail":
+				#######################################################################
+					include "mail_input.html";
+					$result = !empty($message);
+					break;
+
+				#######################################################################
+				## 팝업 폼 - 메일발송
+				case "mail_post":
+				#######################################################################
+					include_once "../../Libs/_php/rankup_mail.class.php";
+					$rankup_mail = new rankup_mail;
+					$result = $rankup_mail->set_mail($_GET);
+					break;
+
+				#######################################################################
+				## 팝업 폼 - SMS
+				case "sms":
+				#######################################################################
+					include "sms_input.html";
+					$result = !empty($message);
+					break;
+
+				#######################################################################
+				## 팝업 폼 - SMS 발송
+				case "sms_post":
+				#######################################################################
+					include_once '../../rankup_module/rankup_sms/rankup_sms.class.php';
+					$rankup_sms = new rankup_sms('send_between_member');
+					$from = $_GET['from_hphone1'].$_GET['from_hphone2'].$_GET['from_hphone3'];	//보내는 사람 전화 번호
+					$to = $_GET['to_hphone1'].$_GET['to_hphone2'].$_GET['to_hphone3']; 	//받는사람 번호
+					$txtMessage = addslashes($_GET['msg']);	 //메시지
+					if(iconv("UTF-8","UTF-8",$txtMessage) == $txtMessage) $txtMessage = iconv("UTF-8", "euc-kr",$txtMessage);
+					$rankup_sms->set_value($to, '' , $txtMessage);
+					$rankup_sms->callback = $from;
+					$result = $rankup_sms->send_msg_member();
+					if(preg_match("/result:ok/i",$result)) $result = 1;
+					else $result = 0;
+					break;
+
+			}
+		$results = array(0=>"failure", 1=>"success");
+		$result = $results[$result];
+
+		// 인코딩 변환
+		$rankup_control->change_encoding($message, "OUT");
+
+		header("Content-type: text/xml; charset=utf-8");
+		echo "<?xml version='1.0' encoding='utf-8'?>\n";
+		echo "<resultData result='$result'>$message</resultData>\n";
+}
+?>

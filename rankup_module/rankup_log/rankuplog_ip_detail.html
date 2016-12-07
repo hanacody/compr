@@ -1,0 +1,93 @@
+<?php
+include "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+include "./Libs/db_class.php";
+include "./Libs/often_class.php";
+
+$db = new db_class;
+$often = new often_class;
+
+$todayyear = date("Y");
+$todaydate = date("m");
+$todayday = date("d");
+$today = $todayyear."-".$todaydate."-".$todayday;
+
+if($_GET['mode'] == 'search') {
+	$searchday1 = $_GET['day1yy']."-".$_GET['day1mm']."-".$_GET['day1dd'];
+	$searchday2 = $_GET['day2yy']."-".$_GET['day2mm']."-".$_GET['day2dd'];
+	$connection = "and wdate >= '$searchday1' and wdate <= '$searchday2'";
+}
+else {
+	$connection = "and wdate >= '$today' and wdate <= '$today'";
+}
+
+$select = $db->sel("rankuplog_ip","where content = '$content' $connection");
+
+include "./rankup_toplink.html";
+?>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+					<tr>
+						<td class="help_bg">
+							<table cellpadding="0" cellspacing="5" border="0" width="100%">
+							<tr>
+								<td><img src="../../Libs/_images/ic_arrow2.gif">2005년1월1일 하루 날짜를 알고 싶을때는 2005-1-1~2005-1-1 선택하시고 검색하시면 됩니다</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name=form method=get action=<?php echo $_SERVER['PHP_SELF'];?>>
+					<input type=hidden name=content value="<?php echo $content;;?>">
+					<input type=hidden name=mode value=search>
+					<tr>
+						<td class="gray_bg" align="center"><?php $often->calendar("form","day1"); echo"~"; $often->calendar("form","day2");?>&nbsp;&nbsp;<input type=image src=../../Libs/_images/btn_search.gif border=0 align=absmiddle alt='검색'></td>
+					</tr>
+					</form>
+					</table>
+
+				</td>
+			</tr>
+			<tr><td height="20"></td></tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+					<tr class="gray_bg" align=center>
+						<td height=30 width=20%>날짜</td>
+						<td width=60%>아이피</td>
+						<td width=20%>접속수</td>
+					</tr>
+			<?php while($row = mysql_fetch_array($select['result'])){ ?>
+					<tr onMouseOver=this.style.backgroundColor='#faf6ec' onMouseOut=this.style.backgroundColor='#ffffff'>
+						<td align=center  height=25><?php echo $row[wdate]; ?></td>
+						<td align=center><?php echo $row[content]; ?></td>
+						<td align=center><?php echo $row[num]; ?> 명</td>
+					</tr>
+			<? } ?>
+					</table>
+
+
+				</td>
+			</tr>
+			<tr><td align="center" height="40"><a href=# onclick="history.go(-1)" style=cursor:hand><img src=../../Libs/_images/btn_back.gif  alt="뒤로"></a></td></tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="50"></td></tr>
+</table>
+
+</body>
+</html>

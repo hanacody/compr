@@ -1,0 +1,653 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './top_menu.inc.php';
+include_once 'rankup_design.class.php';
+include_once 'attachment.class.php';
+
+$design = new rankup_design;
+$ms_rows = $design->get_settings('main_visual_design');
+$mo_rows = $design->get_settings('main_outlogin');
+$mv_rows = $design->get_settings('main_visual_bg');
+
+// 컨테이너 사이즈가 픽스된 경우
+if($_skin_init['main_design']['container_dimensions']=='fixed') {
+	$ms_rows['container_width'] = $_skin_init['main_design']['container_width'];
+	$ms_rows['container_height'] = $_skin_init['main_design']['container_height'];
+}
+?>
+
+<?php
+/**
+ * 컬러픽커 로드
+ *@usage: echo color_picker('name', 'value');
+ *@usage: <script> color_picker.initialize('color_frame'); </script> // 컬러픽커 초기화
+ */
+include_once $base_dir.'Libs/_picker/color_picker.inc.php';
+?>
+<script type="text/javascript"> var direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="attachment.class.js"></script>
+<script type="text/javascript" src="image_box.class.js"></script>
+<script type="text/javascript">
+var change_frame = function(el) {
+	if(!el) return;
+	var mode = [];
+	el.checked = true;
+	switch(el.value) {
+		case 'basic': mode = ['show', 'hide']; break;
+		case 'upload': mode = ['hide', 'show']; break;
+
+		case 'none': mode = ['hide', 'hide', 'hide', 'hide', 'hide', 'show', 'hide']; break;
+		case 'color': mode = ['show', 'hide', 'hide', 'show', 'hide', 'show', 'hide']; break;
+		case 'skin': mode = ['hide', 'show', 'hide', 'show', 'hide', 'show', 'hide']; break;
+		case 'image': mode = ['hide', 'hide', 'show', 'hide', 'show', 'hide', 'show']; break;
+	}
+	var frames = $w('basic upload').include(el.value) ? 'basic_frame upload_frame' : 'bg_color_frame bg_skin_frame bg_image_frame visual_bg_frame visual_bg_preview_frame';
+	$w(frames).each(function(frame, index) {
+		$(frame)[mode[index]]();
+		$A($(frame).select('input')).each(function(field) {
+			if(mode[index]=='hide') field.disabled = true;
+			else field.disabled = field.getAttribute('face') ? true : false;
+		});
+	});
+}
+</script>
+<link type="text/css" rel="stylesheet" href="image_frame.css" />
+<style type="text/css">
+div.preview {
+	width: 712px;
+	*width: 734px;
+	height: 150px;
+	overflow: auto;
+	padding: 10px;
+	border: 1px #dedede solid;
+	background-color: #f7f7f7;
+	text-align: center;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+.w100 { width: 100% }
+</style>
+
+<center>
+<div class="content_wrap">
+
+	<iframe name="post_frame" src="about:blank" style="width:100%;height:0px" frameborder="0"></iframe>
+
+	<div style="width:750px;text-align:left">
+
+		<form id="save_form" name="save_form" onSubmit="return false">
+
+			<div id="sub_title">메인 아웃로그인 설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;아웃로그인 사용</td>
+				<td>
+					<input type="radio" name="use_outlogin" checked value="yes" id="use_outlogin_yes"><label for="use_outlogin_yes">사용함</label>
+					<input type="radio" name="use_outlogin"<? if($mo_rows['use_outlogin']=='no') echo ' checked' ?> value="no" id="use_outlogin_no"><label for="use_outlogin_no">사용안함</label>
+					<span id="tip">+ 회원제를 사용하지 않을 경우 이 설정은 무시됩니다.</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;아웃로그인 위치</td>
+				<td>
+					상단여백 : <input type="text" name="outlogin_top" required hname="아웃로그인 상단여백" value="<?=$mo_rows['outlogin_top']?>" size="5" maxlength="4" option="number" ignore0 class="simpleform" /> px, &nbsp;
+					좌측여백 :<input type="text" name="outlogin_left" required hname="아웃로그인 좌측여백" value="<?=$mo_rows['outlogin_left']?>" size="5" maxlength="4" option="number" ignore0  class="simpleform" /> px
+					<span id="tip">+ 메인 비쥬얼을 기준으로 위치가 적용됩니다.</span>
+				</td>
+			</tr>
+			</table>
+			<br />
+			<br />
+
+			<div id="sub_title">메인 비쥬얼설정</div>
+			<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;메인 비쥬얼</td>
+				<td>
+					<input type="radio" name="flash_type" checked value="basic" onClick="change_frame(this)" id="flash_type_basic"><label for="flash_type_basic">랭크업 메인플래시</label>
+					<input type="radio" name="flash_type" value="upload" onClick="change_frame(this)" id="flash_type_upload"><label for="flash_type_upload">사용자 제작</label>
+				</td>
+			</tr>
+			<tr<? if($_skin_init['main_design']['container_dimensions']=='fixed') echo ' style="display: none"' ?>>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;사이즈설정</td>
+				<td>
+					<input type="text" name="container_width" required hname="메인 비쥬얼 가로크기" option="number" size="5" maxlength="4" value="<?=$ms_rows['container_width']?>" class="simpleform"> px ⅹ
+					<input type="text" name="container_height" required hname="메인 비쥬얼 가로크기" option="number" size="5" maxlength="4" value="<?=$ms_rows['container_height']?>" class="simpleform"> px <span id="tip">( 가로 ⅹ 세로 )</span>
+				</td>
+			</tr>
+			<tbody id="basic_frame">
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 등록 </td>
+					<td>
+						<?php
+						// 기본 메인플래시 - 배경 이미지
+						$attach = new attachment('flash_bg');
+						?>
+						<div id="image_frame">
+							<input type="hidden" face="attach" name="mode" value="post_attach" disabled>
+							<input type="hidden" face="attach" name="kind" value="flash_bg" disabled>
+							<input type="hidden" face="attach" name="handler" value="image_box.draw" disabled>
+							<dl>
+								<dd>
+									<span><input type="file" name="_attach_" onChange="image_box.post(this)"></span>
+									<span><a onClick="image_box.del()"><img src="./img/btn_del.gif" align="absmiddle" /></a></span>
+									<span id="tip" style="letter-spacing:0">( jpg,gif,png 파일만 가능) ( 제한크기 : 최대 <b style="letter-spacing:0"><?=$attach->configs['limit_size']?></b> )</span>
+								</dd>
+								<dt>
+								<?php
+								echo $attach->print_attachments('mfbg', array(
+									'entry' => '<div name="{:name:}" onClick="image_box.selector(this)" onMouseOver="$(this).addClassName(\'hover\')" onMouseOut="$(this).removeClassName(\'hover\')">{:content:}</div>',
+									// content
+									'image' => '<img src="'.$base_url.'{:folder:}{:name:}" align="absmiddle" />'
+								));
+								?>
+								</dt>
+							</dl>
+						</div>
+						<div class="help_bg" style="margin-top:5px">
+							<ul class="help_ul tip">
+								<li><b class="tip2">3D회전형</b> 이미지 권장 크기 : <b class="tip2">400 × 285</b></li>
+								<li><b class="tip2">2D회전형</b> 이미지 권장 크기 : <b class="tip2">500 × 320</b></li>
+								<li>그외 이미지 모션들은 <b class="tip2">메인 비쥬얼 크기</b>에 맞춰 등록하시면 됩니다.</li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 모션</td>
+					<td>
+						<?php
+						if(!$ms_rows['image_motion']) $ms_rows['image_motion'] = 1;
+						$img_motions = array('1'=>'기본','2'=>'3D회전','3'=>'2D회전','4'=>'슬라이드','5'=>'블라인드','6'=>'줌','7'=>'와이드');
+						foreach($img_motions as $num=>$name) {
+							$checked = ($ms_rows['image_motion']==$num) ? ' checked' : '';
+							echo sprintf(' <input type="radio" name="image_motion"%s value="%d" id="image_motion_%d" /><label for="image_motion_%d">%s형</label>', $checked, $num, $num, $num, $name);
+						}
+						?>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;이미지 리스트</td>
+					<td>
+						<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+						<col width="110" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;사용여부</td>
+							<td>
+								<input type="radio" name="image_list_use" checked value="yes" id="image_list_use_yes"><label for="image_list_use_yes">사용함</label>
+								<input type="radio" name="image_list_use"<? if($ms_rows['image_list_use']=='no') echo ' checked' ?> value="no" id="image_list_use_no"><label for="image_list_use_no">미사용</label>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;리스트 형태</td>
+							<td>
+								<?php
+								if(!$ms_rows['image_list_kind']) $ms_rows['image_list_kind'] = 1;
+								$list_motions = array('1'=>'갤러리','2'=>'좌우 화살표','3'=>'둥근 썸네일','4'=>'네모 썸네일','5'=>'스크롤');
+								foreach($list_motions as $num=>$name) {
+									$checked = ($ms_rows['image_list_kind']==$num) ? ' checked' : '';
+									echo sprintf(' <input type="radio" name="image_list_kind"%s value="%d" id="image_list_kind_%d" /><label for="image_list_kind_%d">%s형</label>', $checked, $num, $num, $num, $name);
+								}
+								?>
+								<div id="tip" style="padding-top:5px">+이미지 모션이 '3D회전' , '2D회전형'일 경우 '좌우 화살표형'만 작동이 가능합니다.</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;위치지정</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">상단여백</td>
+									<td>
+										<input type="text" name="image_list_top" hname="이미지 리스트 위치" option="number" value="<?=$ms_rows['image_list_top']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">좌측여백</td>
+									<td>
+										<input type="text" name="image_list_left" hname="이미지 리스트 위치" option="number" value="<?=$ms_rows['image_list_left']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;불투명도</td>
+							<td>
+								<input type="text" name="image_list_opacity" hname="이미지 리스트 불투명도" option="number" value="<?=$ms_rows['image_list_opacity']?>" size="3" maxlength="3" minval="1" maxval="100" class="simpleform">
+								<span id="tip">+불투명도 수치가 높을 수록 진하게 출력됩니다. ( 입력 범위: 1 ~ 100 )</span>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구 등록</td>
+					<td>
+						<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+						<col width="110" />
+						<col />
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구 모션</td>
+							<td>
+								<?php
+								if(!$ms_rows['text_motion']) $ms_rows['text_motion'] = 1;
+								foreach(range(1, 6) as $num) {
+									$checked = ($ms_rows['text_motion']==$num) ? ' checked' : '';
+									echo sprintf(' <input type="radio" name="text_motion"%s value="%d" id="text_motion_%d" /><label for="text_motion_%d">%s형</label>', $checked, $num, $num, $num, strtoupper(chr(64+$num)));
+								}
+								?>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;상단문구</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">문구등록</td>
+									<td>
+										<input type="text" name="top_text" hname="상단문구" value="<?=str_replace('"', '&quot;', $ms_rows['top_text'])?>" maxlength="100" class="simpleform w100" />
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">크기/색상</td>
+									<td>
+										<input type="text" name="top_text_size" hname="상단문구 글자크기" option="number" value="<?=$ms_rows['top_text_size']?>" size="5" maxlength="2" class="simpleform"> px /
+										<?=color_picker('top_text_color', $ms_rows['top_text_color'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;중간문구</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">문구등록</td>
+									<td>
+										<input type="text" name="middle_text" hname="중간문구" value="<?=str_replace('"', '&quot;', $ms_rows['middle_text'])?>" maxlength="100" class="simpleform w100" />
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">크기/색상</td>
+									<td>
+										<input type="text" name="middle_text_size" hname="중간문구 글자크기" option="number" value="<?=$ms_rows['middle_text_size']?>" size="5" maxlength="2" class="simpleform"> px /
+										<?=color_picker('middle_text_color', $ms_rows['middle_text_color'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;하단문구</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">문구등록</td>
+									<td>
+										<input type="text" name="bottom_text" hname="하단문구" value="<?=str_replace('"', '&quot;', $ms_rows['bottom_text'])?>" maxlength="100" class="simpleform w100" />
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">크기/색상</td>
+									<td>
+										<input type="text" name="bottom_text_size" hname="하단문구 글자크기" option="number" value="<?=$ms_rows['bottom_text_size']?>" size="5" maxlength="2" class="simpleform"> px /
+										<?=color_picker('bottom_text_color', $ms_rows['bottom_text_color'])?>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구전체 위치</td>
+							<td>
+								<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">상단여백</td>
+									<td>
+										<input type="text" name="text_container_top" hname="문구전체 위치" option="number" value="<?=$ms_rows['text_container_top']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">좌측여백</td>
+									<td>
+										<input type="text" name="text_container_left" hname="문구전체 위치" option="number" value="<?=$ms_rows['text_container_left']?>" size="5" maxlength="5" class="simpleform">
+										<span id="tip">+좌측상단 기준(0px)으로 위치값을 잡습니다.( 입력 단위: pixel )</span>
+									</td>
+								</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;문구전체 배경</td>
+							<td valign="top">
+								<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+								<col width="80" />
+								<col />
+								<tr>
+									<td class="gray_bg">업로드</td>
+									<td>
+										<span><input type="file" name="_attach_" onChange="text_container_bg.post(this, 'attach2')"></span>
+										<?php
+										// 등록된 문구전체 배경이미지가 있으면 삭제버튼 출력
+										if($ms_rows['text_container_bg']) echo '<span id="text_container_bg_del"><a onClick="text_container_bg.del()"><img src="./img/btn_del.gif" align="absmiddle" /></a></span>';
+										?>
+										<input type="hidden" id="on_text_container_bg" name="on_text_container_bg">
+										<input type="hidden" face="attach2" name="mode" value="post_attach" disabled>
+										<input type="hidden" face="attach2" name="kind" value="text_container_bg" disabled>
+										<input type="hidden" face="attach2" name="handler" value="text_container_bg.draw" disabled>
+									</td>
+								</tr>
+								<tr>
+									<td class="gray_bg">불투명도</td>
+									<td><input type="text" name="text_container_opacity" hname="문구배경 불투명도" option="number" minval="1" maxval="100" value="<?=$ms_rows['text_container_opacity']?>" size="3" maxlength="3" class="simpleform"> <span id="tip">+불투명도 수치가 높을수록 진하게 출력됩니다. ( 입력 범위: 1 ~ 100 )</span></td>
+								</tr>
+								</table>
+								<div id="text_container_bg_preview" class="preview" style="margin-top:7px;width:452px;*width:474px;" file="<?=$ms_rows['text_container_bg']?>"><?php
+									// 등록된 문구전체 배경이미지 출력
+									if($ms_rows['text_container_bg']) {
+										echo sprintf('<img src="%s" align="absmiddle" />', $base_url.$attach->presets['text_container_bg']['save']['folder'].$ms_rows['text_container_bg']);
+									}
+									?></div>
+								<div style="margin-top:8px;text-align:center">
+									<span id="tip" style="margin-left:0">문구배경 <b class="orange_b">이미지( jpg,gif,png )</b> 파일을 업로드하여 주십시오.</span>
+								</div>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+			</table>
+			<div id="upload_frame" style="display:none;margin-top:-1px">
+				<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+				<col width="134" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle">&nbsp;업로드</td>
+					<td>
+						<?php
+						// 사용자제작 - 메인플래시
+						$attach = new attachment('main_flash');
+						?>
+						<span><input type="file" name="_attach_" onChange="main_flash.post(this, 'attach3')"></span>
+						<span id="tip" style="letter-spacing:0"> ( swf,jpg,gif,png 파일만 가능 ) ( 제한크기 : 최대 <b><?=$attach->configs['limit_size']?></b> )</span>
+						<input type="hidden" id="on_main_flash" name="on_main_flash">
+						<input type="hidden" face="attach3" name="mode" value="post_attach" disabled>
+						<input type="hidden" face="attach3" name="kind" value="main_flash" disabled>
+						<input type="hidden" face="attach3" name="handler" value="main_flash.draw" disabled>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" align="center">
+						<div id="main_flash_preview" class="preview" style="height:350px">
+						<?php
+						echo $attach->preview($ms_rows['main_flash'], array(
+							'image' => '<img src="{:folder:}{:name:}" align="absmiddle" />',
+							'flash' => '<embed src="{:folder:}{:name:}" width="{:width:}" height="{:height:}"></embed>'
+						));
+						?>
+						</div>
+						<div style="margin-top:8px;">
+							<span id="tip" style="margin-left:0">제작한 <b class="orange_b">플래시( swf )</b> 또는 <b class="orange_b">이미지( jpg,gif,png )</b> 파일을 업로드하여 주십시오.</span>
+						</div>
+					</td>
+				</tr>
+				</table>
+			</div>
+
+			<div style="margin-top:20px">
+				<div id="sub_title">메인 비쥬얼 배경설정</div>
+				<div>
+					<table width="100%" align="center" cellpadding="7" cellspacing="1" border="0" bgcolor="#d7d7d7" class="list_top" style="table-layout:fixed">
+					<col width="134" />
+					<col />
+					<tbody bgcolor="white">
+					<tr>
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 메인 비쥬얼 배경</td>
+						<td>
+							<input type="radio" name="bg_type" value="none" id="bg_type_none" checked onClick="change_frame(this)"><label for="bg_type_none">배경없음</label>
+							<input type="radio" name="bg_type" value="color" id="bg_type_color" onClick="change_frame(this)"><label for="bg_type_color">배경색</label>
+							<input type="radio" name="bg_type" value="skin" id="bg_type_skin" onClick="change_frame(this)"><label for="bg_type_skin">배경스킨</label>
+							<input type="radio" name="bg_type" value="image" id="bg_type_image" onClick="change_frame(this)"><label for="bg_type_image">이미지업로드</label>
+						</td>
+					</tr>
+					<tr id="bg_color_frame" style="display:none">
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 배경색상 설정</td>
+						<td>
+							<table width="100%" align="center" cellpadding="7" cellspacing="1" border="0" bgcolor="#d7d7d7">
+							<tr>
+								<td width="90" class="gray_bg"><input type="radio" name="visual_bg_type" checked value="solid" id="visual_bg_type_solid" onClick="visual_bg.color(this)"><label for="visual_bg_type_solid">단색</label></td>
+								<td bgcolor="white">
+									<?=color_picker('visual_bg_scolor', $mv_rows['visual_bg_scolor'], 'visual_bg.color')?>
+								</td>
+							</tr>
+							<tr>
+								<td class="gray_bg"><input type="radio" name="visual_bg_type"<? if($mv_rows['visual_bg_type']=='gradient') echo ' checked' ?> value="gradient" id="visual_bg_type_gradient" onClick="visual_bg.color(this)"><label for="visual_bg_type_gradient">그라데이션</label></td>
+								<td bgcolor="white">
+									<select id="visual_bg_gtype" name="visual_bg_gtype" onChange="visual_bg.color(this)">
+									<option value="height">상하</option>
+									<option value="width"<? if($mv_rows['visual_bg_gtype']=='width') echo ' selected' ?>>좌우</option>
+									</select>
+									<?=color_picker('visual_bg_gcolor1', $mv_rows['visual_bg_gcolor1'], 'visual_bg.color')?> &nbsp; ~&nbsp;
+									<?=color_picker('visual_bg_gcolor2', $mv_rows['visual_bg_gcolor2'], 'visual_bg.color')?>
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					<tr id="bg_skin_frame" style="display:none">
+						<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 배경스킨 선택</td>
+						<td>
+							<input type="hidden" id="visual_bg_skin" name="visual_bg_skin" value="<?=$mv_rows['visual_bg_skin']?>" />
+							<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+							<tr>
+								<td style="padding:0">
+									<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1" frame="void">
+									<col width="20%" span="5" />
+									<tr align="center">
+										<td><a onclick="visual_bg.skin('1')"><img src="./img/vbg_a_1.gif"></a></td>
+										<td><a onclick="visual_bg.skin('2')"><img src="./img/vbg_a_2.gif"></a></td>
+										<td><a onclick="visual_bg.skin('3')"><img src="./img/vbg_a_3.gif"></a></td>
+										<td><a onclick="visual_bg.skin('4')"><img src="./img/vbg_a_4.gif"></a></td>
+										<td><a onclick="visual_bg.skin('5')"><img src="./img/vbg_a_5.gif"></a></td>
+									</tr>
+									<tr align="center">
+										<td><a onclick="visual_bg.skin('6')"><img src="./img/vbg_a_6.gif"></a></td>
+										<td><a onclick="visual_bg.skin('7')"><img src="./img/vbg_a_7.gif"></a></td>
+										<td><a onclick="visual_bg.skin('8')"><img src="./img/vbg_a_8.gif"></a></td>
+										<td><a onclick="visual_bg.skin('9')"><img src="./img/vbg_a_9.gif"></a></td>
+										<td><a onclick="visual_bg.skin('10')"><img src="./img/vbg_a_10.gif"></a></td>
+									</tr>
+									</table>
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					<tr id="bg_image_frame" style="display:none">
+						<td bgcolor="#f4f4f4"><img src="../../Libs/_images/ic_dot1.gif"> 이미지 업로드</td>
+						<td>
+							<?php
+							$attach = new attachment('visual_bg');
+							?>
+							<span><input type="file" name="_attach_" hname="이미지" filter="jpg,gif,png" onChange="visual_bg.post(this, 'attach4')"></span>
+							<span id="tip">( 제한크기 : 최대 <b style="letter-spacing:0"><?=$attach->configs['limit_size']?></b> )</span>
+							<input type="hidden" id="on_visual_bg" name="on_visual_bg" />
+							<input type="hidden" face="attach4" name="mode" value="post_attach" disabled />
+							<input type="hidden" face="attach4" name="kind" value="visual_bg" disabled />
+							<input type="hidden" face="attach4" name="handler" value="visual_bg.draw" disabled />
+						</td>
+					</tr>
+					<tr id="visual_bg_frame">
+						<td colspan="2" align="center">
+							<div id="preview" class="preview"></div>
+						</td>
+					</tr>
+					<tr id="visual_bg_preview_frame" style="display:none">
+						<td colspan="2" align="center">
+							<div id="visual_bg_preview" class="preview"<? echo $attach->preview($mv_rows['visual_bg'], array('image' => ' style="background: url(\'{:folder:}{:name:}\');"')); ?>></div>
+						</td>
+					</tr>
+					</tbody>
+					</table>
+
+				</div>
+			</div>
+
+
+			<div style="margin-top:20px;<? if($_skin_init['main_design']['main_bottom_content']=='hidden') echo 'display: none' ?>">
+				<div id="sub_title">메인 컨텐츠하단 디자인설정 <span id="tip" style="font-weight:normal">+ 카피라이트 바로 상단에 출력될 내용입니다.</span></div>
+				<div>
+					<textarea id="main_bottom_content" name="main_bottom_content" type="editor" hname="내용" style="width:100%;height:250px" nofocus><?=$design->get_settings('main_bottom_content');?></textarea>
+				</div>
+			</div>
+
+		</form>
+
+	</div>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="저장하기" /></a>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript"> color_picker.initialize('save_form'); </script>
+<script type="text/javascript">
+Wysiwyg.createELM();
+
+// form initialize
+change_frame($('flash_type_<?=$ms_rows['flash_type']?>'));
+change_frame($('bg_type_<?=$mv_rows['bg_type']?>'));
+</script>
+
+<script type="text/javascript">
+// IMAGE·BOX 초기화
+image_box.template = new Template('<div class="hover" onMouseOver="$(this).addClassName(\'hover\')" onMouseOut="$(this).removeClassName(\'hover\')" onClick="image_box.selector(this)" name="#{name}"><img src="#{domain}#{folder}#{name}" align="absmiddle"></div>');
+image_box.initialize('image_frame');
+
+// 문구배경 정의
+var text_container_bg = {
+	post: attachment.post,
+	post_reset: attachment.reset,
+	draw: function(infos) {
+		with(infos) {
+			$('on_text_container_bg').value = name;
+			$('text_container_bg_preview').update('<img src="'+ domain + folder + name +'" align="absmiddle" />');
+		}
+	},
+	del: function() {
+		var preview = $('text_container_bg_preview');
+		if(!preview.select('img')[0]) {
+			alert('등록된 문구전체 배경이미지가 없습니다.');
+			return false;
+		}
+		if(!confirm('문구전체 배경이미지를 삭제하시겠습니까?')) return false;
+		var name = preview.getAttribute('file');
+		proc.parameters({mode: 'del_attach', kind: 'text_container_bg', name: name});
+		proc.process(function(trans) {
+			if(!trans.responseText.blank()) proc.response(trans);
+			else {
+				preview.update('');
+				$('text_container_bg_del').remove();
+				alert('삭제되었습니다.');
+			}
+		}, false);
+	}
+}
+
+// 사용자제작 메인플래시 정의
+var main_flash = {
+	post: attachment.post,
+	post_reset: attachment.reset,
+	draw: function(infos) {
+		with(infos) {
+			$('on_main_flash').value = name;
+			var html = '';
+			if(type.match(/image\//i)) html = '<img src="'+ domain + folder + name +'" align="absmiddle" />';
+			else if(type.match(/flash/i)) html = '<embed src="'+ domain + folder + name +'" width="'+ width +'" height="'+ height +'"></embed>';
+			$('main_flash_preview').update(html);
+		}
+	}
+}
+
+// 메인 비쥬얼 배경 정의
+var visual_bg = {
+	post: attachment.post,
+	post_reset: attachment.reset,
+	draw: function(infos) {
+		with(infos) {
+			$('on_visual_bg').value = name;
+			$('visual_bg_preview').setStyle({backgroundImage: 'url('+ domain + folder + name +')'});
+		}
+	},
+	skin: function(num) {
+		$('preview').setStyle({
+			filter: '',
+			background: 'url('+ domain + 'design/main/bg_'+ num +'.jpg)'
+		});
+		$('visual_bg_skin').value = num;
+	},
+	color: function(el) {
+		var preview = $('preview');
+		if(el.target) el = el.target.obj; // color_picker
+		if(el.name=='visual_bg_scolor' || el.value=='solid') { // 단색
+			preview.setStyle({ filter: '', background: '', backgroundColor: $F('visual_bg_scolor') });
+			$('visual_bg_type_solid').checked = true;
+		}
+		else { // 그라데이션
+			var gtype = $F('visual_bg_gtype')=='height' ? 0 : 1;
+			var color1 = $F('visual_bg_gcolor1'), color2 = $F('visual_bg_gcolor2');
+			if(Prototype.Browser.IE) preview.setStyle({ filter: 'progid:DXImageTransform.Microsoft.Gradient(GradientType='+ gtype +', StartColorStr='+ color1 +', EndColorStr='+ color2 +')' });
+			else if(Prototype.Browser.Gecko) preview.setStyle({ background: '-moz-linear-gradient('+ (gtype?'left':'top') +', '+ color1 +', '+ color2 +')' });
+			else preview.setStyle({ background: '-webkit-gradient(linear, 0% 0%, '+ (gtype?'100% 0%':'0% 100%') +', from('+ color1 +'), to('+ color2 +'))' });
+			$('visual_bg_type_gradient').checked = true;
+		}
+	}
+}
+
+// $form submit setting
+$form.debug = false;
+$form.hashes = {mode: 'save_design', kind: 'main'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		$w('on_text_container_bg on_main_flash on_visual_bg').each(function(field) { if(!$(field).disabled) { $(field).value = '' } });
+		alert('저장되었습니다.');
+	}
+}
+</script>
+
+</body>
+</html>

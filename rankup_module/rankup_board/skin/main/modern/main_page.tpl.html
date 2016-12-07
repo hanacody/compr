@@ -1,0 +1,40 @@
+<script type="text/javascript" src="<?=$this->board_url?>rankup_board.js"></script>
+<script type="text/javascript">rankup_board.index_url = "<?=$this->index_url?>"</script>
+<link rel="stylesheet" type="text/css" href="<?=$this->skin_url?>skin_style.css">
+<table width="100%" cellspacing="0" cellpadding="0" border="0">
+	<tr>
+		<td>
+			<table width="100%" cellspacing="0" cellpadding="0" border="0" style="table-layout:fixed;">
+				<col width="50%" span="2" />
+				<tbody>
+<? if($category_infos->sprint['narticle']=="yes") { ?>
+				<tr>
+					<td colspan="2">
+						<!-- 새로 등록된 글 -->
+						<table border="0" cellpadding="0" cellspacing="0" width="100%">
+						<tr>
+							<td class="list_bg_color" class="title" height="22"><img src="<?=$this->skin_url?>titleicon.gif" align="absmiddle"> 새로 등록된 글</td>
+						</tr>
+						<tr>
+							<td class="list_top_color" height="2"></td>
+						</tr>
+						<tr>
+							<td align="center" style="padding-top:5px">
+								<table border="0" cellpadding="4" cellspacing="0" width="100%">
+								<?=$this->get_new_articles($category_infos, $pcno)?>
+								</table>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2" height="15"></td>
+				</tr>
+<? } ?>
+				<?=$main_article_contents?>
+				</tbody>
+			</table>
+		</td>
+	</tr>
+</table>

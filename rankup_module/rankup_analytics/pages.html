@@ -1,0 +1,78 @@
+<?php
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once 'top_menu.inc.php';
+include_once 'rankup_analytics.class.php';
+
+$analytics = new rankup_analytics;
+
+if(!$_GET['sdate']) $_GET['sdate'] = date('Y-m-01');
+if(!$_GET['edate']) $_GET['edate'] = date('Y-m-d');
+
+$loader = '<table width="100%" height="100%" cellpadding="0" cellspacing="0"><tr><td align="center" height="100%"><b>구글 Analytics</b>로부터 데이터를 수신하는 중입니다.<br /><br/> 잠시만 기다려 주십시오.<div style="margin-top:20px"><img src="./img/loader.gif" align="absmiddle" /></div></td></tr></table>';
+
+?>
+<script type="text/javascript" src="../rankup_chart/js/swfobject.js"></script>
+<script type="text/javascript" src="./rankup_analytics.class.js"></script>
+<style type="text/css"> @import url('./rankup_analytics.css'); </style>
+
+<center>
+<div id="search_frame">
+	<form name="search_form" method="GET">
+		<table width="100%" align="center" cellpadding="4" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1" style="table-layout:fixed">
+		<tr>
+			<td class="gray_bg">
+				<table width="505" cellpadding="0" cellspacing="0" border="0" align="center" style="table-layout: fixed">
+				<tr align="center">
+					<td width="190">
+						<? echo $rankup_control->print_period_search('sdate|edate', $_GET['sdate']."|".$_GET['edate']) ?>
+					</td>
+					<td id="period_search_option" width="270">
+						<? echo $analytics->print_period_buttons('sdate|edate') ?>
+					</td>
+					<td align="left">
+						<input type="image" src="../../Libs/_images/btn_search.gif" alt="검색" align="absmiddle" />
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</form>
+</div>
+
+<div id="chart_frame">
+	<div id="sub_title">랜딩(도착) 페이지</div>
+	<table width="100%" cellpadding="0" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+	<tr>
+		<td><?=$analytics->draw_chart('landingPagePath', 'bar', 730, 500, $loader)?></td>
+	</tr>
+	</table>
+	<br />
+	<br />
+
+	<div id="sub_title">많이 열린 페이지</div>
+	<table width="100%" cellpadding="0" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+	<tr>
+		<td><?=$analytics->draw_chart('pagePath', 'bar', 730, 500, $loader)?></td>
+	</tr>
+	</table>
+	<br />
+	<br />
+
+	<div id="sub_title">많이 이탈한 페이지<span id="tip" style="font-weight:normal">+ 브라우져를 닫거나 다른 사이트로 이동한 경우</span></div>
+	<table width="100%" cellpadding="0" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout:fixed">
+	<tr>
+		<td><?=$analytics->draw_chart('exitPagePath', 'bar', 730, 500, $loader)?></td>
+	</tr>
+	</table>
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript"> rankup_analytics.initialize('chart_frame') </script>
+
+</body>
+</html>

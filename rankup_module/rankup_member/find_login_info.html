@@ -1,0 +1,123 @@
+<?php
+/**
+ * 아이디 비밀번호 찾기
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+
+// 회원제 사용여부 확인
+if($config_info['membership_use']=='no' || $member_info['uid']) {
+	scripts('location.replace("'.$base_url.'main/index.html")');
+	exit;
+}
+
+// 페이지 제너레이터 - 필수
+include_once '../../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$rankup_control->print_user_head($gen->page_title);
+include_once '../../include/top.html';
+?>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr>
+	<td height="30" align="center" valign="top">&nbsp;</td>
+</tr>
+<tr>
+	<td align="center" valign="top"><img src="./img/join8.png" alt="아이디/비밀번호찾기" /></td>
+</tr>
+<tr>
+	<td height="20" align="center" valign="top">&nbsp;</td>
+</tr>
+<tr>
+	<td align="center" valign="top">
+		<table width="710" border="0" align="center" cellpadding="0" cellspacing="0">
+			<tr>
+				<td valign="top">
+					<!--아이디찾기시작-->
+					<table border="0" cellpadding="0" cellspacing="0" width="340">
+						<tr>
+							<td align="left"><img src="./img/tit_login_id.png"></td>
+						</tr>
+						<tr><td height="10"></td></tr>
+						<tr>
+							<td align="center" bgcolor="#f0f0f0">
+								<form id="find_form1" name="find_form1" action="javascript:void(0)" autocomplete="off" onSubmit="return $found.submit(this, 'find_form1')" style="margin:10px 0">
+									<input type="hidden" name="mode" value="find_id" />
+									<table border="0" cellpadding="0" cellspacing="0" width="90%">
+									<tr><td height="30" colspan="5"></td></tr>
+									<tr>
+										<td width="100" height="25" align="left" valign="middle"><font color="#666666" style="font-size:8pt; FONT-FAMILY: tahoma; letter-spacing:1pt;"><b>NAME</b></font></td>
+										<td align="left" valign="middle"><input type="text" name="f_name" required hname="이름" maxlength="10" style="width: 120px;height:16px;" class="simpleform" tabindex="1"></td>
+										<td width="20" align="left" valign="middle"></td>
+										<td width="60" rowspan="2" align="left" valign="middle"><input src="./img/ok_btn.gif" tabindex="3" type="image" alt="확인"></td>
+									</tr>
+									<tr>
+										<td height="25" align="left" valign="middle"><font color="#666666" style="font-size:8pt; FONT-FAMILY: tahoma; letter-spacing:1pt;"><b>EMAIL</b></font></td>
+										<td align="left" valign="middle"><input type="text" name="f_email" required hname="회원가입시 입력한 이메일 주소" maxlength="30" style="width:170px;height:16px;" class="simpleform"  tabindex="2"></td>
+										<td width="20" align="left" valign="middle"></td>
+									</tr>
+									<tr><td height="30" colspan="5"></td></tr>
+									</table>
+								</form>
+							</td>
+						</tr>
+					</table>
+					<!--아이디찾기끝-->
+				</td>
+				<td width="30" align="right">&nbsp;</td>
+				<td align="right" valign="top">
+					<!--비밀번호찾기시작-->
+					<table border="0" cellpadding="0" cellspacing="0" width="340">
+						<tr>
+							<td align="left"><img src="./img/tit_login_pass.png"></td>
+						</tr>
+						<tr><td height="10"></td></tr>
+						<tr>
+							<td align="center" bgcolor="#f0f0f0">
+								<form id="find_form2" name="find_form2" action="javascript:void(0)" autocomplete="off" onSubmit="return $found.submit(this, 'find_form2')" style="margin:10px 0">
+									<input type="hidden" name="mode" value="find_passwd" />
+									<table border="0" cellpadding="0" cellspacing="0" width="90%" bgcolor="#f1f1f1">
+									<tr><td height="30" colspan="5"></td></tr>
+									<tr>
+										<td width="100" height="25" align="left" valign="middle"><font color="#666666" style="font-size:8pt; FONT-FAMILY: tahoma; letter-spacing:1pt;"><b>ID</b></font></td>
+										<td align="left" valign="middle"><input type="text" name="f_userid" required hname="아이디" option="userid" maxlength="20" tabindex="4" style="width: 120px;height:16px;" class="simpleform"/></td>
+										<td width="20" align="left" valign="middle"></td>
+										<td width="60" rowspan="3" align="left" valign="middle"><input src="./img/ok_btn.gif" tabindex="7" type="image" alt="확인"></td>
+									</tr>
+									<tr>
+										<td height="25" align="left" valign="middle"><font color="#666666" style="font-size:8pt; FONT-FAMILY: tahoma; letter-spacing:1pt;"><b>NAME</b></font></td>
+										<td align="left" valign="middle"><input type="text" name="f_name" required hname="이름" maxlength="20" tabindex="5" style="width: 120px;height:16px;" class="simpleform"/></td>
+										<td width="20" rowspan="2" align="left" valign="middle"></td>
+									</tr>
+									<tr>
+										<td height="25" align="left" valign="middle"><font color="#666666" style="font-size:8pt; FONT-FAMILY: tahoma; letter-spacing:1pt;"><b>EMAIL</b></font></td>
+										<td align="left" valign="middle"><input type="text" name="f_email" required hname="회원가입시 입력한 이메일 주소" maxlength="30" tabindex="6" style="width:170px;height:16px;" class="simpleform" /></td>
+									</tr>
+									<tr><td height="30" colspan="5"></td></tr>
+									</table>
+								</form>
+							</td>
+						</tr>
+					</table>
+					<!--비밀번호찾기끝-->
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td height="30" align="center" valign="top">&nbsp;</td>
+</tr>
+</table>
+
+<script type="text/javascript">
+var $found = Object.clone($form);
+$found.handler = function(trans) { proc.response(trans) }
+</script>
+
+<?php
+include_once '../../include/bottom.html';
+?>

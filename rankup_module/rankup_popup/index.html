@@ -1,0 +1,272 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "../../Libs/_php/rankup_popup.class.php";
+$rankup_control->check_admin();
+
+$popup_lists = $rankup_control->get_popup_list();
+
+// 헤더
+$rankup_control->print_admin_head("팝업관리");
+?>
+<body style="margin:0px;overflow:auto">
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="./rankup_popup.js"></script>
+<script type="text/javascript">
+<!--
+// 팝업 클래스 변수 정의
+var popup = classObj = new POPUP;
+
+// window load 시 tr 에 onClick 이벤트 부여
+Event.observe(window, "load", function() {
+	classObj.registFrm = document.registFrm;
+	classObj.settingFrm = document.settingFrm;
+	classObj.popupBody = $('popupBody');
+	classObj.maxWidth = 900; // 가로사이즈 제한 설정
+	classObj.popupItems = document.getElementsByName("popupItem");
+	classObj.rebuild_event(); // 팝업 리스트에 이벤트 할당
+});
+//-->
+</script>
+<link rel="stylesheet" type="text/css" href="./rankup_popup.css">
+<!-- 블라인드 -->
+<div id="screenBlindDiv" style="display:none;position:absolute;left:0px;top:0px;width:100%;z-index:90;text-align:center;background-color:black;FILTER:gray alpha(opacity=20 Style=4 FinishOpacity=90)"></div>
+<!-- 블라인드 -->
+
+<div class="bar"><script> titleBar('팝업관리') </script></div>
+
+<center>
+<!-- 프로세스 처리 프레임 -->
+<iframe name="multiProcessFrame" src="about:blank" style="width:100%;height:0px;" frameborder="0" scrolling="0"></iframe>
+<!-- 프로세스 처리 프레임 -->
+
+<!-- 팝업 스킨 모음 -->
+<div id="popupSkinTemplate">
+<div id="skin1">
+	<TABLE border=0 cellSpacing=0 cellPadding=0 width=500>
+	<TBODY>
+	<TR>
+	<TD height=20></TD></TR>
+	<TR>
+	<TD>
+	<TABLE border=0 cellSpacing=0 cellPadding=0 width=460 align=center>
+	<TBODY>
+	<TR>
+	<TD><IMG src="<?=$base_url?>rankup_module/rankup_popup/img/box_top.gif"></TD></TR>
+	<TR vAlign=top bgColor=#ffffff>
+	<TD style="BORDER-LEFT: #986930 2px solid; PADDING-BOTTOM: 20px; PADDING-LEFT: 20px; PADDING-RIGHT: 20px; BORDER-RIGHT: #986930 2px solid; PADDING-TOP: 20px">
+	<P style="COLOR: #986930; FONT-SIZE: 16px; FONT-WEIGHT: bold;background-color:#eee;padding:5px">제목을 입력하세요!</P>
+	<P style="COLOR: #7b7065; FONT-SIZE: 12px; PADDING-TOP: 10px">내용을 입력하세요.</P></TD></TR>
+	<TR>
+	<TD><IMG src="<?=$base_url?>rankup_module/rankup_popup/img/popup_img.gif"></TD></TR></TBODY></TABLE></TD></TR>
+	<TR>
+	<TD height=20></TD></TR></TBODY></TABLE>
+</div>
+<div id="skin2">
+	<TABLE border=0 cellSpacing=0 cellPadding=0 width=500>
+	<TBODY>
+	<TR>
+	<TD height=20></TD></TR>
+	<TR>
+	<TD>
+	<TABLE border=0 cellSpacing=0 cellPadding=0 width=460 align=center>
+	<TBODY>
+	<TR>
+	<TD><IMG src="<?=$base_url?>rankup_module/rankup_popup/img/notice_tit.gif"></TD></TR>
+	<TR vAlign=top bgColor=#ffffff>
+	<TD style="BORDER-LEFT: #986930 2px solid; PADDING-BOTTOM: 20px; PADDING-LEFT: 20px; PADDING-RIGHT: 20px; BORDER-RIGHT: #986930 2px solid; PADDING-TOP: 20px">
+	<P style="COLOR: #7b7065; FONT-SIZE: 12px">내용을 입력하세요.</P></TD></TR>
+	<TR>
+	<TD><IMG src="<?=$base_url?>rankup_module/rankup_popup/img/box_bottom.gif"></TD></TR></TBODY></TABLE></TD></TR>
+	<TR>
+	<TD height=20></TD></TR></TBODY></TABLE>
+</div>
+<div id="skin3">
+	<TABLE border=0 cellSpacing=0 cellPadding=0 width=500>
+	<TBODY>
+	<TR>
+	<TD height=20></TD></TR>
+	<TR>
+	<TD>
+	<TABLE border=0 cellSpacing=0 cellPadding=0 width=460 align=center>
+	<TBODY>
+	<TR>
+	<TD><IMG src="<?=$base_url?>rankup_module/rankup_popup/img/event_tit.gif"></TD></TR>
+	<TR vAlign=top bgColor=#ffffff>
+	<TD style="BORDER-LEFT: #986930 2px solid; PADDING-BOTTOM: 20px; PADDING-LEFT: 20px; PADDING-RIGHT: 20px; BORDER-RIGHT: #986930 2px solid; PADDING-TOP: 20px">
+	<P style="COLOR: #7b7065; FONT-SIZE: 12px">내용을 입력하세요.</P></TD></TR>
+	<TR>
+	<TD><IMG src="<?=$base_url?>rankup_module/rankup_popup/img/box_bottom.gif"></TD></TR></TBODY></TABLE></TD></TR>
+	<TR>
+	<TD height=20></TD></TR></TBODY></TABLE>
+</div>
+</div>
+<!-- 팝업 스킨 모음 -->
+
+<!-- 등록/수정폼 -->
+<div id="registFrmDiv">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="table-layout:fixed">
+<form name="registFrm" method="POST" action="./multiProcess.html" target="multiProcessFrame" onSubmit="return (Wysiwyg.submit_start() && validate(this))">
+<input type="hidden" name="position" value="<?=$_GET['position']?>">
+<input type="hidden" name="mode">
+<input type="hidden" name="no">
+<tbody align="center">
+<tr>
+	<td><b>팝업등록 / 수정 폼</b></td>
+</tr>
+<tr>
+	<td>
+		<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#D0D0D0" style="table-layout:fixed">
+		<colgroup bgcolor="white"><col align="center" width="60" bgcolor="#F1F4E8"><col></colgroup>
+		<tr height="30">
+			<td>팝업제목</td>
+			<td><input type="text" name="title" style="width:350px" class="enable" hname="팝업제목" maxlength="30"><span id="tip">+ 입력시 팝업제목이 팝업창 상단에 출력 됨 (30자 이내)</span></td>
+		</tr>
+		<tr height="30">
+			<td>사용기간</td>
+			<td style="padding:0px 0px 0px 1px;">
+				<table width="100%" height="100%" cellpadding="3" cellspacing="0" border="0">
+				<tr>
+					<td width="138">
+						<input type="radio" name="period" value="no" checked onClick="popup.change_period_set(this)" id="period_id1"><label for="period_id1">설정안함</label>
+						<input type="radio" name="period" value="yes" onClick="popup.change_period_set(this)" id="period_id2"><label for="period_id2">설정함</label>
+					</td>
+					<td id="period_field" style="display:none;background-color:#f9f9f9;padding:0px 0px 0px 4px;border-left:#dedede 1px dotted;"><?
+						// 기간제한용 날짜/시간 입력 폼 생성
+						function get_time_options($arr, $unit='') {
+							foreach($arr as $arv) {
+								if(is_int($arv)) $arv = sprintf("%02d", $arv);
+								$options .= "<option value='$arv'>$arv$unit</option>";
+							}
+							return $options;
+						}
+						// 시·분 템플릿
+						$timmer_template = " <select name='{:name:}'>{:options:}</select>";
+						$stime  = str_replace(array("{:name:}", "{:options:}"), array("period_shour", get_time_options(range(0,23), "시")), $timmer_template);		// 시작 - 시
+						$stime .= str_replace(array("{:name:}", "{:options:}"), array("period_sminute", get_time_options(array("정각","반"))), $timmer_template);	// 시작 - 분
+						$etime  = str_replace(array("{:name:}", "{:options:}"), array("period_ehour", get_time_options(range(0,23), "시")), $timmer_template);		// 종료 - 시
+						$etime .= str_replace(array("{:name:}", "{:options:}"), array("period_eminute", get_time_options(array("정각","반"))), $timmer_template);	// 종료 - 분
+						?>
+						<table cellpadding="2" cellspacing="0" border="0">
+						<tr>
+							<td><input type="text" name="period_sdate" readOnly onClick="rankup_calendar.draw_calendar(this)" class="calendar"></td>
+							<td><?=$stime?> 부터</td>
+							<td><input type="text" name="period_edate" readOnly onClick="rankup_calendar.draw_calendar(this)" class="calendar"></td>
+							<td><?=$etime?> 까지 사용</td>
+						</tr>
+						</table>
+					</td>
+					<td id="period_tip_field" style="padding-top:8px"><span id="tip">+ 사용기간을 설정할 경우 지정한 기간 동안만 팝업이 노출</span></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr height="30">
+			<td>팝업스킨</td>
+			<td id="popup_type_td">
+				<input type="radio" name="popup_type" value="text" onClick="popup.change_form(this)" checked id="popup_type_id1"><label for="popup_type_id1">직접입력</label>
+				<input type="radio" name="popup_type" value="skin1" onClick="popup.change_form(this)" id="popup_type_id2"><label for="popup_type_id2">기본스킨</label>
+				<input type="radio" name="popup_type" value="skin2" onClick="popup.change_form(this)" id="popup_type_id3"><label for="popup_type_id3">공지스킨</label>
+				<input type="radio" name="popup_type" value="skin3" onClick="popup.change_form(this)" id="popup_type_id4"><label for="popup_type_id4">이벤트스킨</label><span id="tip">+ 스킨 변경시 입력내용이 초기화 됨을 주의</span>
+			</td>
+		</tr>
+		<tr height="30">
+			<td>팝업크기</td>
+			<td>
+				<input type="text" name="width" size="4" hname="가로크기" option="number" onKeyUp="popup.set_resize(this)" maxlength="3" class="enable" style="display:none;margin-right:4px;"><select name="width_type" onChange="popup.change_size_type(this)"><option value="pixel">픽셀</option><option value="exact" selected>자동맞춤</option></select> × <input type="text" name="height" size="4" hname="세로크기" option="number" onKeyUp="popup.set_resize(this)" maxlength="3" class="enable" style="display:none;margin-right:4px;"><select name="height_type" onChange="popup.change_size_type(this)"><option value="pixel">픽셀</option><option value="exact" selected>자동맞춤</option></select><span id="tip">+ 자동맞춤시 팝업내용이 차지하는 영역 만큼만 자동설정 됨</span>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr id="editorBox">
+	<td style="padding:8px 0px 6px 0px;"><textarea type="editor" name="content" style="word-break:break-all;width:100%;height:250px;" required hname="팝업내용" nofocus antifilter="<script,</script>"></textarea></td>
+</tr>
+<tr>
+	<td><!--a onClick="popup.preview_popup(true)"><img src="./img/bt_preview.gif"></a--><input type="image" src="./img/bt_input.gif" style="margin-left:2px"><a onClick="popup.change_display('registFrmDiv', false)"><img src="./img/bt_close_s.gif" style="margin-left:2px"></a></td>
+</tr>
+</tbody>
+</form>
+</table>
+</div>
+<!-- 등록/수정폼 -->
+</center>
+
+<table width="770" cellpadding="2" cellspacing="5" bgcolor="white" border="0" align="center" bgcolor="#dedede">
+<form name="settingFrm" method="POST" action="./multiProcess.html" target="multiProcessFrame">
+<input type="hidden" name="mode">
+<thead id="popupHeader">
+<tr><td height="30"></td></tr>
+<tr>
+	<td style="padding:0px 0px 0px 5px">
+		<table width="100%" cellpadding="0" cellspacing="0">
+		<tr>
+			<td><div id="sub_title">팝업관리</div>  &nbsp;<img src='./img/btn_popup_regist.gif' border='0' align='absmiddle' style="cursor:pointer;" onClick="popup.regist_item()" alt="팝업등록"><span id="tip">+ 순위에 따라 팝업의 출력 순서가 바뀝니다.</span>
+			</td>
+			<td width="50" align="right">
+				<a onClick="popup_help.style.display= popup_help.style.display=='none' ? 'block' : 'none';" title="도움말"><img src="../../Libs/_images/btn_help.gif" alt="도움말" vspace="5" align="absmiddle"></a>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<!--도움말-->
+<tr id="popup_help" style="display:none;">
+	<td>
+		<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:7px;">
+		<tr>
+			<td class="help_bg">
+				<table cellpadding="0" cellspacing="5" border="0" width="100%">
+				<tr>
+					<td><img src="../../Libs/_images/ic_arrow2.gif">사이트접속시 열리는 첫화면 즉, 메인페이지에서 설정하신 팝업이 뜨게 됩니다.</td>
+				</tr>
+				<tr>
+					<td><img src="../../Libs/_images/ic_arrow2.gif">팝업기능을 사용하지 않으려면 전부 '팝업사용안함'으로 설정하세요.</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<!--도움말-->
+<tr>
+	<th style="padding:5px 0px 0px 0px">
+		<table width="100%" cellpadding="4" cellspacing="1" border="0"  class="list_top">
+			<colgroup align="center" bgcolor="#F7F7F7"><col width="60"><col width="40"><col></colgroup>
+			<tr height="26">
+				<td><input type="checkbox" style="cursor:pointer;width:12px;height:12px;margin:0px 2px 2px 5px;" id="checkAll_id1" onClick="popup.checkAll(this.checked)" onFocus="this.blur()"><label for="checkAll_id1" onFocus="this.blur()" style="cursor:pointer">선택</label></td>
+				<td>순위</td>
+				<td>팝업정보</td>
+			</tr>
+		</table>
+	</th>
+</tr>
+</thead>
+<!-- 팝업리스트 -->
+<tbody id="popupBody">
+<?=$popup_lists?>
+</tbody>
+<!-- 팝업리스트 -->
+<tfoot>
+<tr>
+	<th style="padding:0px 0px 0px 0px">
+		<table width="100%" cellpadding="4" cellspacing="1" border="0" bgcolor="white" class="list_top">
+			<colgroup bgcolor="#F7F7F7"><col><col><col></colgroup>
+			<tr>
+				<td>
+					<table width="100%" height="28" cellpadding="0" cellspacing="0">
+					<tr>
+						<td width="100" style="padding-left:4px">☞ 선택한 팝업을</td><td><a onClick="popup.ajax_process('view', true, 'yes')"><img src="./img/bt_use2.gif" style="margin-left:2px"></a><a onClick="popup.ajax_process('view', true, 'no')"><img src="./img/bt_unused2.gif" style="margin-left:2px"></a><a onClick="popup.ajax_process('delete', true)"><img src="./img/bt_del_s2.gif" style="margin-left:2px"></a></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</th>
+</tr>
+</tfoot>
+</form>
+</table>
+
+</body>
+</html>

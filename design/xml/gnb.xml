@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="euc-kr" ?><root>
+			<setting>
+				<containerWidth>980</containerWidth>
+				<containerHeight>65</containerHeight>
+				<depth1MenuSpace>95</depth1MenuSpace>
+				<depth2MenuSpace>12</depth2MenuSpace>
+				<depth2MenuStartPositionXList>5,150,290,450,570,680</depth2MenuStartPositionXList>
+				<bgType>
+					<depth1 type="solid">
+						<solid>
+							<bgColor>0x296CCC</bgColor>
+						</solid>
+						<gradient>
+							<bgGradientStartColor>0xC82A1E</bgGradientStartColor>
+							<bgGradientEndColor>0xE94F43</bgGradientEndColor>
+							<bgGradientType>height</bgGradientType>
+						</gradient>
+						<image>
+							<url>/design/top/mbg.13315255173756.png</url>
+						</image>
+					</depth1>
+					<depth2 type="solid">
+						<solid>
+							<bgColor>0xFFFFFF</bgColor>
+						</solid>
+						<gradient>
+							<bgGradientStartColor>0x999999</bgGradientStartColor>
+							<bgGradientEndColor>0xCCCCCC</bgGradientEndColor>
+							<bgGradientType>height</bgGradientType>
+						</gradient>
+					</depth2>
+				</bgType>
+				<depth1MenuTextOnColor>0xFFF100</depth1MenuTextOnColor>
+				<depth1MenuTextOffColor>0xFFFFFF</depth1MenuTextOffColor>
+				<depth2MenuTextOnColor>0x212120</depth2MenuTextOnColor>
+				<depth2MenuTextOffColor>0xB0AAAA</depth2MenuTextOffColor>
+			</setting><menu>
+			<depth1>
+				<label>회사소개</label>
+				<label2>Company</label2>
+				<url target="javascript"><![CDATA[menu_handler(1)]]></url>
+				
+				<depth2>
+					<label>CEO인사말</label>
+					<url target="javascript"><![CDATA[menu_handler(8)]]></url>
+				</depth2>
+				<depth2>
+					<label>회사연혁</label>
+					<url target="javascript"><![CDATA[menu_handler(9)]]></url>
+				</depth2>
+				<depth2>
+					<label>조직도</label>
+					<url target="javascript"><![CDATA[menu_handler(48)]]></url>
+				</depth2>
+				<depth2>
+					<label>회사전경</label>
+					<url target="javascript"><![CDATA[menu_handler(10)]]></url>
+				</depth2>
+				<depth2>
+					<label>주요일정안내</label>
+					<url target="javascript"><![CDATA[menu_handler(11)]]></url>
+				</depth2>
+				<depth2>
+					<label>오시는길</label>
+					<url target="javascript"><![CDATA[menu_handler(12)]]></url>
+				</depth2>
+			</depth1>
+			<depth1>
+				<label>사업소개</label>
+				<label2>Business</label2>
+				<url target="javascript"><![CDATA[menu_handler(2)]]></url>
+				
+				<depth2>
+					<label>사업소개1</label>
+					<url target="javascript"><![CDATA[menu_handler(13)]]></url>
+				</depth2>
+				<depth2>
+					<label>사업소개2</label>
+					<url target="javascript"><![CDATA[menu_handler(14)]]></url>
+				</depth2>
+				<depth2>
+					<label>사업소개3</label>
+					<url target="javascript"><![CDATA[menu_handler(15)]]></url>
+				</depth2>
+				<depth2>
+					<label>사업소개4</label>
+					<url target="javascript"><![CDATA[menu_handler(49)]]></url>
+				</depth2>
+			</depth1>
+			<depth1>
+				<label>제품소개</label>
+				<label2>Product</label2>
+				<url target="javascript"><![CDATA[menu_handler(3)]]></url>
+				
+				<depth2>
+					<label>컴퓨터/전자</label>
+					<url target="javascript"><![CDATA[menu_handler(16)]]></url>
+				</depth2>
+				<depth2>
+					<label>노트북</label>
+					<url target="javascript"><![CDATA[menu_handler(17)]]></url>
+				</depth2>
+				<depth2>
+					<label>데스크탑</label>
+					<url target="javascript"><![CDATA[menu_handler(18)]]></url>
+				</depth2>
+				<depth2>
+					<label>모니터</label>
+					<url target="javascript"><![CDATA[menu_handler(19)]]></url>
+				</depth2>
+				<depth2>
+					<label>이벤트상품</label>
+					<url target="javascript"><![CDATA[menu_handler(58)]]></url>
+				</depth2>
+			</depth1>
+			<depth1>
+				<label>채용정보</label>
+				<label2>Recruit</label2>
+				<url target="javascript"><![CDATA[menu_handler(6)]]></url>
+				
+				<depth2>
+					<label>채용안내</label>
+					<url target="javascript"><![CDATA[menu_handler(25)]]></url>
+				</depth2>
+				<depth2>
+					<label>채용공고</label>
+					<url target="javascript"><![CDATA[menu_handler(26)]]></url>
+				</depth2>
+				<depth2>
+					<label>온라인입사지원</label>
+					<url target="javascript"><![CDATA[menu_handler(27)]]></url>
+				</depth2>
+			</depth1>
+			<depth1>
+				<label>고객센터</label>
+				<label2>Customer</label2>
+				<url target="javascript"><![CDATA[menu_handler(5)]]></url>
+				
+				<depth2>
+					<label>공지사항</label>
+					<url target="javascript"><![CDATA[menu_handler(22)]]></url>
+				</depth2>
+				<depth2>
+					<label>견적문의</label>
+					<url target="javascript"><![CDATA[menu_handler(57)]]></url>
+				</depth2>
+				<depth2>
+					<label>자주하는질문</label>
+					<url target="javascript"><![CDATA[menu_handler(23)]]></url>
+				</depth2>
+				<depth2>
+					<label>1:1고객상담</label>
+					<url target="javascript"><![CDATA[menu_handler(45)]]></url>
+				</depth2>
+			</depth1>
+			<depth1>
+				<label>커뮤니티</label>
+				<label2>Community</label2>
+				<url target="javascript"><![CDATA[menu_handler(7)]]></url>
+				
+				<depth2>
+					<label>업계소식</label>
+					<url target="javascript"><![CDATA[menu_handler(28)]]></url>
+				</depth2>
+				<depth2>
+					<label>보도자료</label>
+					<url target="javascript"><![CDATA[menu_handler(29)]]></url>
+				</depth2>
+				<depth2>
+					<label>시공사진</label>
+					<url target="javascript"><![CDATA[menu_handler(31)]]></url>
+				</depth2>
+				<depth2>
+					<label>자유게시판</label>
+					<url target="javascript"><![CDATA[menu_handler(32)]]></url>
+				</depth2>
+			</depth1></menu></root>

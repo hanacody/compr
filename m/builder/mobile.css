@@ -1,0 +1,16 @@
+div.note {
+	margin-top: 5px;
+	border: 1px #dedede solid;
+	background-color: #f7f7f7;
+	padding: 10px;
+}
+div.note ul {
+	margin: 0;
+	list-style: none;
+	padding: 0;
+}
+div.note li {
+	margin: 0;
+	padding: 0.3em 0;
+	line-height: 1.0em;
+}

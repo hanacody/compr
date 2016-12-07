@@ -1,0 +1,49 @@
+/**
+ * 실명인증 CSS
+ *@author: kurokisi
+ *@authDate: 2012.01.12
+ */
+
+h1 {display:none}
+div.tip {float:right;padding-top:4px;font-size:11px;font-family:dotum;letter-spacing:-1px;text-decoration:underline;color:#e63123}
+#ipin_tip {position:absolute;width:320px; height:100px; border:2px #e63123 solid;background-color:#fff;line-height:1.5em;margin-top:-2px;}
+#ipin_tip div.wrap {margin:5px;padding:15px;text-align:left}
+#ipin_tip div.close {float:right;width:20px;font-size:14px;margin-top:5px}
+#ipin_tip b {color:#e63123}
+#ipin_tip p {margin:5px 0 0 0;font-size:11px;letter-spacing:-1px;white-space:normal}
+
+span.tip {font-size:11px;letter-spacing:-1px;color:#999}
+
+ul.hint {border:1px #dedede dotted;padding:10px 30px;margin:0;line-height:1.5em}
+ul.hint li {list-style:disc;margin:0;padding:0;font-size:11px;letter-spacing:-1px;color:#777}
+
+div.tab {position:relative;width:100%;z-index:1;margin-bottom:0px;}
+.tab ul {list-style:none;display:table;margin:0;padding:0}
+.tab li {display:table-cell;vertical-align:top;width:96px;font-size:8pt;text-align:center;padding:3px 0;border:1px #dedede solid;background-color:#f1f1f1;float:left}
+.tab li.on {border-bottom:1px #fff solid;background-color:#fff;font-weight:bolder;cursor:pointer;}
+.tab li.end {border-left:0;cursor:pointer;}
+
+div.kind_mem{margin:4px 0 3px;height:18px;}
+div.kind_mem input{vertical-align:top;}
+div.kind_mem label{margin-right:5px;}
+
+.tip a{font-size:8pt;}
+.tip a:hover{color:#E63123;}
+
+.ip_box{margin:26px 0 1px;}
+.name_box{margin:10px 0 15px;}
+.non_mem{height:120px;}
+
+.form_tit{padding-left:3px;font-size:9pt; letter-spacing:-1pt;}
+.hipen{display:inline-block;width:14px;text-align:center;}
+
+div.box {clear:both;border:1px #dedede solid;margin-top:-1px;padding:15px;z-index:0}
+div.box dl.box{margin:10px 0 20px 0;border:1px #dedede dotted;padding:15px 10px;background-color:#f7f7f7}
+dl.box dl {white-space:nowrap}
+dl.box dt {display:inline;text-align:right;padding-left:10px;padding-right:10px;vertical-align:middle;*display:inline}
+dl.box dd {display:inline;margin-left:0;vertical-align:middle;*display:inline}
+#userno_text {width:110px;padding-left:0;}
+
+div.box input.input {width:150px;border:1px #ccc solid;background-color:#fff;color:#000;font-size:12px;height:23px;line-height:23px;padding:2px;font-family:verdana;font-weight:bold;line-height:1.0em;*line-height:1.4em}
+div.box input.sno {width:120px;text-align:center}
+div.box p.box {text-align:center;margin-bottom:15px;border:1px #dedede dotted;background-color:#f7f7f7;padding:10px;line-height:1.6em;color:#333}

@@ -1,0 +1,134 @@
+<?php
+/**
+ * 제품관리 환경설정
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../class/product.class.php';
+$product = new product;
+$rows = $product->get_settings();
+
+include_once '../../rankup_module/rankup_fbuilder/rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+include_once 'top_menu.inc.php';
+?>
+
+<center>
+<div style="width:760px;text-align:left">
+
+	<form id="save_form" name="save_form" onSubmit="return false">
+		<div id="sub_title">기본환경설정</div>
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top">
+		<col width="120" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 스킨별 출력설정</td>
+			<td>
+				<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1">
+				<col width="100" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 리스트형</td>
+					<td>
+						<select name="list_limits">
+						<?php
+						foreach(range(5, 50, 5) as $qty) {
+							$selected = ($qty==$rows['list_limits']) ? ' selected' : '';
+							echo sprintf('<option value="%d"%s>%s 개씩</option>', $qty, $selected, $qty);
+						}
+						?>
+						</select> 출력
+						<span id="tip">+ 한 페이지에 출력할 제품의 개수를 설정합니다.</span>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 갤러리형</td>
+					<td>
+						<select name="gallery_limits">
+						<?php
+						foreach(range(6, 60, 3) as $qty) {
+							$selected = ($qty==$rows['gallery_limits']) ? ' selected' : '';
+							echo sprintf('<option value="%d"%s>%s 개씩</option>', $qty, $selected, $qty);
+						}
+						?>
+						</select> 출력
+						<span id="tip">+ 한 페이지에 출력할 제품의 개수를 설정합니다.</span>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 견적문의 설정</td>
+			<td>
+				<select name="use_component">
+				<option value="">사용안함</option>
+				<optgroup label="--컴포넌트연결하기--"></optgroup>
+				<?php
+				echo $fbuilder->print_forms(array(
+					'mode' => 'option',
+					'value' => $rows['use_component'],
+					'entry' => '<option value="{:no:}"{:selected:}>{:form_name:}</option>',
+					'on_selected' => ' selected'
+				));
+				?>
+				</select>
+				<span id="tip">+ 제품에 대한 견적문의를 받으려면 관련 컴포넌트를 연결하십시오.</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 등록항목 설정</td>
+			<td>
+				<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1">
+				<col width="100" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 제품특징</td>
+					<td>
+						<input type="radio" name="use_feature" checked value="yes" id="use_feature_yes"><label for="use_feature_yes">사용함</label>
+						<input type="radio" name="use_feature"<? if($rows['use_feature']=='no') echo ' checked' ?> value="no" id="use_feature_no"><label for="use_feature_no">사용안함</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 제품용도</td>
+					<td>
+						<input type="radio" name="use_purpose" checked value="yes" id="use_purpose_yes"><label for="use_purpose_yes">사용함</label>
+						<input type="radio" name="use_purpose"<? if($rows['use_purpose']=='no') echo ' checked' ?> value="no" id="use_purpose_no"><label for="use_purpose_no">사용안함</label>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 제품상세정보</td>
+					<td>
+						<input type="radio" name="use_spec" checked value="yes" id="use_spec_yes"><label for="use_spec_yes">사용함</label>
+						<input type="radio" name="use_spec"<? if($rows['use_spec']=='no') echo ' checked' ?> value="no" id="use_spec_no"><label for="use_spec_no">사용안함</label>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</form>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정하신 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" /></a>
+	</div>
+
+</div>
+</center>
+
+<script type="text/javascript">
+//<![CDATA[
+$form.hashes = {mode:'save_settings'}
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

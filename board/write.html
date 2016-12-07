@@ -1,0 +1,195 @@
+<?php
+/**
+ * 폼(FORM)빌더용 - 등록 페이지
+ *@note: 다른 페이지에서 include 하기도 함 (ex) product/estimate.html
+ */
+include_once '../Libs/_php/rankup_basic.class.php';
+
+// 페이지 제너레이터 - 필수
+include_once '../rankup_module/rankup_builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+if(!isset($frame)) $frame = new rankup_frame;
+if(!isset($gen)) $gen = new page_generator($_GET['pid']);
+
+
+// 타이틀, 스타일 출력 / 상단 컨텐츠
+$rankup_control->print_user_head($gen->page_title);
+include_once '../include/top.html';
+
+include_once '../rankup_module/rankup_fbuilder/rankup_fbuilder.class.php';
+$fbuilder = new rankup_fbuilder;
+
+$fs_rows = $fbuilder->get_settings($_GET['fno']);
+if(!$fs_rows['no']) {
+	scripts('alert("잘못된 요청입니다.");history.back()');
+	exit;
+}
+// 글쓰기 권한 체크
+if($fs_rows['write_level']<$rankup_member->lowest_level) { // lowest_level : 비회원(7)
+	if(!$member_info['level'] || $member_info['level']>$fs_rows['write_level']) {
+		scripts(sprintf('alert("%s 등급부터 글쓰기가 가능합니다.");history.back();', $config_info['smlevel'][$fs_rows['write_level']]));
+		exit;
+	}
+}
+
+// 필수·일반항목 텍
+$require_icon = '<img src="../rankup_module/rankup_member/img/arrow.gif" /> ';
+$normal_icon = '<font>　</font>';
+
+?>
+<script type="text/javascript"> direct_board = true </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<script type="text/javascript" src="../rankup_module/rankup_builder/attachment.class.js"></script>
+
+<style type="text/css">
+#privacy {
+	text-align: left;
+	width:auto;
+	height: 100px;
+	overflow: auto;
+	padding: 10px;
+	border: #d7d7d7 1px solid;
+	background-color: #ebebeb;
+	line-height: 1.6em;
+	scrollbar-highlight-color: #d7d7d7;
+	scrollbar-shadow-color: #d7d7d7;
+	scrollbar-arrow-color: #d7d7d7;
+	scrollbar-face-color: #FFFFFF;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+</style>
+
+<iframe name="post_frame" src="about:blank" style="width:100%;height:0" frameborder="0"></iframe>
+
+<table width="730" cellpadding="0" cellspacing="0" border="0" align="center">
+	<tr>
+		<td>
+			<form id="save_form" name="save_form" action="javascript:void(0)">
+				<input type="hidden" name="mode" value="save_article" />
+				<input type="hidden" name="fno" value="<?=$_GET['fno']?>" />
+<?php
+// 개인정보취급동의
+if($fs_rows['use_privacy']=='yes') {
+?>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0" >
+				<tr>
+					<td class="subtitle">개인정보 수집 및 이용에 대한 안내</td>
+				</tr>
+				<tr>
+					<td align="center" class="pd_t_10">
+						<div id="privacy">
+							<?php echo $rankup_control->get_config_info("mem_privacy") ?>
+						</div>
+					</td>
+				</tr>
+				<td height="35" align="center">
+					<input type="checkbox" name="agree" required id="agree_yes" class="input_box" value="yes" message="개인정보 수집 및 이용안내에 동의하시기 바랍니다."><label for="agree_yes" style="line-heihgt:1.7em">위의 '<b>개인정보 수집 및 이용</b>' 에 동의합니다.</label>
+				</td>
+				</table>
+				<br />
+<?php
+}
+
+// 스팸방지코드 - 비회원인 경우에만 노출
+if($fs_rows['use_antispam']=='yes' && !$member_info['uid']) {
+	$after_contents = '
+	<tr>
+		<td class="Form_ess">'.$require_icon.'스팸방지코드</td>
+		<td class="Form_right">
+			<div id="tip" style="margin:0">아래 코드를 입력하십시오. <font color="gray">(코드 식별이 힘드실 때에는 코드를 클릭해 주시기 바랍니다.)</font></div>
+			<table cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<a id="confirm_image" onClick="confirm_code_reset()" title="클릭시 스팸방지코드가 갱신됩니다" />'.$rankup_control->print_confirm_image(array(110, 33)).'</a>
+				</td>
+				<td width="10"></td>
+				<td>
+					'.$rankup_control->print_confirm_field('keystring', ' required hname="스팸방지코드" class="simpleform"').'
+				</td>
+			</tr>
+			</table>
+		</td>
+	</tr>';
+}
+
+// 등록폼 출력
+echo '<div style="float:right"><img src="../'.SKIN.'img/tag_require.png" /></div>';
+
+echo $fbuilder->draw_form($fs_rows, '', array(
+	'forms' => $fs_rows,
+	'entry' => array(
+		1 => '
+			<div style="height:22px">
+				{:on_group_name:}
+			</div>
+			<table width="100%" cellpadding="0" cellspacing="0" border="0">
+			<col width="120" />
+			<col />
+			<tr>
+				<td class="Form_top" colspan="2">&nbsp;</td>
+			</tr>
+			{:before_contents:}
+			{:fields:}
+			{:after_contents:}
+			</table>',
+		2 => '<hr style="visibility:hidden" /><br>'
+	),
+	'on_group_name' => '<div class="subtitle"><img src="../'.SKIN.'img/bullet_s_tit.png" class="bullet_img" />&nbsp;{:group_name:}</div>',
+
+	'before_contents' => $before_contents, // the first time
+	'after_contents' => $after_contents, // the last time
+
+	'field_entry' => $fbuilder->field_entires + array(
+		'entry' => array(
+			1 => '
+			<tr>
+				<td class="Form_ess">{:require_icon:}{:normal_icon:}{:field_name:}</td>
+				<td class="Form_right">{:field_item:} {:on_hint:}</td>
+			</tr>'
+		),
+		'on_hint' => ' <span class="tip">{:hint:}</span>',
+		'require_icon' => $require_icon,
+		'normal_icon' => $normal_icon
+	)
+));
+?>
+
+				<div style="margin-top:10px;text-align:center">
+					<a onClick="$write.submit(this, 'save_form', '입력하신 사항을 저장하시겠습니까?')"><input type="image" src="../Libs/_images/btn_save1.gif" /></a>
+				</div>
+
+			</form>
+
+		</td>
+	</tr>
+</table>
+<script type="text/javascript">
+//<![CDATA[
+Wysiwyg.createELM();
+var $write = Object.clone($form);
+$write.face = attachment.face;
+$write.post = attachment.post;
+$write.post_reset = attachment.reset;
+$write.draw = function(infos) {
+	$(this.face).value = infos.name;
+	$(this.face+'_preview').innerHTML = '<font color="red">[첨부됨]</font>';
+}
+$write.url = '../board/';
+$write.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+		location.reload();
+	}
+}
+//]]>
+</script>
+
+<?php
+// 우편번호 폼 로드
+include_once '../rankup_module/rankup_post/rankup_post.inc.html';
+include_once '../include/bottom.html';
+?>

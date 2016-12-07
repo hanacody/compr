@@ -1,0 +1,80 @@
+#image_box_frame {
+	position: absolute;
+	width: 580px;
+	*width: 600px;
+	border: 1px #333 solid;
+	padding: 10px;
+	z-index: 200; /* wysiwyg level */
+	background-color: white;
+}
+#image_box_frame h2 {
+	text-align: left;
+	font-size: 9pt;
+	line-height: 1.0em;
+	margin: 0 0 8px 0;
+	font-family: Arial;
+	letter-spacing: 2px;
+	color: black;
+}
+#image_box_frame div.close {
+	float: right;
+	width: 16px;
+}
+#image_box_frame dl {
+	padding: 0;
+	margin: 0;
+}
+/* images area */
+#image_box_frame dt {
+	height: 330px;
+	*height: 340px;
+	background-color: #003366;
+	text-align: left;
+	overflow-y: scroll;
+	border: 1px #777 solid;
+	padding: 4px;
+	*padding-bottom: 7px;
+	scrollbar-highlight-color: #CCCCCC;
+	scrollbar-shadow-color: #CCCCCC;
+	scrollbar-arrow-color: #AAAAAA;
+	scrollbar-face-color: #F4F3F0;
+	scrollbar-3dlight-color: #FFFFFF;
+	scrollbar-darkshadow-color: #FFFFFF;
+	scrollbar-track-color: #FFFFFF;
+}
+#image_box_frame dt div {
+	width: 102px;
+	height: 102px;
+	border: 1px #142E47 solid;
+	background-color: #142E47;
+	float: left;
+	margin: 3px;
+	cursor: pointer;
+	*filter: gray alpha(opacity=40);
+	opacity: .4;
+}
+#image_box_frame dt div img {
+	width: 88px;
+	height: 88px;
+	border: 1px #102F4D solid;
+	margin: 6px;
+}
+#image_box_frame dt div.hover {
+	border: 1px #102F4D solid;
+	background-color: #336699;
+	*filter: alpha(opacity=100);
+	opacity: 1;
+}
+#image_box_frame dt div.selected {
+	border: 1px #102F4D solid;
+	background-color: #ff9933;
+	*filter: alpha(opacity=100);
+	opacity: 1;
+}
+/* tools */
+#image_box_frame dd {
+	margin: 0;
+	padding: 0;
+	margin-top: 8px;
+	height: 30px;
+}

@@ -1,0 +1,128 @@
+<?php
+/**
+ * 인증폼설정
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once './rankup_authentic.class.php';
+$auth = new rankup_authentic;
+
+if(!$_GET['kind']) $_GET['kind'] = array_shift(array_keys($auth->pin_kinds));
+$rows = $auth->get_pins($_GET['kind']);
+
+include_once 'top_menu.inc.php';
+
+$membership_kinds = array(
+	1 => '일반인회원<span style="color:#999">(만14세이상내국인)</span>',
+	2 => '국내외국인회원',
+	3 => '모두사용'
+);
+?>
+<style type="text/css">
+#kinds_frame ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	height: 40px;
+}
+#kinds_frame li {
+	display: inline;
+	margin-right: 10px;
+	background: url('../../Libs/_images/ic_arrow1.gif') no-repeat 0 3px;
+	padding-left: 10px;
+}
+</style>
+
+<center>
+<div style="width:760px;margin-top:30px;text-align:left;">
+
+	<div id="kinds_frame">
+		<ul>
+		<?php
+		foreach($auth->pin_kinds as $kind=>$sett) {
+			if($_GET['kind']==$kind) $sett['name'] = '<b>'.$sett['name'].'</b>';
+			echo sprintf('<li><a href="form_setting.html?kind=%s">%s</a></li>', $kind, $sett['name']);
+		}
+		?>
+		</ul>
+	</div>
+
+	<form id="save_form" name="save_form">
+		<input type="hidden" name="pin_kind" value="<?=$_GET['kind']?>" />
+
+		<div id="sub_title">인증폼설정</div>
+		<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="margin-top:3px">
+		<col width="120" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 사용여부</td>
+			<td>
+				<input type="radio" name="use_pin" checked value="yes" id="use_pin_yes"><label for="use_pin_yes">사용함</label>
+				<input type="radio" name="use_pin"<? if($rows['use_pin']=='no') echo ' checked' ?> value="no" id="use_pin_no"><label for="use_pin_no">사용안함</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif"> 인증폼종류</td>
+			<td>
+				<input type="radio" name="form_kind" checked value="normal" id="form_kind_normal"><label for="form_kind_normal">일반인증</label>
+				<input type="radio" name="form_kind"<? if($rows['form_kind']=='adult') echo ' checked' ?> value="adult" id="form_kind_adult"><label for="form_kind_adult">성인인증</label>
+				<span id="tip">+ '성인인증' 설정시 성인인증 콘텐츠가 출력됩니다.</span>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg" rowspan="2"><img src="../../Libs/_images/ic_dot1.gif"> 인증모듈설정</td>
+			<td>
+				<input type="checkbox" name="use_jumin"<? if($rows['use_jumin']=='yes') echo ' checked' ?> value="yes" id="use_jumin_yes"><label for="use_jumin_yes">실명인증</label>
+				<span id="tip">+ 선택된 회원만 이용이 허가됩니다.</span>
+				<div style="margin:8px 0 5px 20px">
+					<?php
+					foreach(range(1, 3) as $num) {
+						$checked = ($rows['jumin_foreginer']==$num) ? ' checked' : '';
+						echo sprintf('<input type="radio" name="jumin_foreginer"%s value="%d" id="jumin_foreginer_%d"><label for="jumin_foreginer_%d">%s</label>', $checked, $num, $num, $num, $membership_kinds[$num]);
+					}
+					?>
+				</div>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<input type="checkbox" name="use_ipin"<? if($rows['use_ipin']=='yes') echo ' checked' ?> value="yes" id="use_ipin_yes"><label for="use_ipin_yes">아이핀(I-Pin)인증</label>
+				<span id="tip">+ 선택된 회원만 이용이 허가됩니다.</span>
+				<div style="margin:8px 20px">
+					<?php
+					foreach(range(1, 3) as $num) {
+						$checked = ($rows['ipin_foreginer']==$num) ? ' checked' : '';
+						echo sprintf('<input type="radio" name="ipin_foreginer"%s value="%d" id="ipin_foreginer_%d"><label for="ipin_foreginer_%d">%s</label>', $checked, $num, $num, $num, $membership_kinds[$num]);
+					}
+					?>
+				</div>
+			</td>
+		</tr>
+		</table>
+
+	</form>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$form.submit(this, 'save_form', '설정하신 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" /></a>
+	</div>
+
+</div>
+</center>
+<br />
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+$form.hashes = {mode:'set_pins'}
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+//]]>
+</script>
+
+</body>
+</html>

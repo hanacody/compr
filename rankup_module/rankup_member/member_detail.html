@@ -1,0 +1,130 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+$rows = $rankup_member->get_member_info($_GET['uid']);
+if(!$rows['uid']) $rankup_control->popup_msg_js("죄송합니다. [ $_GET[uid] ] 고객님의 정보가 존재하지 않습니다.");
+$agreements = array("yes"=>"수신동의", "no"=>"수신거부");
+
+if($rows['login_infos']) $login_infos = unserialize($rows['login_infos']);
+
+$rankup_control->print_admin_head("$rows[uid] 회원정보");
+?>
+<body>
+<div class="bar"><script> titleBar('회원정보') </script></div>
+
+<style type="text/css">
+* {font-family:verdana;font-size:11px!important;letter-spacing:-1px}
+.ls0 {letter-spacing:0}
+</style>
+
+<center>
+<div style="width:760px;text-align:left;margin-top:30px">
+
+	<div id="sub_title"><b class="ls0"><?=$_GET['uid']?></b> 님의 회원정보입니다.</div>
+	<table width="100%" cellpadding="9" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+		<col width="14%" />
+		<col width="34%" />
+		<col width="14%" />
+		<col width="38%" />
+		<tr>
+			<td class="gray_bg">이름 (닉네임)</td>
+			<td>
+				<?php
+				echo sprintf('<b>%s</b>', $rows['name']);
+				if($rows['nickname']) echo sprintf(' <span class="tip2">(%s)</span>', $rows['nickname']);
+				?>
+			</td>
+			<td class="gray_bg">가입유형</td>
+			<td><?=str_replace(array(' ', '(', ')'), array('', ' <span class="tip2">(', ')</span>'), $rankup_member->member_types[$rows['type']])?></td>
+		</tr>
+		<tr>
+			<td class="gray_bg">아이디</td>
+			<td><b class="ls0"><?=$rows['uid']?></b></td>
+			<td class="gray_bg">회원등급</td>
+			<td>
+				<?php
+				echo sprintf('<b>%s</b>', $config_info['smlevel'][$rows['level']]);
+				echo sprintf(' <span class="tip2">(Lv.%d)</span>', $rows['level']);
+				?>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg">생일 (성별)</td>
+			<td>
+				<?php
+				echo date('Y 년 n 월 j 일', strtotime($rows['birthday']));
+				echo sprintf(' <span class="tip2">(%s)</span>', $rankup_member->genders[$rows['gender']]);
+				?>
+			</td>
+			<td class="gray_bg">가입일시 (IP)</td>
+			<td>
+				<?php
+				echo $rows['join_time'];
+				echo sprintf(' <span class="tip2">(IP:%s)</span>', $rows['join_ip']);
+				?>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg">일반전화</td>
+			<td><?=$rows['phone']?></td>
+			<td class="gray_bg">최종로그인 (IP)</td>
+			<td>
+				<?php
+				echo $login_infos['login_time'];
+				echo sprintf(' <span class="tip2">(IP:%s)</span>', $login_infos['login_ip']);
+				?>
+				&nbsp;<a href="./member_log.html?smode=member_id&skey=<?=$rows['uid']?>"><b class="tip2">[LOG]</b></a>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg">휴대전화</td>
+			<td><?=$rows['hphone']?></td>
+			<td class="gray_bg">비밀번호변경</td>
+			<td><?=$rows['passwd_time']?></td>
+		</tr>
+		<tr>
+			<td class="gray_bg">이메일</td>
+			<td><? if($rows['email']) echo sprintf('<a href="mailto:%s" class="ls0">%s</a>', $rows['email'], $rows['email']) ?></td>
+			<td class="gray_bg">방문횟수</td>
+			<td><?=$rows['visit']?> 회</td>
+		</tr>
+		<tr>
+			<td class="gray_bg">주소</td>
+			<td colspan="3"><?="[".$rows['zipcode']."] ".$rows['address1']." ".$rows['address2']?></td>
+		</tr>
+		<tr>
+			<td class="gray_bg">뉴스레터 수신</td>
+			<td><?=$agreements[$rows['mailing']]?></td>
+			<td class="gray_bg">문자메시지 수신</td>
+			<td><?=$agreements[$rows['sms']]?></td>
+		</tr>
+		<tr>
+			<td class="gray_bg">
+				가입인사<br />
+			</td>
+			<td height="150" colspan="3" valign="top" class="ls0"><?=nl2br($rows['introduce'])?></td>
+		</tr>
+	</table>
+	<br />
+	<br />
+	<br />
+
+	<div id="sub_title">관리자메모</div>
+	<table width="100%" cellpadding="9" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+		<tr>
+			<td class="gray_bg" width="14%">관리자 메모</td>
+			<td height="150" valign="top" class="ls0"><?=$rows['memo']?></td>
+		</tr>
+	</table>
+
+	<div style="margin-top:20px;text-align:center">
+		<a href="./rad_member_modify.html?uid=<?=$_GET['uid']?>"><img src="../../Libs/_images/btn_modify1.gif" border="0" align="absmiddle" alt="수정" /></a>
+		<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" border="0" align="absmiddle" alt="뒤로" /></a>
+	</div>
+
+</div>
+</center>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<?php
+/**
+ * 갤러리 상세보기
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+include_once '../builder/rankup_frame.class.php';
+include_once '../design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+include_once $base_dir.'rankup_module/rankup_builder/attachment.class.php';
+include_once '../class/gallery.class.php';
+
+$gallery = new gallery;
+list($totals, $rank, $gs_rows, $prev_no, $next_no) = $gallery->get_webzine($_GET['pno'], $_GET['no']);
+?>
+
+<div id="container">
+	<div class="tit0">
+		<div class="tit_t" id="subject"><?=$gs_rows['subject']?></div>
+	</div>
+</div>
+
+<style type="text/css" media="all"> @import url('../styles/carousel.css'); </style>
+<div id="carousel">
+	<div style="height:1px;background:url(../images/lite_bg.png);margin-bottom:10px;"></div>
+	<div id="wrapper">
+		<div id="scroller">
+			<ul id="thelist">
+				<?php
+				$attach = new attachment('webzine', $base_dir.'gallery/admin/');
+				echo $gallery->print_contents($_GET['pno'], array(
+					'entry' => '<li no="{:no:}">{:on_attach:}</li>',
+					'on_attach' => '<img src="'.substr($pc_domain, 0, -1).'{:attach:}" />',
+					'non_attach' => '<img src="./img/frame_no_img.gif" />',
+					'folder' => $attach->configs['save']['folder']
+				));
+				?>
+			</ul>
+		</div>
+		<ul id="nav">
+			<li id="prev"><a onclick="myScroll.scrollToPage('prev', 0);return false"><span>이전보기</span></a></li>
+			<li>
+				<ul id="indicator">
+					<?php
+					echo $gallery->print_contents($_GET['pno'], array(
+						'value' => $rank,
+						'entry' => '<li{:on_active:}>{:no:}</li>',
+						'on_active' => ' class="active"'
+					));
+					?>
+				</ul>
+			</li>
+			<li id="next"><a onclick="myScroll.scrollToPage('next', 0);return false"><span>다음보기</span></a></li>
+		</ul>
+	</div>
+	<div style="height:1px;background:url(../images/lite_bg.png);margin-top:9px;"></div>
+</div>
+
+<div id="content" class="gwc">
+	<?=nl2br($gs_rows['content'])?>
+</div>
+
+<script type="text/javascript" src="../scripts/iscroll.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var myScroll;
+var initialize = true;
+function loaded() {
+	myScroll = new iScroll('wrapper', {
+		snap: true,
+		momentum: false,
+		hScrollbar: false,
+		onScrollEnd: function () {
+			document.querySelector('#indicator > li.active').className = '';
+			document.querySelector('#indicator > li:nth-child(' + (this.currPageX+1) + ')').className = 'active';
+			if(initialize==false) {
+				var no = $('indicator').select('li[class~="active"]')[0].innerHTML;
+				proc.parameters({mode: 'load_webzine', no:no});
+				proc.process(function(trans) {
+					var item = trans.responseXML.getElementsByTagName('item')[0];
+					$w('subject content').each(function(field) {
+						$(field).innerHTML = item.getElementsByTagName(field)[0].firstChild.nodeValue.replace(/\r\n/g, '<BR>');
+					});
+				}, false);
+			}
+		}
+	});
+	// initialize
+	var pageX = <?=$rank-1?>;
+	myScroll.currPageX = pageX;
+	myScroll.scrollTo(-myScroll.wrapperW * pageX, 0, 0);
+	initialize = false;
+}
+Event.observe(document, 'DOMContentLoaded', loaded);
+//]]>
+</script>
+
+<?php
+include_once $m_dir.'include/bottom.html';
+?>

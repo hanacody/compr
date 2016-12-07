@@ -1,0 +1,210 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+include_once "rankup_board.class.php";
+include_once "rankup_board_admin.class.php";
+$rankup_control->check_admin();
+
+$rankup_board = new rankup_board_admin($_GET['id']);
+
+list($category_board_contents, $category_board_options, $_GET['id']) = $rankup_board->get_category_boards($_GET, true); // 메뉴별 게시판 목록
+list($total_comments, $comment_contents, $paging_button) = $rankup_board->get_board_comments($_GET); // 삭제 게시물 목록
+
+if(empty($_GET['sdate'])) $_GET['sdate'] = date("Y-m-d");
+if(empty($_GET['edate'])) $_GET['edate'] = date("Y-m-d");
+
+$rankup_control->print_admin_head("멀티게시판관리 - 댓글관리");
+?>
+<body>
+<?php
+if($rankup_board->include_js_class) rankup_basic::include_js_class(); // 2009.10.08 fixed
+?>
+<div class="bar" style="margin-bottom:30px"><script> titleBar('멀티게시판관리 - 댓글관리') </script></div>
+<link rel="stylesheet" type="text/css" href="./rankup_board.css">
+<script type="text/javascript" src="./rankup_board.class.js"></script>
+<script type="text/javascript">
+var rankup_board = new RANKUP_BOARD;
+rankup_board.board_id = "<?=$_GET[id]?>";
+rankup_board.index_url = "<?=$rankup_board->index_url?>";
+</script>
+<style type="text/css">
+.icon {filter:gray alpha(opacity=40)}
+.content {padding:5px;line-height:150%;font-family:verdana;letter-spacing:-1px;}
+
+/* Paging */
+#paging{text-align:center;margin-top:10px;margin-bottom:10px;width:100%;}
+#paging span{margin-left:5px;margin-right:5px;color:#c5c5c5;}
+#paging .num a{font-weight:bold;margin-left:3px;margin-right:3px;}
+#paging .on{font-weight:bold;color:#ff8400;margin-left:5px;margin-right:5px;}
+</style>
+
+<!-- 회원정보 폼 -->
+<table id="authorInfoTable" style="position:absolute;left:-2000px;top:-1000px;z-index:200;" width="450" cellpadding="4" cellspacing="1" bgcolor="#777777">
+<tbody bgcolor="white">
+<tr>
+	<td style="border:#dedede 2px solid;">
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td height="27" bgcolor="F2F2F2" class="title_blue" style="padding-left:7px"><img src="<?=$base_url?>rankup_module/rankup_board/img/icon_p_mem.gif" align="absmiddle">회원정보</td>
+		</tr>
+		</table>
+		<table border="0" cellpadding="7" cellspacing="0" width="95%" align="center">
+		<tr><td height="5"></td></tr>
+		<tr>
+			<td class="black_sb" width="20%"><img src="<?=$base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">닉네임</td>
+			<td><span id="author_nick">랭크업 (rankup)</span></td>
+		</tr>
+		<tr><td height="1" background="<?=$base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">가입일</td>
+			<td><span id="author_join">2008-07-23</span></td>
+		</tr>
+		<tr><td height="1" background="<?=$base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">등급</td>
+			<td><span id="author_level">운영자 (1)</span></td>
+		</tr>
+		<tr><td height="1" background="<?=$base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb" valign="top"><img src="<?=$base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">활동</td>
+			<td>
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr><td height="18">포인트 : <b><span id="author_points">0</span></b> 점</td></tr>
+				<tr><td height="18">게시물 작성수 : <b><span id="author_articles">0</span></b> 개</td></tr>
+				<tr><td height="18">댓글 작성수 : <b><span id="author_comments">0</span></b> 개</td></tr>
+				</table>
+			</td>
+		</tr>
+		<tr><td height="1" background="<?=$base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr align="center" height="30">
+			<td colspan="2"><img src="<?=$base_url?>rankup_module/rankup_board/img/bt_close.gif" onClick="rankup_board.change_display('authorInfoTable', false);" style="cursor:pointer;" align="absmiddle"></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</tbody>
+</table>
+<!-- 회원정보 폼 -->
+
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+	<td align="center">
+		<table border="0" cellpadding="0" cellspacing="0" width="750">
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="1" bgcolor="#dedede">
+				<form name="searchFrm" action="./comment.html" method="GET">
+				<input type="hidden" name="id" value="<?=$_GET['id']?>">
+				<tr bgcolor="#f7f7f7">
+					<td>
+						<table cellpadding="2" cellspacing="1" border="0" align="center">
+						<tr align="center">
+							<td><input type="checkbox" name="use_date"<? if($_GET['use_date']) echo " checked" ?>></td>
+							<td width="180">
+								<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+							</td>
+							<td width="409" id="period_search_option">
+								<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+							</td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td bgcolor="white">
+						<table cellpadding="2" cellspacing="1" border="0" align="center">
+						<tr>
+							<td>
+								<select name="smode">
+								<option value="content">내용</option>
+								<option value="author">작성자</option>
+								<option value="uid">아이디</option>
+								</select>
+							</td>
+							<td><input type="text" name="skey" size="20" value="<?=$_GET['skey']?>" maxlength="20" class="simpleform"></td>
+							<td><input type="image" src="./img/btn_search.gif" border="0" align="absmiddle"></td>
+						</tr>
+						</table>
+					</td>
+				</tr>
+				</form>
+				</table>
+				<script type="text/javascript">
+				<!--
+				document.searchFrm.smode.value = "<? echo empty($_GET['smode']) ? 'uid' : $_GET['smode'] ?>";
+				//-->
+				</script>
+
+			</td>
+		</tr>
+		<tr>
+			<td height="10"></td>
+		</tr>
+		<tr>
+			<td>
+				<table bgcolor="#c9ddec" border="0" cellpadding="5" cellspacing="1" width="100%">
+				<tbody bgcolor="#f6f9fb">
+				<tr>
+					<td align="center">
+						<table width="100%" cellpadding="4" cellspacing="0" border="0">
+						<? echo $category_board_contents ?>
+						</table>
+					</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td height="20"></td>
+		</tr>
+		<tr>
+			<td height="20"><img src="./img/ic_bullet1.gif"><b>총 <span class="orange_b"><? echo $total_comments ?>건</span>이 등록되어있습니다.</td>
+		</tr>
+		<tr>
+			<td>
+				<table align="center" bgcolor="#dddddd" border="0" cellpadding="5" cellspacing="1" width="750">
+				<tbody bgcolor="white">
+				<tr>
+					<td class="list_color" colspan="8" height="2"></td>
+				</tr>
+				<tr>
+					<td>
+						<table border="0" cellpadding="3" cellspacing="0" width="100%">
+						<? echo $comment_contents ?>
+						</table>
+					</td>
+				</tr>
+				</tbody>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td height="10"></td>
+		</tr>
+		<tr>
+			<td>
+				<table width="100%" cellpadding="0" cellspacing="0" border="0">
+				<tr>
+					<td width="125">
+						<a onClick="rankup_board.check_all($('sAllButton').src.indexOf('bt_sall.gif')!=-1, $('sAllButton'))"><img id="sAllButton" src="./img/bt_sall.gif" align="absmiddle"></a>
+						<a onClick="rankup_board.comment_delete()"><img src="./img/bt_sdel.gif" align="absmiddle"></a>
+					</td>
+					<td align="center">
+						<div id="paging">
+						<? echo $paging_button ?>
+						</div>
+					</td>
+					<td width="125"></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+<tr>
+	<td height="30"></td>
+</tr>
+</table>
+</body>
+</html>

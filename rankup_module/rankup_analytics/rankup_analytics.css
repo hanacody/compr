@@ -1,0 +1,17 @@
+#search_frame {
+	width: 750px;
+	margin: 0 auto 30px auto;
+}
+#chart_frame {
+	width: 750px;
+	margin: 0 auto;
+	text-align: left;
+}
+#chart_frame td {
+	padding: 10px;
+	text-align: center;
+}
+div.chart {
+	float: left;
+	text-align: center;
+}

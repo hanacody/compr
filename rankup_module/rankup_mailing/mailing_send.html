@@ -1,0 +1,213 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+if(!$_GET['sdate']) $_GET['sdate'] = date('Y-m-d');
+if(!$_GET['edate']) $_GET['edate'] = date('Y-m-d');
+
+if($_GET['mode']=='search') {
+	$result = $rankup_control->make_mail_que($_GET);
+	$lists = $rankup_control->queryFetchRows($result);
+	$totals = count($lists);
+
+	include_once './rankup_mailing.class.php';
+	$mailing = new rankup_mailing('newsletter');
+}
+else {
+	if(!$_GET['mailing']) $_GET['mailing'] = 'no'; // 수신거부 제외 활성화
+	if(!$_GET['duplicate_chk']) $_GET['duplicate_chk'] = 'on'; // 이메일중복체크 활성화
+}
+
+include_once 'top_menu.inc.php';
+?>
+<script type="text/javascript"> var direct_board = true; </script>
+<script type="text/javascript" src="<?=$wysiwyg_url?>wysiwyg.js"></script>
+<table width="770" border="0" cellpadding="0" cellspacing="0" align="center">
+	<tr>
+		<td>
+			<form name="searchFrm" method="GET" action="<?=$_SERVER['PHP_SELF']?>">
+			<input type="hidden" name="mode" value="search">
+			<table width="100%" cellpadding="0" cellspacing="1" bgcolor="#dedede">
+			<tr bgcolor="#f7f7f7">
+				<td>
+					<table cellpadding="2" cellspacing="1" border="0" align="center">
+					<tr align="center">
+						<td><input type="checkbox" id="use_date" name="use_date"<? if($_GET['use_date']) echo ' checked' ?>></td>
+						<td>
+							<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+						</td>
+						<td width="409" id="period_search_option">
+							<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td bgcolor="white">
+					<table cellpadding="2" cellspacing="1" border="0" align="center">
+					<tr>
+						<td id="level_frame">
+							<select name="slevel">
+							<option value="">회원등급</option>
+							<?php
+							array_pop($config_info['smlevel']);
+							foreach($config_info['smlevel'] as $level=>$name) {
+								$selected = ($_GET['slevel']==$level) ? ' selected' : '';
+								echo sprintf('<option value="%d"%s>%s</option>', $level, $selected, $name);
+							}
+							?>
+							</select>
+						</td>
+						<td>
+							<select id="smode" name="smode">
+							<option value="uid">아이디</option>
+							<option value="name">이름</option>
+							<option value="email">이메일</option>
+							</select>
+						</td>
+						<td>
+							<input type="text" name="skey" value="<? echo $_GET['skey'] ?>" class="simpleform" size="20" maxlength="30">
+						</td>
+						<td>
+							<input type="checkbox" name="mailing" value="no"<? if($_GET['mailing']=='no') echo ' checked' ?> id="mailing"><label for="mailing">수신거부제외</label>
+							<input type="checkbox" name="duplicate_chk"<? if($_GET['duplicate_chk']) echo ' checked' ?> id="duplicate_chk"><label for="duplicate_chk">이메일중복체크</label>
+						</td>
+						<td width="50" align="right">
+							<input type="image" src="../../Libs/_images/btn_search.gif" align="absmiddle">
+						</td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+			</form>
+			<script type="text/javascript">
+			$('smode').value = '<? echo $_GET['smode'] ? $_GET['smode'] : 'uid' ?>';
+			</script>
+		</td>
+	</tr>
+</table>
+
+<?php
+//
+if(!$_GET['mode']) {
+?>
+
+<table width="770" border="0" cellpadding="0" cellspacing="0" align="center" style="margin-top:25px">
+<tr>
+	<td>
+		<div class="help_bg">
+			<ul class="help_ul">
+				<li>뉴스레터를 발송하시려면 먼저 상단 <b><u>검색란에서 발송할 대상을 검색</u></b>해 주시기 바랍니다.</li>
+				<li style="margin-top:5px">상단 2차메뉴의 '<a href="./mailing_config.html"><b class="blue">메일폼설정</b></a>' 페이지에서 뉴스레터의 기본디자인을 변경하실 수 있습니다.</li>
+			</ul>
+		</div>
+	</td>
+</tr>
+</table>
+
+<?php
+}
+else {
+?>
+<table width="770" border="0" cellpadding="0" cellspacing="0" align="center" style="margin-top: 30px">
+<tr>
+	<td>
+		<div id="sub_title">이메일 머지(치환)문자</div>
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="134" />
+			<col />
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> {이름}</td>
+				<td>회원의 이름으로 치환됩니다. <span id="tip" style="letter-spacing:0;font-family:verdana;">ex) 홍길동</span></td>
+			</tr>
+			<tr>
+				<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align="absmiddle"> {아이디}</td>
+				<td>회원의 아이디로 치환됩니다. <span id="tip" style="letter-spacing:0;font-family:verdana;">ex) rankup</span></td>
+			</tr>
+		</table>
+	</td>
+</tr>
+</table>
+<br />
+
+<form name="send_form" id="send_form" onSubmit="return false">
+<input type="hidden" name="query" value="<?=urlencode($result)?>">
+<table width="770" border="0" cellpadding="0" cellspacing="0" align="center" style="margin-top: 30px">
+<tr>
+	<td>
+		<div style="float:right"><a onClick="$('help').toggle()"><img src="../../Libs/_images/btn_help.gif" alt="도움말" align="absmiddle" /></a></div>
+		<div id="sub_title">총 <b style="color:#FF6600"><?=number_format($totals)?> 명</b>의 회원이 검색 되었습니다.</div>
+		<div id="help" class="help_bg" style="display: none;margin-bottom: 8px">
+			<ul class="help_ul">
+				<li>이메일(호스팅) 서버에 설정된 발송제한용량을 초과할 경우 이메일이 발송되지 않습니다.</li>
+			</ul>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td>
+<? if($totals <= 0) { ?>
+		<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+		<tr>
+			<td height="30" align="center" disabled class="gray_bg">검색조건에 일치하는 회원은 존재하지 않습니다.</td>
+		</tr>
+		</table>
+<? } else { ?>
+		<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+		<col width="134" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" align='absmiddle'>&nbsp;<b>이메일 제목</b></td>
+			<td><input type="text" name="subject" class="simpleform" style="width:93%" required hname="이메일 제목" maxlength="100" /></td>
+		</tr>
+		</table>
+		<div style="margin-top: 10px">
+			<textarea type="editor" name="body" id="body" required hname="메일 내용" style="width:100%;height:500px" nofocus><?=$mailing->settings['body']?></textarea>
+		</div>
+<? } ?>
+	</td>
+</tr>
+<tr>
+	<td align="center" style="padding:15px">
+		<?php
+		// 보내기 버튼
+		if(rankup_basic::is_demo()) {
+			echo "
+			<a onClick=\"alert('데모 버전에서는 이메일을 발송할 수 없습니다.')\"><img src='./img/btn_mail_send.gif' border='0' align='absmiddle' alt='메일보내기'></a>
+			<a onClick=\"alert('데모 버전에서는 이메일을 발송할 수 없습니다.')\"><img src='./img/btn_mail_addview.gif' border='0' align='absmiddle' alt='발송될 메일주소보기'></a>";
+		}
+		else {
+			if($totals <= 0) echo "<a onClick=\"alert('이메일을 발송할 회원이 존재하지 않았습니다.')\"><img src='./img/btn_mail_send.gif' border='0' align='absmiddle' alt='메일보내기'></a>";
+			else echo '<a onClick="$form.submit(this, \'send_form\', \'발송할 대상자 수가 많은 경우 처리시간이 오래 걸릴 수 있습니다.\\n[확인] 후 본래 화면으로 되돌아올때까지 기다려 주십시오.\\n\\n지금 뉴스레터를 발송하시겠습니까?\')"><img src="./img/btn_mail_send.gif" align="absmiddle" alt="메일보내기"></a>';
+			echo " <a onClick=\"var mailingList=window.open('./mailing_list_pop.html?query=".base64_encode($result)."', 'mailingList', 'width=480,height=500,scrollbars=yes,noresize'); mailingList.focus();\"><img src='./img/btn_mail_addview.gif' border='0' align='absmiddle' alt='발송될 메일주소보기'></a>";
+		}
+		?>
+	</td>
+</tr>
+</table>
+</form>
+<br />
+<br />
+<script type="text/javascript">
+//<![CDATA[
+Wysiwyg.createELM();
+
+// $form submit setting
+$form.blind = true;
+$form.hashes = {mode: 'send_mailing'};
+$form.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('발송되었습니다.');
+	}
+}
+//]]>
+</script>
+
+<?php
+}
+?>
+</body>
+</html>

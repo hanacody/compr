@@ -1,0 +1,56 @@
+/**
+ * Form Builder stylesheet
+ *@authDate: 2012.02.09
+ */
+
+div.group {width:auto;margin:5px 0 10px 0;border:4px #fff solid;padding:8px;border:4px #f0f0f0 solid;background-color:#f7f7f7;filter:alpha(opacity=60);opacity:.6;*width:100%}
+div.group table {width:756px;table-layout:fixed}
+
+/* 비활성화 색상 */
+div.group table.list_top {border-top-color:#ccc}
+div.group table .blue_bg {background-color:#eee}
+div.group span.tip {color:#999}
+div.group font.no {color:#999}
+div.group font.yes {color:#999}
+div.group font.visible {color:#999}
+div.group font.invisible {color:#999}
+div.group div.item {*z-index:-1} /* IE hack */
+
+/* 활성화 색상 */
+div.on {border:4px #c4e7ba solid;background-color:#eff8e7;filter:alpha(opacity=100);opacity:1}
+div.on table.list_top{border-top-color:#6699cc}
+div.on table .blue_bg {background-color:#e1ecf4}
+div.on span.tip {color:#3399ff}
+div.on font.no {color:#ff3300}
+div.on font.yes {color:#3399ff}
+div.on font.visible {color:#ff3300}
+div.on font.invisible {color:#999}
+div.on div.item {*z-index:1} /* IE hack */
+
+input.size3 {width:30px}
+input.size4 {width:40px}
+input.size5 {width:50px}
+input.size6 {width:60px}
+input.size7 {width:70px}
+input.size12 {width:120px}
+input.size15 {width:150px}
+.w100 {width:100%}
+
+#group_name {font-weight:bold}
+#tool_frame {margin-top:5px}
+
+div.item {position:relative;padding-right:35px;margin:1px 0}
+div.item input {width:100%;*width:243px}
+div.item p {position:absolute;width:32px;top:2px;right:0;*right:5px}
+div.item img {vertical-align:top}
+
+/* field select color */
+div.group tr.on {background-color:#e6f1fb}
+
+/* dialog */
+div.dialog {position:absolute;width:400px;border:1px #000 solid;background-color:#fff;z-index:2}
+div.dialog dl {margin:0;}
+div.dialog dt {position:relative;background-color:#336699;color:#fff;font-weight:bold;padding:8px}
+div.dialog div.x {position:absolute;right:8px;top:8px;width:10px;color:white;font-weight:normal}
+div.dialog dd {width:auto;margin:10px;text-align:center}
+div.dialog textarea{width:100%;overflow:visible;height:26px;background-color:#f4f4f4;border:1px #aaa solid;padding:5px;line-height:1.2em;font-size:11px}

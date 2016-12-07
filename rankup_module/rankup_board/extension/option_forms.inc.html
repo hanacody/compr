@@ -1,0 +1,168 @@
+<!-- 보조 처리 프레임 -->
+<iframe name="secondProcessFrame" src="about:blank" style="width:100%;height:0px"></iframe>
+<!-- 보조 처리 프레임 -->
+
+<!-- 회원정보 폼 -->
+<table id="authorInfoTable" style="position:absolute;left:-2000px;top:-1000px;z-index:200;" width="450" cellpadding="4" cellspacing="1" bgcolor="#777777">
+<tbody bgcolor="white">
+<tr>
+	<td style="border:#dedede 2px solid;">
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td height="27" bgcolor="F2F2F2" class="title_blue" style="padding-left:7px"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_p_mem.gif" align="absmiddle">회원정보</td>
+		</tr>
+		</table>
+		<table border="0" cellpadding="7" cellspacing="0" width="95%" align="center">
+		<tr><td height="5"></td></tr>
+		<tr>
+			<td class="black_sb" width="20%"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">닉네임</td>
+			<td><?=$board_infos->author." (".$board_infos->uid.")"?></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">가입일</td>
+			<td><span id="author_join">2008-07-23</span></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">등급</td>
+			<td><span id="author_level">운영자 (1)</span></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb" valign="top"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_blue.gif">활동</td>
+			<td>
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+				<tr><td height="18">포인트 : <b><span id="author_points">0</span></b> 점</td></tr>
+				<tr><td height="18">게시물 작성수 : <b><span id="author_articles">0</span></b> 개</td></tr>
+				<tr><td height="18">댓글 작성수 : <b><span id="author_comments">0</span></b> 개</td></tr>
+				</table>
+			</td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr align="center" height="30">
+			<td colspan="2"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/bt_close.gif" onClick="rankup_board.change_display('authorInfo', false);" style="cursor:pointer;" align="absmiddle"></td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</tbody>
+</table>
+<!-- 회원정보 폼 -->
+
+
+<!-- 쪽지보내기 폼 -->
+<table id="sendMessageTable" style="position:absolute;left:-2000px;top:-1000px;z-index:200;" width="450" cellpadding="4" cellspacing="1" bgcolor="#777777">
+<form name="sendMessageFrm" method="POST" action="<?=$this->base_url?>mypage/multiProcess.ajax.html" target="secondProcessFrame" onSubmit="return (validate(this)&&confirm('상대방에게 쪽지를 발송하시겠습니까?'+SPACE))" autocomplete="off">
+<input type="hidden" name="mode" value="send_message">
+<input type="hidden" name="ruid" value="<?=$board_infos->uid?>">
+<tbody bgcolor="white">
+<tr>
+	<td style="border:#dedede 2px solid;">
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td height="27" bgcolor="F2F2F2" class="title_orange" style="padding-left:7px"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_p_msg.gif" align="absmiddle">쪽지보내기</td>
+		</tr>
+		</table>
+		<table border="0" cellpadding="7" cellspacing="0" width="95%" align="center">
+		<tr><td height="5"></td></tr>
+		<tr>
+			<td class="black_sb" width="82"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_yellow.gif">닉네임</td>
+			<td><?=$board_infos->author." (".$board_infos->uid.")"?></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_yellow.gif">제목</td>
+			<td><input type="text" name="subject" required hname="제목" class="enable" style="width:100%" maxlength="40"></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_yellow.gif"><span class="black_sb">내용</span><br><span class="gray_ds">(<span id="nowByte">0</span>/200바이트)</span></td>
+			<td><textarea name="content" style="width:100%;height:100px" required hname="내용" maxbyte="200" onKeyUp="rankup_board.check_byte(this, $('nowByte'))"></textarea></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr align="center">
+			<td colspan="2"><input type="image" src="<?=$this->base_url?>rankup_module/rankup_board/img/bt_send_msg2.gif" onfocus="blur()" align="absmiddle"> <img src="<?=$this->base_url?>rankup_module/rankup_board/img/bt_cancle.gif" onClick="rankup_board.change_display('sendMessage', false);" style="cursor:pointer;" align="absmiddle">
+		</td>
+		</tr>
+		</table>
+	</td>
+</tr>
+</tbody>
+</form>
+</table>
+<!-- 쪽지보내기 폼 -->
+
+
+<!-- 게시물신고 폼 -->
+<table id="articleReportTable" style="position:absolute;left:-2000px;top:-1000px;z-index:200;" width="450" cellpadding="4" cellspacing="1" bgcolor="#777777">
+<form name="articleReportFrm" method="POST" action="<?=$this->base_url?>mypage/multiProcess.ajax.html" target="secondProcessFrame" onSubmit="return (validate(this)&&confirm('게시물을 신고하시겠습니까?'+SPACE))">
+<input type="hidden" name="mode" value="regist_report">
+<input type="hidden" name="bid" value="<?=$this->board_id?>">
+<input type="hidden" name="pcno" value="<?=$this->board_configs['pcno']?>">
+<input type="hidden" name="ano" value="<?=$board_infos->no?>">
+<input type="hidden" name="auid" value="<?=$board_infos->uid?>">
+<input type="hidden" name="aunick" value="<?=$board_infos->author?>">
+<input type="hidden" name="asubject" value="<?=$board_infos->subject?>">
+<tbody bgcolor="white">
+<tr>
+	<td style="border:#dedede 2px solid;">
+		<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td height="27" bgcolor="F2F2F2" class="black_b" style="padding-left:7px"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_p_complain.gif" align="absmiddle" style="margin-top:3px">게시물 신고하기</td>
+		</tr>
+		<tr><td height="10"></td></tr>
+		<tr>
+			<td>
+				<table width="95%" cellpadding="2" cellspacing="0" align="center">
+				<tr>
+					<td style="letter-spacing:-1px;color:#999999"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_p_arrow.gif" style="margin-left:5px" align="absmiddle">게시판 성격에 맞지 않거나 불건전한 게시물을 운영자에게 신고할 수 있습니다.</td>
+				</tr>
+				<tr>
+					<td style="letter-spacing:-1px;color:#999999"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_p_arrow.gif" style="margin-left:5px" align="absmiddle">운영자 확인 후 해당글 삭제조치 및 해당 회원에게 불이익이 갈 수 있습니다.</td>
+				</tr>
+				<tr>
+					<td style="letter-spacing:-1px;color:#999999"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_p_arrow.gif" style="margin-left:5px" align="absmiddle">허위신고시에 불이익을 받을 수 있으니 신중하게 신고해주세요.</td>
+				</tr>
+				<tr><td height="3"></td></tr>
+				<tr><td height="1" style="padding:0;font-size:0px" bgcolor="f7f7f7"></td></tr>
+				</table>
+			</td>
+		</tr>
+		<tr><td height="5"></td></tr>
+		</table>
+
+		<table width="95%" cellpadding="7" cellspacing="0" border="0" align="center" style="table-layout:fixed;">
+		<tbody bgcolor="white">
+		<tr>
+			<td class="black_sb" width="80"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_gray.gif">글 제목</td>
+			<td nowrap style="overflow:hidden;text-overflow:ellipsis;"><?=$this->str_cut($board_infos->subject, 34)?></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_gray.gif">글 작성자</td>
+			<td><?=$board_infos->author?></td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr>
+			<td class="black_sb"><img src="<?=$this->base_url?>rankup_module/rankup_board/img/icon_star_gray.gif">신고이유</td>
+			<td>
+				<select name="reason" required hname="신고이유">
+				<option value=''>신고이유 선택</option>
+				<?=$this->get_report_reason_options()?>
+				</select>
+			</td>
+		</tr>
+		<tr><td height="1" style="padding:0;font-size:0px" background="<?=$this->base_url?>rankup_module/rankup_board/img/dot_line_gray.gif" colspan="2"></td></tr>
+		<tr><td height="7"></td></tr>
+		<tr align="center">
+			<td colspan="2"><input type="image" src="<?=$this->base_url?>rankup_module/rankup_board/img/bt_complain.gif" onfocus="blur()" align="absmiddle"> <img src="<?=$this->base_url?>rankup_module/rankup_board/img/bt_cancle.gif" onClick="rankup_board.change_display('articleReport', false);" style="cursor:pointer;" align="absmiddle"></td>
+		</tr>
+		</tbody>
+		</table>
+	</td>
+</tr>
+</tbody>
+</form>
+</table>
+<!-- 게시물신고 폼 -->

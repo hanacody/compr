@@ -1,0 +1,43 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title> 위지윅 샘플 </title>
+<meta name="Generator" content="EditPlus">
+<style type='text/css'>
+p{ margin:0px; }
+ul,ol{ margin-top:0; margin-bottom:0; }
+body, table, td{font-family:'Tahoma'; font-size:9pt; line-height:140%;}
+</style>
+<!-- 자바스크립트 파일경로 맞춰서 딱 한줄만 등록해주세요..-->
+<script language="JavaScript" src="wysiwyg.js"></script>
+<!-- //자바스크립트 파일경로 맞춰서 딱 한줄만 등록해주세요..-->
+</head>
+
+<body>
+자바스크립트를 이용한 위지윅(WYSIWYG) 에디터입니다.<br>
+웹메일에 쓰려고 만들었는데...<br>
+기능은 별로지만.. 그냥 깔끔하고 심플하게 쓰고 싶을때..<br>
+사용하면 좋을것 같네요..<br>
+<br>
+사용방법은..<br>
+1. 상단에 <font color="#336699">"wysiwyg.js"를 호출</font>하는 한줄 추가.<br>
+2. 에디팅 하고 싶은 TEXTAREA 태그안에 <font color="#336699">type="editor"</font> 라고 추가해주세요.<br>
+3. Editor 의 크기가 textarea에 스타일로 지정된 넓이와 높이를 참조하므로..<br>
+아래처럼 스타일로 지정해주세요.<br>
+&lt;textarea name="content" <font color="#FF0088">type="editor"</font> <font color="#336699">style="width:700px; height:300px;</font>"&gt;
+<br>
+4. wysiwyg.js 파일안에 아래와 같은 곳이 있는데요.. X좌표를 알맞게 설정하시면 됩니다. <br>
+<font color="#336699">
+	var left1 = (navigator.appName == "Microsoft Internet Explorer")?"13px":"9px"; //화면에 따라 약간씩 정해줘야해요..(IE:FireFox)<br>
+	var left2 = (navigator.appName == "Microsoft Internet Explorer")?"53px":"49px"; //화면에 따라 약간씩 정해줘야해요..(IE:FireFox)<br>
+	var left3 = (navigator.appName == "Microsoft Internet Explorer")?"179px":"175px"; //화면에 따라 약간씩 정해줘야해요..(IE:FireFox)<br>
+	var left4 = (navigator.appName == "Microsoft Internet Explorer")?"197px":"193px"; //화면에 따라 약간씩 정해줘야해요..(IE:FireFox)<br>
+</font>
+<br>
+특징은..<br>
+1. 그럴일이야 살면서 몇번이나 있으랴만은.. 한 화면에 복수의 에디터가 필요한 경우가 생기더라도.. 잘 작동합니다.<br>
+2. IE전용 인것들이 많아서.. IE와 파이어폭스에서 돌아가도록 했습니다. IE6.0 / FF1.5<br>
+<br>
+<textarea name="content"  type="editor" style="width:700px; height:300px;">
+</body>
+</html>

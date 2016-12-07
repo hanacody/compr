@@ -1,0 +1,26 @@
+<?php
+include_once '../Libs/_php/rankup_basic.class.php';
+include_once './builder/rankup_frame.class.php';
+include_once './design/page_generator.class.php';
+
+$frame = new rankup_frame;
+$gen = new page_generator($_GET['pid']);
+
+$mobile->print_header($gen->page_title);
+include_once $m_dir.'include/top.html';
+
+/**
+ * 페이지 콘텐츠 로드
+ *@note: ready  &  html 컨텐츠만 해당
+ */
+if(!$gen->page) {
+	// 관리자가 일반페이지를 모듈페이지로 바꾼 경우
+	scripts("location.replace('{$mobile->m_domain}index.html')");
+	exit;
+}
+else {
+	include_once $mobile->skin_dir.$gen->page;
+}
+
+include_once $m_dir.'include/bottom.html';
+?>

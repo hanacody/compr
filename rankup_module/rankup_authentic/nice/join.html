@@ -1,0 +1,54 @@
+<?php
+/**
+ * 회원가입폼 샘플
+ */
+include_once '../../../Libs/_php/rankup_basic.class.php';
+include_once 'authentic.class.php';
+
+$auth = new authentic;
+
+?>
+
+<table border="1" width="100%" cellpadding="3" cellspacing="0">
+	<tr><td class="td_left">회원사 아이디</td>
+		<td class="td_content"><? echo $auth->res->niceId; ?></td>
+	</tr>
+	<tr><td class="td_left">주문번호</td>
+		<td class="td_content"><? echo $auth->res->ordNo . "(". $_SESSION['sess_OrderNo'] .")"; ?></td>
+	</tr>
+	<tr><td class="td_left">인증번호</td>
+		<td class="td_content"><? echo $auth->res->trNo; ?></td>
+	</tr>
+	<tr><td class="td_left">응답코드</td>
+		<td class="td_content"><? echo $auth->res->retCd; ?></td>
+	</tr>
+	<tr><td class="td_left">응답상세코드</td>
+		<td class="td_content"><? echo $auth->res->retDtlCd; ?></td>
+	</tr>
+	<tr><td class="td_left">응답메시지</td>
+		<td class="td_content"><? echo $auth->res->message; ?></td>
+	</tr>
+	<tr><td class="td_left">아이핀번호</td>
+		<td class="td_content"><? echo $auth->res->paKey; ?></td>
+	</tr>
+	<tr><td class="td_left">한국신용정보 등록성명</td>
+		<td class="td_content"><? echo $auth->res->niceNm; ?></td>
+	</tr>
+	<tr><td class="td_left">생년월일</td>
+		<td class="td_content"><? echo $auth->res->birthday; ?></td>
+	</tr>
+	<tr><td class="td_left">성별</td>
+		<td class="td_content"><? echo $auth->res->sex; ?>(1: 남, 2: 여)</td>
+	</tr>
+	<tr><td class="td_left">내외국인구분</td>
+		<td class="td_content"><? echo $auth->res->foreigner; ?>(1: 내국인, 2: 외국인)</td>
+	</tr>
+	<tr><td class="td_left" colspan="2">중복가입확인정보</td></tr>
+	<tr>
+		<td class="td_content" colspan="2"><font style="font-size:10px"><? echo $auth->res->dupeInfo; ?></font> <BR>※ 아이핀번호는 동일인에게 여러 개 부여될 수 있으니 회원정보의 PK는 중복가입확인정보를 이용하여 주시기 바랍니다.</td>
+	</tr>
+	<tr><td class="td_left" colspan="2">연계정보</td></tr>
+	<tr>
+		<td class="td_content" colspan="2" style="word-break:break-all;"><font style="font-size:10px"><? echo $auth->res->coInfo; ?></font> </td>
+	</tr>
+</table>

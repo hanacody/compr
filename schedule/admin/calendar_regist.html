@@ -1,0 +1,292 @@
+<?php
+/**
+ * 달력등록
+ */
+include_once '../../Libs/_php/rankup_basic.class.php';
+$rankup_control->check_admin();
+
+include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+$category = new rankup_category;
+
+include_once '../class/calendar.class.php';
+$calendar = new calendar;
+
+if($_GET['no']) $rows = $calendar->get_settings($_GET['no']);
+
+$rows['use_cate'] = 'yes';
+if(!$rows['bundle']) $rows['bundle'] = time();
+
+$rankup_control->print_admin_head('달력등록');
+?>
+<body>
+<div class="bar"><script> titleBar('달력등록') </script></div>
+
+<script type="text/javascript" src="../../rankup_module/rankup_category/single_category.class.js"></script>
+<style type="text/css">
+.w100 {width:100%}
+#item_frame td{font-size:0px;letter-spacing:-1px} /* direction hack */
+</style>
+
+<?php
+/**
+ * 컬러픽커 로드
+ *@usage: echo color_picker('name', 'value', 'handler', 'attributes');
+ *@usage: <script> color_picker.initialize('color_frame'); </script> // 컬러픽커 초기화
+ */
+include_once $base_dir.'Libs/_picker/color_picker.inc.php';
+?>
+
+<center>
+<div id="config_frame" style="width:760px;text-align:left;margin-top:30px">
+
+	<div id="sub_title">기본설정</div>
+	<form id="save_form" name="save_form" onSubmit="return false">
+		<input type="hidden" id="no" name="no" value="<?=$rows['no']?>" />
+		<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#dedede" class="table1 list_top">
+		<col width="120" />
+		<col />
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 달력이름</td>
+			<td>
+				<input type="hidden" id="prev_subject" name="prev_subject" value="<?=htmlspecialchars($rows['subject'])?>" />
+				<input type="text" id="subject" name="subject" required hname="달력이름" value="<?=htmlspecialchars($rows['subject'])?>" size="20" maxlength="10" class="simpleform" />
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 스킨형태</td>
+			<td>
+				<input type="radio" name="skin_type" checked value="basic" id="skin_type_basic"><label for="skin_type_basic">달력형</label>
+				<input type="radio" name="skin_type"<? if($rows['skin_type']=='list') echo ' checked' ?> value="list" id="skin_type_list"><label for="skin_type_list">리스트형</label>
+				<!--<input type="radio" name="skin_type"<? if($rows['skin_type']=='both') echo ' checked' ?> value="both" id="skin_type_both"><label for="skin_type_both">달력+리스트형</label>-->
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 분류사용</td>
+			<td>
+				<input type="radio" name="use_cate" checked value="yes" id="use_cate_yes" onClick="change_frame(this)"><label for="use_cate_yes">사용함</label>
+				<input type="radio" name="use_cate" value="no" id="use_cate_no" onClick="change_frame(this)"><label for="use_cate_no">사용안함</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 열람등급</td>
+			<td>
+				<select name="read_level">
+				<?php
+				foreach($config_info['smlevel'] as $level=>$text) {
+					$_selected = ($rows['read_level']==$level) ? ' selected' : '';
+					echo sprintf('<option value="%d"%s>%s</option>', $level, $_selected, $text);
+				}
+				?>
+				</select>
+				부터 열람 가능
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 국경일출력</td>
+			<td>
+				<input type="radio" name="view_holyday" checked value="yes" id="view_holyday_yes"><label for="view_holyday_yes">출력함</label>
+				<input type="radio" name="view_holyday"<? if($rows['view_holyday']=='no') echo ' checked' ?> value="no" id="view_holyday_no"><label for="view_holyday_no">출력안함</label>
+			</td>
+		</tr>
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 일정출력사항</td>
+			<td>
+				<input type="radio" name="print_type" checked value="cate" id="print_type_cate"><label for="print_type_cate">분류명</label>
+				<input type="radio" name="print_type"<? if($rows['print_type']=='title') echo ' checked' ?> value="title" id="print_type_title"><label for="print_type_title">제목</label>
+				<input type="radio" name="print_type"<? if($rows['print_type']=='both') echo ' checked' ?> value="both" id="print_type_both"><label for="print_type_both">분류명+제목</label>
+			</td>
+		</tr>
+		<!--
+		<tr>
+			<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 달력색상</td>
+			<td>
+
+				<table width="100%" cellpadding="5" cellspacing="0" border="1" bordercolor="#dedede" class="table1">
+				<col width="100" />
+				<col />
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 프레임</td>
+					<td>
+						배경색 : <?=color_picker('frame_bgcolor', $rows['frame']['bgcolor'], '', ' required hname="배경색"')?> &nbsp; &nbsp;
+						테두리 : <?=color_picker('frame_color', $rows['frame']['color'], '', ' required hname="테두리색"')?><br />
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 타이틀</td>
+					<td>
+						배경색 : <?=color_picker('title_bgcolor', $rows['title']['bgcolor'], '', ' required hname="배경색"')?> &nbsp; &nbsp;
+						글자색 : <?=color_picker('title_color', $rows['title']['color'], '', ' required hname="날짜색"')?>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 기본날짜</td>
+					<td>
+						배경색 : <?=color_picker('basic_bgcolor', $rows['basic']['bgcolor'], '', ' required hname="배경색"')?> &nbsp; &nbsp;
+						날짜색 : <?=color_picker('basic_color', $rows['basic']['color'], '', ' required hname="날짜색"')?>
+						<span id="tip">+ 토, 일, 국경일은 제외</span>
+					</td>
+				</tr>
+				<tr>
+					<td class="gray_bg"><img src="../../Libs/_images/ic_dot1.gif" /> 오늘날짜</td>
+					<td>
+						배경색 : <?=color_picker('today_bgcolor', $rows['today']['bgcolor'], '', ' required hname="배경색"')?> &nbsp; &nbsp;
+						날짜색 : <?=color_picker('today_color', $rows['today']['color'], '', ' required hname="날짜색"')?>
+					</td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		-->
+		</table>
+	</form>
+
+	<div style="margin-top:10px;text-align:center">
+		<a onClick="$calendar.submit(this, 'save_form', '설정하신 [기본설정] 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="기본설정 저장하기" /></a>
+		<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" align="absmiddle" /></a>
+	</div>
+
+<?php
+// 카테고리 로드
+include_once '../../rankup_module/rankup_category/rankup_category.class.php';
+$category = new rankup_category;
+?>
+
+	<div id="cate_frame" style="display:none;margin-top:30px">
+		<div id="sub_title">분류설정</div>
+		<form id="cate_form" name="cate_form" onSubmit="return false">
+			<input type="hidden" id="bundle" name="bundle" value="<?=$rows['no']?>" required message="먼저 기본설정 사항을 저장하시기 바랍니다." nofocus />
+			<table width="100%" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top" style="table-layout: fixed">
+			<col width="40" />
+			<col width="70" />
+			<col />
+			<col width="150" />
+			<col width="150" />
+			<col width="70" />
+			<tr class="blue_bg" align="center">
+				<td><input type="checkbox" id="checker_top" onClick="checker.all(this.checked)" /></td>
+				<td>순위</td>
+				<td>분류명</td>
+				<td>배경색</td>
+				<td>글자색</td>
+				<td>삭제</td>
+			</tr>
+			<tbody id="item_frame" align="center">
+			<?php
+			if($rows['no']) {
+				echo $category->print_single_categories('calendar', array(
+					'entry' => array(
+						1 => '
+						<tr>
+							<td style="padding:0">
+								<input type="checkbox" name="no[]" value="{:no:}" />
+								<input type="hidden" name="nos[]" value="{:no:}" />
+								<input type="hidden" name="identity[]" />
+							</td>
+							<td>
+								<a onClick="category.direction.up(this)"><img src="../../Libs/_images/btn_order_up.gif" align="absmiddle" hspace="1" /></a><a onClick="category.direction.down(this)"><img src="../../Libs/_images/btn_order_down.gif" align="absmiddle" hspace="1" /></a>
+							</td>
+							<td><input type="text" name="items[]" required hname="분류명" value="{:item:}" maxlength="20" class="simpleform w100" /></td>
+							<td>'.color_picker('bgcolors[]', '{:bgcolor:}', '', ' required hname="배경색"').'</td>
+							<td>'.color_picker('colors[]', '{:color:}', '', ' required hname="글자색"').'</td>
+							<td><a onClick="category.del(this)"><img src="../../Libs/_images/btn_delete_s.gif" /></a></td>
+						</tr>'
+					)
+				), $rows['no']);
+			}
+			?>
+			</tbody>
+			</table>
+
+			<div style="position:relative;width:100%;margin-top:10px;margin-bottom:50px">
+				<div style="position:absolute;width:100%;text-align:center">
+					<a onClick="$cate.submit(this, 'cate_form', '설정하신 [분류설정] 사항을 저장하시겠습니까?')"><img src="../../Libs/_images/btn_save1.gif" align="absmiddle" alt="분류설정 저장하기" /></a>
+					<a onClick="history.back()"><img src="../../Libs/_images/btn_back1.gif" align="absmiddle" /></a>
+				</div>
+				<div style="position:absolute">
+					<a id="checker_bottom" onClick="checker.all()"><img src="../../Libs/_images/btn_select_all.gif" align="absmiddle" alt="전체선택" /></a>
+					<a onClick="category.del()"><img src="../../Libs/_images/btn_select_delete.gif" align="absmiddle" alt="선택삭제" /></a>
+					<a onClick="category.add()"><img src="../../Libs/_images/btn_form_add.gif" align="absmiddle" alt="항목추가" /></a>
+				</div>
+			</div>
+
+		</form>
+	</div>
+
+</div>
+</center>
+<br />
+
+<script type="text/javascript">
+//<![CDATA[
+color_picker.initialize('config_frame');
+
+// 프레임 토글
+var change_frame = function(el) {
+	var mode = [];
+	el.checked = true; //
+	switch(el.value) {
+		case 'yes': mode = ['show']; break;
+		case 'no': mode = ['hide']; break;
+	}
+	$w('cate_frame').each(function(frame, index) { $(frame)[mode[index]]() });
+}
+change_frame($('use_cate_<?=$rows['use_cate']?>'));
+
+//]]>
+</script>
+
+<script type="text/javascript">
+//<![CDATA[
+var $calendar = Object.clone($form);
+$calendar.hashes = {mode:'save_calendar'}
+$calendar.handler = function(trans) {
+	if(!proc.isXML(trans)) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+		var value = trans.responseXML.getElementsByTagName('bundle')[0].firstChild.nodeValue;
+		$w('no bundle').each(function(field) { $(field).value = value });
+		if($F('prev_subject')!=$F('subject')) { // 달력이름이 바뀐 경우
+			$('prev_subject').value = $F('subject');
+			try { top.frames['left'].location.reload(); } catch(e) { }
+		}
+	}
+}
+
+// 카테고리 활성화
+category.initialize('item_frame');
+category.template = new Template('\
+	<tr>\
+		<td style="padding:0">\
+			<input type="checkbox" name="no[]" />\
+			<input type="hidden" name="nos[]" />\
+			<input type="hidden" name="identity[]" value="#{identity}" />\
+		</td>\
+		<td>\
+			<a onClick="category.direction.up(this)"><img src="../../Libs/_images/btn_order_up.gif" align="absmiddle" hspace="1" /></a><a onClick="category.direction.down(this)"><img src="../../Libs/_images/btn_order_down.gif" align="absmiddle" hspace="1" /></a>\
+		</td>\
+		<td><input type="text" name="items[]" required hname="분류명" maxlength="20" class="simpleform w100" /></td>\
+		<td><?=str_replace("'", "\'", color_picker('bgcolors[]', '', '', ' required hname="배경색"'))?></td>\
+		<td><?=str_replace("'", "\'", color_picker('colors[]', '', '', ' required hname="글자색"'))?></td>\
+		<td><a onClick="category.del(this)"><img src="../../Libs/_images/btn_delete_s.gif" /></a></td>\
+	</tr>'
+);
+
+// 체커활성화
+checker.initialize('item_frame', 'input[name="no[]"]');
+
+// $form submit setting
+var $cate = Object.clone($form);
+$cate.url = domain +'rankup_module/rankup_category';
+$cate.hashes = {mode: 'save', type: 'single', kind: 'calendar', extra_value: 'bgcolor:bgcolors,color:colors'};
+$cate.handler = function(trans) {
+	if(!trans.responseText.blank()) proc.response(trans);
+	else {
+		alert('저장되었습니다.');
+	}
+}
+
+//]]>
+</script>
+
+</body>
+</html>

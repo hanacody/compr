@@ -1,0 +1,137 @@
+<?php
+include_once "../../Libs/_php/rankup_basic.class.php";
+$rankup_control->check_admin();
+
+if(empty($_GET['sdate'])) $_GET['sdate'] = date("Y-m-d");
+if(empty($_GET['edate'])) $_GET['edate'] = date("Y-m-d");
+if(empty($_GET['cmd'])) $_GET['cmd'] = "success";
+
+// 접속자수
+$today = date("Y-m-d");
+$edate = date("Y-m-d", mktime(0,0,0,date("n"), date("j")-7, date("Y")) );
+
+$addWhere = " where wdate between '$edate' and '$today' ";
+$totalCount['con'] = $rankup_control->queryR("select sum(num) from rankuplog_total $addWhere");
+
+// 회원 가입자수
+$addWhere = "";
+if($_GET['use_date']=="on") $addWhere = " and date_format(join_time, '%Y-%m-%d') between '$_GET[sdate]' and '$_GET[edate]'";
+$totalCount['member'] = $rankup_control->queryR("select count(no) from rankup_member where (uid REGEXP '='!=1)$addWhere");
+
+$rankup_control->print_admin_head("종합사이트통계");
+?>
+<body>
+<script type="text/javascript" src="../rankup_chart/js/swfobject.js"></script>
+<style type="text/css">
+div.hline {
+	padding: 5px 0 0 0;
+	margin-top: 4px;
+	border-top: 1px #dedede dotted;
+	font-size: 11px;
+	color: #777;
+	line-height: 1.4em;
+	font-family: dotum, verdana;
+}
+div.hline.gray_bg {
+	padding-bottom: 4px;
+}
+div {font-weight:normal;}
+</style>
+
+<?php
+
+include_once $base_dir."rankup_module/rankup_statistics/top_menu.html";
+?>
+<div id="reserve_frame"  style="display:none;position:absolute;width:700px;height:630px;overflow-y:scroll;z-index:100;background-color:white;padding:8px;border:4px #999 solid">
+</div>
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+<tr><td height="30"></td></tr>
+<tr>
+	<td align="center">
+		<table width="750" border="0" cellpadding="0" cellspacing="0">
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="5" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1">
+					<form name="searchFrm" action="./total_statistic.html" method="GET">
+					<tr>
+						<td class="gray_bg">
+							<table cellpadding="0" cellspacing="3" border="0" align="center">
+							<tr align="center">
+								<td><input type="checkbox" name="use_date"<? if($_GET['use_date']) echo " checked" ?>></td>
+								<td width="180">
+									<? echo $rankup_control->print_period_search("sdate|edate", $_GET['sdate']."|".$_GET['edate']) ?>
+								</td>
+								<td width="401" id="period_search_option">
+									<? echo $rankup_control->print_period_search_option("sdate|edate") ?>
+								</td>
+								<td>
+									<input type="image" src="../../Libs/_images/btn_search.gif" alt="검색" align="absmiddle">
+								</td>
+							</tr>
+							</table>
+						</td>
+					</tr>
+					</form>
+					</table>
+				</td>
+			</tr>
+
+
+			<tr><td height="15"></td></tr>
+			<tr>
+				<td height="25">
+					<div id="sub_title" style="float:left">방문자통계</div>
+					<div style="float:right">총 접속자 : <b style="color:#ff6633;font-family:verdana;"><? echo number_format($totalCount['con']) ?>명 <a href="<?=$base_url?>rankup_module/rankup_log/rankuplog_main.html"><img src="./img/btn_statistics_more.gif" align="absmiddle"></a></b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<tr>
+							<td align="center">
+								<?
+								$data_file = urlencode("../rankup_log/chart_data/set_chart_total.php?use_date=$_GET[use_date]&sdate=$_GET[sdate]&edate=$_GET[edate]&");
+								?>
+								<div style="width:730px;overflow:hidden">
+									<div id="my_chart"></div>
+									<script type="text/javascript">
+									swfobject.embedSWF(
+									"../rankup_chart/open-flash-chart.swf", "my_chart", "730", "170",
+									"9.0.0", "expressInstall.swf",
+									{"data-file":"<?=$data_file?>"} );
+									</script>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td height="15"></td></tr>
+			<tr>
+				<td height="25">
+					<div id="sub_title" style="float:left">사이트 종합현황</div>
+					<div style="float:right"></b>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<table width="100%" align="center" cellpadding="7" cellspacing="0" border="1" bordercolor="#d7d7d7" class="table1 list_top">
+						<col width="50%" span="2">
+						<tr align="center">
+							<td class="blue_bg">방문자수</td>
+							<td class="blue_bg">회원가입수</td>
+						</tr>
+						<tr align="center">
+							<td><?=number_format($totalCount['con'])?> 명</td>
+							<td><?=number_format($totalCount['member'])?> 명</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</td>
+</tr>
+<tr><td height="20"></td></tr>
+</table>
+</body>
+</html>
